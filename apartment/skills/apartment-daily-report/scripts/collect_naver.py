@@ -50,7 +50,7 @@ def extract_payload_hints(html):
         hints["nextFlightPayload"] = True
     scripts = len(re.findall(r"<script", html, re.I))
     hints["scriptCount"] = scripts
-    for kw in ["articleTradeTypes", "articleSortingType", "tradeTypes", "realEstateTypes", "map?layer="]:
+    for kw in ["articleTradeTypes", "articleSortingType", "tradeTypes", "realEstateTypes", "map?layer=", "complexes/"]:
         if kw in html:
             hints.setdefault("keywords", []).append(kw)
     return hints
@@ -64,6 +64,58 @@ def extract_map_state(final_url):
         if key in qs:
             state[key] = qs[key][0]
     return state
+
+
+def extract_json_blobs(html):
+    blobs = []
+    for match in re.finditer(r"self\.__next_f\.push\((.*?)\);", html, re.S):
+        blob = compact(match.group(1))
+        if blob and blob not in blobs:
+            blobs.append(blob[:4000])
+    return blobs[:5]
+
+
+def extract_numeric_signals(text):
+    numeric = {}
+
+    m = re.search(r"(\d{1,4})세대", text)
+    if m:
+        numeric["households"] = int(m.group(1))
+
+    m = re.search(r"(\d{2,4})동", text)
+    if m:
+        numeric["buildingCount"] = int(m.group(1))
+
+    completion = re.search(r"(?:사용승인|준공|입주)\s*(\d{4})\.?\s*(\d{1,2})?", text)
+    if completion:
+        numeric["completionYear"] = int(completion.group(1))
+        if completion.group(2):
+            numeric["completionMonth"] = int(completion.group(2))
+
+    area_range = re.search(r"([0-9.]+\s*㎡\s*[~\-]\s*[0-9.]+\s*㎡)", text)
+    if area_range:
+        numeric["areaRange"] = compact(area_range.group(1))
+
+    article_counts = {}
+    for label in ["매매", "전세", "월세"]:
+        m = re.search(rf"{label}\s*(\d+)건", text)
+        if m:
+            article_counts[label] = int(m.group(1))
+    if article_counts:
+        numeric["articleCounts"] = article_counts
+
+    return numeric
+
+
+def build_snippets(text):
+    snippets = []
+    for kw in ["세대", "매매", "전세", "월세", "사용승인", "준공", "입주"]:
+        idx = text.find(kw)
+        if idx >= 0:
+            snippet = compact(text[max(0, idx - 80): idx + 220])
+            if snippet and snippet not in snippets:
+                snippets.append(snippet)
+    return snippets[:5]
 
 
 def main():
@@ -96,12 +148,18 @@ def main():
     status = classify_response(selected)
     payload_hints = extract_payload_hints(selected.text)
     map_state = extract_map_state(selected.url)
+    numeric_signals = extract_numeric_signals(text)
+    json_blobs = extract_json_blobs(selected.text)
+    snippets = build_snippets(text)
 
-    note = "네이버 fin.land 진입점은 확보됐지만, 현재는 Next/JS shell과 map 상태까지만 확인된다. 정적 HTML에서 매물/가격 수치가 직접 드러나지 않는다."
-    if status == "complex-entry-ok":
+    note = "네이버 fin.land 진입점은 확보됐지만, 현재는 Next/JS shell과 map 상태까지만 확인된다. 정적 HTML에서 매물/가격 수치가 제한적으로만 보인다."
+    if numeric_signals.get("articleCounts"):
+        counts = numeric_signals["articleCounts"]
+        note = f"Naver Land에서 정적 HTML 기준 매물 카운트 일부를 읽었다: 매매 {counts.get('매매', '?')} / 전세 {counts.get('전세', '?')} / 월세 {counts.get('월세', '?')}."
+    elif status == "complex-entry-ok":
         note = "Naver Land complexes 진입은 성공했지만, 내부적으로 추가 데이터 로딩이 필요한 구조다."
     elif status == "legacy-map-redirect":
-        note = "complexes 또는 m.land 경로는 fin.land map shell로 연결된다. 유효한 진입점은 확보됐고, 다음 단계는 payload/API 추적이다."
+        note = "complexes 또는 m.land 경로는 fin.land map shell로 연결된다. 유효한 진입점은 확보됐고, 정적 HTML에서 읽히는 신호는 제한적이다."
     elif status == "fallback-404":
         note = "현재 등록된 Naver Land URL은 404 fallback이다."
 
@@ -114,12 +172,14 @@ def main():
         "host": urlparse(selected.url).netloc,
         "title": title,
         "description": "",
-        "signals": [kw for kw in ["단지", "지도", "매물", "시세"] if kw in text],
-        "numericSignals": {},
+        "signals": [kw for kw in ["단지", "지도", "매물", "시세", "전세", "월세"] if kw in text],
+        "numericSignals": numeric_signals,
         "jsonLd": [],
         "triedUrls": tried,
         "payloadHints": payload_hints,
         "mapState": map_state,
+        "nextFlightBlobs": json_blobs,
+        "snippets": snippets,
         "note": note,
     }
 

@@ -56,6 +56,7 @@ Default target for this workspace:
 ## Files
 
 - Main runner: `scripts/run_report.sh` (self-wraps through `_shared/bin/track_task.sh` via `TRACK_TASK_WRAPPED` guard)
+- Smoke test: `scripts/run_smoke_test.sh`
 - Normalizer: `scripts/normalize_results.py`
 - Claude synthesis prompt: `references/claude-prompt.md`
 

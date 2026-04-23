@@ -48,8 +48,18 @@ OpenClaw workspace files should only provide thin delegation or scheduling glue.
 
 ## Improvement priorities
 
-1. Make Naver extraction more structured.
+1. Deepen Naver extraction beyond redirect/static shell signals.
 2. Move target/source config from env defaults into explicit config files where useful.
-3. Add a small smoke-test entrypoint for collector/normalizer health.
+3. Expand the smoke-test entrypoint into a routine health check for collector/normalizer changes.
 4. Clarify notification policy vs pure batch mode.
 5. Keep OpenClaw wrapper glue-only.
+
+## Smoke test
+
+Quick collector/normalizer health check:
+- `skills/apartment-daily-report/scripts/run_smoke_test.sh`
+
+Current expectation:
+- Naver collector should at least return a non-error status plus limited static signals.
+- Hogangnono and KB Land should produce structured data.
+- `summary.json` should be generated successfully.

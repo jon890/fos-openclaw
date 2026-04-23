@@ -140,8 +140,11 @@ def main():
     kb = get_source(source_results, "KB Land")
     naver = get_source(source_results, "Naver Land")
 
-    if naver.get("status") == "legacy-map-redirect":
-        notes.append("Naver Land는 new.land 직접 URL 대신 m.land -> fin.land map redirect까지만 복구했다.")
+    if naver.get("numericSignals", {}).get("articleCounts"):
+        counts = naver["numericSignals"]["articleCounts"]
+        notes.append(f"Naver Land 정적 HTML 기준 매물 수 일부 추출: 매매 {counts.get('매매', '?')}건, 전세 {counts.get('전세', '?')}건, 월세 {counts.get('월세', '?')}건")
+    elif naver.get("status") == "legacy-map-redirect":
+        notes.append("Naver Land는 new.land 직접 URL 대신 m.land -> fin.land map redirect 경로와 제한적 정적 신호까지만 복구했다.")
     if hogang.get("numericSignals", {}).get("areaTradeSummary"):
         area = hogang["numericSignals"]["areaTradeSummary"]
         notes.append(f"호갱노노에서 {area['areaLabel']} 최근 1개월 평균 {area['monthlyAverage']} 추출")

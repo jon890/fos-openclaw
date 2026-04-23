@@ -138,18 +138,6 @@ if [[ -n "$SUMMARY_MESSAGE" ]]; then
   notify_safe "$SUMMARY_MESSAGE"
 fi
 
-  cat > "$FALLBACK_MD" <<EOF
-# 엘지원앙아파트 (LG원앙) 일일 시장 리포트
-
-- 기준일: $REPORT_DATE
-- 상태: Claude 요약 실패, fallback 리포트 생성
-- summary.json 경로: $SUMMARY_JSON
-- raw-search.json 경로: $RAW_JSON
-- 메모: 후속 분석 시 summary.json을 기준으로 재생성 가능
-EOF
-  cp "$FALLBACK_MD" "$REPORT_MD"
-fi
-
 echo "Wrote: $REPORT_MD"
 echo "Wrote: $CLAUDE_JSON"
 echo "Wrote: $RAW_JSON"
