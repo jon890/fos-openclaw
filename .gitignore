@@ -1,0 +1,29 @@
+# Runtime / agent state
+.omc/
+.claude/
+**/.omc/
+**/.claude/
+
+# Generated task outputs
+**/data/
+**/logs/
+**/tmp/
+
+# Nested repos / published outputs managed separately
+career-os/sources/fos-study/
+
+# Local env / transient artifacts
+.env
+.env.*
+*.log
+*.pid
+*.result.json
+
+# Python cache
+__pycache__/
+**/__pycache__/
+*.pyc
+
+# OS/editor noise
+.DS_Store
+Thumbs.db

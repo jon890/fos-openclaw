@@ -1,0 +1,156 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+if [[ "${TRACK_TASK_WRAPPED:-0}" != "1" ]]; then
+  export TRACK_TASK_WRAPPED=1
+  TASK_ROOT="${TASK_ROOT:-$HOME/ai-nodes/apartment}"
+  TRACKER="${TRACKER:-$HOME/ai-nodes/_shared/bin/track_task.sh}"
+  exec "$TRACKER" "$TASK_ROOT" "apartment:daily-report" "$0" "$@"
+fi
+
+TARGET_NAME="${TARGET_NAME:-엘지원앙아파트}"
+TARGET_ALIAS="${TARGET_ALIAS:-LG원앙}"
+TARGET_LOCATION="${TARGET_LOCATION:-경기 구리시 수택동 854-2 / 체육관로 54}"
+TARGET_UNIT_LABEL="${TARGET_UNIT_LABEL:-59A}"
+TARGET_UNIT_EXCLUSIVE_AREA_M2="${TARGET_UNIT_EXCLUSIVE_AREA_M2:-59}"
+TASK_ROOT="${TASK_ROOT:-$HOME/ai-nodes/apartment}"
+OUTPUT_ROOT="${OUTPUT_ROOT:-$TASK_ROOT/data}"
+REPORT_DATE="${REPORT_DATE:-$(date +%F)}"
+OUTDIR="$OUTPUT_ROOT/$REPORT_DATE"
+RAW_JSON="$OUTDIR/raw-search.json"
+SUMMARY_JSON="$OUTDIR/summary.json"
+REPORT_MD="$OUTDIR/report.md"
+CLAUDE_JSON="$OUTDIR/claude.result.json"
+SKILL_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+PROMPT_FILE="$SKILL_ROOT/references/claude-prompt.md"
+NORMALIZER="$SKILL_ROOT/scripts/normalize_results.py"
+COLLECTOR="$SKILL_ROOT/scripts/collect_sources.py"
+NOTIFIER="$SKILL_ROOT/scripts/notify_discord.sh"
+FALLBACK_MD="$OUTDIR/report.fallback.md"
+EXTRACT="$HOME/ai-nodes/_shared/bin/extract_claude_result.py"
+
+mkdir -p "$OUTDIR"
+
+notify_safe() {
+  local msg="$1"
+  if [[ -x "$NOTIFIER" ]]; then
+    "$NOTIFIER" "$msg" || true
+  fi
+}
+
+notify_safe "[시작] apartment-daily-report 데이터 수집 및 리포트 생성 시작 (${TARGET_NAME}, ${REPORT_DATE})"
+
+if [[ -f "$COLLECTOR" ]]; then
+  TARGET_NAME="$TARGET_NAME" \
+  TARGET_ALIAS="$TARGET_ALIAS" \
+  TARGET_LOCATION="$TARGET_LOCATION" \
+  TARGET_UNIT_LABEL="$TARGET_UNIT_LABEL" \
+  TARGET_UNIT_EXCLUSIVE_AREA_M2="$TARGET_UNIT_EXCLUSIVE_AREA_M2" \
+  python3 "$COLLECTOR" "$RAW_JSON"
+else
+  cat > "$RAW_JSON" <<JSON
+{
+  "target": {
+    "name": "$TARGET_NAME",
+    "alias": "$TARGET_ALIAS",
+    "location": "$TARGET_LOCATION",
+    "focusUnit": {
+      "label": "$TARGET_UNIT_LABEL",
+      "exclusiveAreaM2": "$TARGET_UNIT_EXCLUSIVE_AREA_M2"
+    }
+  },
+  "sources": [],
+  "recentTransactions": [],
+  "listingSummary": {
+    "status": "limited",
+    "focusUnit": "$TARGET_UNIT_LABEL",
+    "notes": ["collector script not found"]
+  },
+  "comparison": {},
+  "notes": ["collector script not found, fallback raw json created"]
+}
+JSON
+fi
+
+if ! python3 "$NORMALIZER" "$RAW_JSON" "$SUMMARY_JSON"; then
+  notify_safe "[실패] apartment-daily-report 정규화 실패 (${TARGET_NAME}, ${REPORT_DATE})"
+  exit 1
+fi
+
+CLAUDE_INPUT=$(cat "$PROMPT_FILE")
+CLAUDE_INPUT+=$'\n\n다음은 summary.json 입니다:\n'
+CLAUDE_INPUT+=$(cat "$SUMMARY_JSON")
+
+if timeout 90s claude --permission-mode bypassPermissions --print --output-format json "$CLAUDE_INPUT" > "$CLAUDE_JSON"; then
+  python3 "$EXTRACT" "$CLAUDE_JSON" "$REPORT_MD" "${TRACK_TASK_CLAUDE_USAGE_FILE:-}"
+else
+  notify_safe "[실패] apartment-daily-report Claude 보고서 생성 실패 (${TARGET_NAME}, ${REPORT_DATE})"
+  cat > "$FALLBACK_MD" <<EOF
+# 엘지원앙아파트 (LG원앙) 일일 시장 리포트
+
+- 기준일: $REPORT_DATE
+- 상태: Claude 요약 실패, fallback 리포트 생성
+- summary.json 경로: $SUMMARY_JSON
+- raw-search.json 경로: $RAW_JSON
+- 메모: 후속 분석 시 summary.json을 기준으로 재생성 가능
+EOF
+  cp "$FALLBACK_MD" "$REPORT_MD"
+fi
+
+SUMMARY_MESSAGE=$(python3 - "$SUMMARY_JSON" <<'PY'
+import json, sys
+p = sys.argv[1]
+with open(p, 'r', encoding='utf-8') as f:
+    data = json.load(f)
+parts = []
+target = data.get('target', {}).get('name', '대상 단지')
+parts.append(f"{target} 요약")
+focus = data.get('focusSummary') or {}
+if focus.get('label'):
+    parts.append(f"- 기준 평형: {focus['label']}")
+rt = data.get('recentTransactions') or []
+exact = [x for x in rt if x.get('matchStatus') == 'exact']
+if exact:
+    latest = exact[0]
+    price = latest.get('price')
+    date = latest.get('date')
+    floor = latest.get('floor')
+    if price and date:
+        extra = f" ({floor})" if floor else ''
+        parts.append(f"- 최근 실거래(정확매칭): {date} {price}{extra}")
+ls = data.get('listingSummary') or {}
+counts = ls.get('counts') or {}
+if counts:
+    parts.append(f"- 매물 수: 매매 {counts.get('매매', '?')} / 전세 {counts.get('전세', '?')} / 월세 {counts.get('월세', '?')}")
+pricing = ls.get('pricing') or {}
+sale = pricing.get('매매') or {}
+if sale.get('general'):
+    parts.append(f"- KB 매매 일반가: {sale['general']}")
+lease = pricing.get('전세') or {}
+if lease.get('general'):
+    parts.append(f"- KB 전세 일반가: {lease['general']}")
+print("\n".join(parts))
+PY
+)
+
+notify_safe "[완료] apartment-daily-report 리포트 생성 완료 (${TARGET_NAME}, ${REPORT_DATE})"
+if [[ -n "$SUMMARY_MESSAGE" ]]; then
+  notify_safe "$SUMMARY_MESSAGE"
+fi
+
+  cat > "$FALLBACK_MD" <<EOF
+# 엘지원앙아파트 (LG원앙) 일일 시장 리포트
+
+- 기준일: $REPORT_DATE
+- 상태: Claude 요약 실패, fallback 리포트 생성
+- summary.json 경로: $SUMMARY_JSON
+- raw-search.json 경로: $RAW_JSON
+- 메모: 후속 분석 시 summary.json을 기준으로 재생성 가능
+EOF
+  cp "$FALLBACK_MD" "$REPORT_MD"
+fi
+
+echo "Wrote: $REPORT_MD"
+echo "Wrote: $CLAUDE_JSON"
+echo "Wrote: $RAW_JSON"
+echo "Wrote: $SUMMARY_JSON"

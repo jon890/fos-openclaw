@@ -1,0 +1,124 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+TASK_ROOT="${TASK_ROOT:-$HOME/ai-nodes/career-os}"
+SOURCE_DIR="$TASK_ROOT/sources/fos-study"
+TOPIC="${QUESTION_BANK_TOPIC:?QUESTION_BANK_TOPIC is required}"
+OUTPUT_REL_PATH="${OUTPUT_REL_PATH:?OUTPUT_REL_PATH is required}"
+OUTDIR="$TASK_ROOT/data/reports/daily/${REPORT_DATE:-$(date +%F)}/question-bank-$TOPIC"
+PROMPT_FILE="$TASK_ROOT/skills/experience-question-bank-writer/references/question-bank-prompt.md"
+SCHEMA_FILE="$TASK_ROOT/skills/experience-question-bank-writer/references/question-bank-schema.json"
+OUTPUT_MD="$SOURCE_DIR/$OUTPUT_REL_PATH"
+INPUT_NOTE="$OUTDIR/analysis-input.md"
+RAW_JSON="$OUTDIR/question-bank.json"
+INPUT_FILES_JSON="${INPUT_FILES_JSON:?INPUT_FILES_JSON is required}"
+PROMPT_APPEND="${QUESTION_BANK_APPEND_PROMPT:-}"
+
+mkdir -p "$OUTDIR"
+mkdir -p "$(dirname "$OUTPUT_MD")"
+
+if [[ ! -d "$SOURCE_DIR/.git" ]]; then
+  git clone --depth=1 https://github.com/jon890/fos-study.git "$SOURCE_DIR"
+else
+  git -C "$SOURCE_DIR" pull --ff-only
+fi
+
+python3 - "$TASK_ROOT" "$INPUT_FILES_JSON" "$INPUT_NOTE" "$PROMPT_FILE" "$TOPIC" "$OUTPUT_REL_PATH" "$PROMPT_APPEND" <<'PY'
+import json
+import sys
+from pathlib import Path
+
+root = Path(sys.argv[1])
+input_files = json.loads(sys.argv[2])
+input_note = Path(sys.argv[3])
+prompt_file = Path(sys.argv[4])
+topic = sys.argv[5]
+output_rel_path = sys.argv[6]
+prompt_append = sys.argv[7]
+
+parts = [prompt_file.read_text(encoding='utf-8').strip(), '', f'토픽: {topic}', f'fos-study 내부 출력 경로: {output_rel_path}', '', '선택된 입력 파일:']
+for rel in input_files:
+    p = root / 'sources' / 'fos-study' / rel
+    parts.append(f'## FILE: {p}')
+    parts.append(p.read_text(encoding='utf-8'))
+    parts.append('')
+if prompt_append:
+    parts.append(prompt_append)
+input_note.write_text('\n'.join(parts).strip() + '\n', encoding='utf-8')
+PY
+
+SCHEMA_JSON="$(python3 - <<'PY' "$SCHEMA_FILE"
+from pathlib import Path
+import sys
+print(Path(sys.argv[1]).read_text(encoding='utf-8'))
+PY
+)"
+
+run_once() {
+  rm -f "$RAW_JSON"
+  local code=0
+  timeout 900s claude --print --no-session-persistence \
+    --output-format json \
+    --json-schema "$SCHEMA_JSON" \
+    --permission-mode bypassPermissions \
+    "$(cat "$INPUT_NOTE")" \
+    > "$RAW_JSON" || code=$?
+  if (( code != 0 )); then
+    echo "claude CLI failed (exit ${code}) for question-bank ${TOPIC}" >&2
+    return "$code"
+  fi
+}
+
+attempt() {
+  run_once || return 1
+  validate_and_render || return 1
+}
+
+RENDERER="$TASK_ROOT/skills/experience-question-bank-writer/scripts/render_question_bank.py"
+
+validate_and_render() {
+  python3 "$RENDERER" "$RAW_JSON" "$OUTPUT_MD"
+}
+
+if ! attempt; then
+  echo "First generation failed for $TOPIC, retrying once with stricter prompt..." >&2
+  cat >> "$INPUT_NOTE" <<'EOF'
+
+재시도 지시사항:
+- 이전 응답이 요구된 JSON 구조를 만족하지 못했다.
+- 유효한 JSON만 출력한다.
+- 마크다운을 출력하지 않는다.
+- 설명 텍스트를 출력하지 않는다.
+- 자기소개(selfIntro)와 지원 동기/회사 핏(motivationAndFit) 섹션이 반드시 포함되어야 한다.
+- 메인 질문 5개, 각 메인 질문당 꼬리 질문 5개를 정확히 맞춘다.
+EOF
+  if ! attempt; then
+    echo "Question-bank generation failed after retry for $TOPIC" >&2
+    exit 1
+  fi
+fi
+
+if git -C "$SOURCE_DIR" ls-files --error-unmatch "$OUTPUT_REL_PATH" >/dev/null 2>&1; then
+  EFFECTIVE_ACTION="update"
+  if git -C "$SOURCE_DIR" diff --quiet -- "$OUTPUT_REL_PATH"; then
+    echo "No content change detected for $OUTPUT_REL_PATH"
+    exit 0
+  fi
+else
+  EFFECTIVE_ACTION="add"
+fi
+
+BASENAME="$(basename "$OUTPUT_REL_PATH" .md)"
+COMMIT_MSG="docs(interview): ${EFFECTIVE_ACTION} draft ${BASENAME} question bank"
+
+git -C "$SOURCE_DIR" add "$OUTPUT_REL_PATH"
+git -C "$SOURCE_DIR" commit -m "$COMMIT_MSG"
+git -C "$SOURCE_DIR" push origin HEAD
+
+COMMIT_HASH="$(git -C "$SOURCE_DIR" rev-parse HEAD)"
+python3 "$HOME/ai-nodes/_shared/bin/update_artifacts.py" \
+  "$TASK_ROOT/data/generated-artifacts.json" \
+  "$TOPIC" "$OUTPUT_REL_PATH" "$COMMIT_HASH" \
+  --kind question-bank
+
+echo "Committed and pushed: $COMMIT_MSG ($COMMIT_HASH)"

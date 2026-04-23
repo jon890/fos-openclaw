@@ -1,0 +1,156 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "title",
+    "trackSummary",
+    "selfIntro",
+    "motivationAndFit",
+    "questions",
+    "finalChecklist"
+  ],
+  "properties": {
+    "title": {
+      "type": "string",
+      "minLength": 10
+    },
+    "trackSummary": {
+      "type": "array",
+      "minItems": 3,
+      "items": {
+        "type": "string",
+        "minLength": 5
+      }
+    },
+    "selfIntro": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "oneMinute",
+        "oliveYoungFit"
+      ],
+      "properties": {
+        "oneMinute": {
+          "type": "array",
+          "minItems": 4,
+          "items": { "type": "string", "minLength": 5 }
+        },
+        "oliveYoungFit": {
+          "type": "array",
+          "minItems": 4,
+          "items": { "type": "string", "minLength": 5 }
+        }
+      }
+    },
+    "motivationAndFit": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["whyChange", "whyOliveYoung", "whyThisRole"],
+      "properties": {
+        "whyChange": {
+          "type": "array",
+          "minItems": 3,
+          "items": { "type": "string", "minLength": 5 }
+        },
+        "whyOliveYoung": {
+          "type": "array",
+          "minItems": 3,
+          "items": { "type": "string", "minLength": 5 }
+        },
+        "whyThisRole": {
+          "type": "array",
+          "minItems": 3,
+          "items": { "type": "string", "minLength": 5 }
+        }
+      }
+    },
+    "questions": {
+      "type": "array",
+      "minItems": 5,
+      "maxItems": 5,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "question",
+          "interviewerIntent",
+          "answerPoints",
+          "oneMinuteAnswer",
+          "pressureDefense",
+          "weakAnswers",
+          "followUps"
+        ],
+        "properties": {
+          "question": {
+            "type": "string",
+            "minLength": 10
+          },
+          "interviewerIntent": {
+            "type": "array",
+            "minItems": 2,
+            "items": {
+              "type": "string",
+              "minLength": 5
+            }
+          },
+          "answerPoints": {
+            "type": "array",
+            "minItems": 3,
+            "items": {
+              "type": "string",
+              "minLength": 5
+            }
+          },
+          "oneMinuteAnswer": {
+            "type": "array",
+            "minItems": 3,
+            "items": {
+              "type": "string",
+              "minLength": 5
+            }
+          },
+          "pressureDefense": {
+            "type": "array",
+            "minItems": 2,
+            "items": {
+              "type": "string",
+              "minLength": 5
+            }
+          },
+          "weakAnswers": {
+            "type": "array",
+            "minItems": 2,
+            "items": {
+              "type": "string",
+              "minLength": 5
+            }
+          },
+          "followUps": {
+            "type": "array",
+            "minItems": 5,
+            "maxItems": 5,
+            "items": {
+              "type": "string",
+              "minLength": 5
+            }
+          },
+          "addedDate": {
+            "type": "string"
+          },
+          "updatedDate": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "finalChecklist": {
+      "type": "array",
+      "minItems": 5,
+      "items": {
+        "type": "string",
+        "minLength": 5
+      }
+    }
+  }
+}

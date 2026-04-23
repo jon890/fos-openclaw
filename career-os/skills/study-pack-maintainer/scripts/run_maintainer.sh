@@ -1,0 +1,136 @@
+#!/usr/bin/env bash
+set -euo pipefail
+# Executed via bash or direct exec from track_task.sh.
+
+TASK_ROOT="${TASK_ROOT:-$HOME/ai-nodes/career-os}"
+SOURCE_DIR="$TASK_ROOT/sources/fos-study"
+TOPIC="${MAINTAINER_TOPIC:?MAINTAINER_TOPIC is required}"
+REQUESTED_TOPIC="${REQUESTED_TOPIC:?REQUESTED_TOPIC is required}"
+CANDIDATE_FILES_JSON="${CANDIDATE_FILES_JSON:?CANDIDATE_FILES_JSON is required}"
+PREFERRED_DOMAIN="${PREFERRED_DOMAIN:-interview}"
+OUTDIR="$TASK_ROOT/data/reports/daily/${REPORT_DATE:-$(date +%F)}/maintainer-$TOPIC"
+PROMPT_FILE="$TASK_ROOT/skills/study-pack-maintainer/references/maintainer-prompt.md"
+MAINTENANCE_RULES_FILE="$TASK_ROOT/skills/study-pack-maintainer/references/fos-study-maintenance-rules.md"
+INPUT_NOTE="$OUTDIR/analysis-input.md"
+RAW_RESULT_JSON="$OUTDIR/claude.result.json"
+PARSED_JSON="$OUTDIR/parsed.json"
+
+mkdir -p "$OUTDIR"
+
+if [[ ! -d "$SOURCE_DIR/.git" ]]; then
+  git clone --depth=1 https://github.com/jon890/fos-study.git "$SOURCE_DIR"
+else
+  git -C "$SOURCE_DIR" pull --ff-only
+fi
+
+python3 - "$TASK_ROOT" "$PROMPT_FILE" "$MAINTENANCE_RULES_FILE" "$REQUESTED_TOPIC" "$CANDIDATE_FILES_JSON" "$INPUT_NOTE" <<'PY'
+import json
+import sys
+from pathlib import Path
+
+root = Path(sys.argv[1])
+prompt_file = Path(sys.argv[2])
+maintenance_rules_file = Path(sys.argv[3])
+requested_topic = sys.argv[4]
+candidate_files = json.loads(sys.argv[5])
+input_note = Path(sys.argv[6])
+
+parts = [
+    prompt_file.read_text(encoding='utf-8').strip(),
+    '',
+    '다음 유지보수/연결 규칙을 함께 따른다:',
+    maintenance_rules_file.read_text(encoding='utf-8').strip(),
+    '',
+    f'요청 주제: {requested_topic}',
+    '',
+    '검토 대상 기존 문서:'
+]
+for rel in candidate_files:
+    p = root / 'sources' / 'fos-study' / rel
+    parts.append(f'## FILE: {p}')
+    if p.exists():
+        parts.append(p.read_text(encoding='utf-8'))
+    else:
+        parts.append(f'[파일 없음: {rel}]')
+    parts.append('')
+input_note.write_text('\n'.join(parts).strip() + '\n', encoding='utf-8')
+PY
+
+run_once() {
+  rm -f "$RAW_RESULT_JSON"
+  timeout 900s claude --permission-mode bypassPermissions --print \
+    --output-format json \
+    --no-session-persistence \
+    "$(cat "$INPUT_NOTE")" > "$RAW_RESULT_JSON"
+}
+
+parse_result() {
+  python3 - "$RAW_RESULT_JSON" "$PARSED_JSON" <<'PY'
+import json
+import sys
+from pathlib import Path
+
+raw = Path(sys.argv[1]).read_text(encoding='utf-8', errors='replace').strip()
+if not raw:
+    raise SystemExit('maintainer validation failed: empty claude json envelope')
+envelope = json.loads(raw)
+result = envelope.get('result', '').strip()
+if not result:
+    raise SystemExit('maintainer validation failed: empty result field')
+data = json.loads(result)
+required = ['action', 'outputPath', 'rationale', 'markdown']
+for key in required:
+    if key not in data:
+        raise SystemExit(f'maintainer validation failed: missing key {key}')
+if data['action'] not in ['update-existing', 'create-new', 'augment-existing', 'create-bridge']:
+    raise SystemExit('maintainer validation failed: invalid action')
+markdown = data['markdown'].strip()
+if not markdown.startswith('#'):
+    raise SystemExit('maintainer validation failed: markdown does not start with heading')
+if 'relatedFiles' not in data:
+    data['relatedFiles'] = []
+Path(sys.argv[2]).write_text(json.dumps(data, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
+PY
+}
+
+run_once
+parse_result
+
+OUTPUT_REL_PATH="$(python3 - <<'PY' "$PARSED_JSON"
+import json, sys
+from pathlib import Path
+print(json.loads(Path(sys.argv[1]).read_text(encoding='utf-8'))['outputPath'])
+PY
+)"
+OUTPUT_MD="$SOURCE_DIR/$OUTPUT_REL_PATH"
+mkdir -p "$(dirname "$OUTPUT_MD")"
+python3 - <<'PY' "$PARSED_JSON" "$OUTPUT_MD"
+import json, sys
+from pathlib import Path
+payload = json.loads(Path(sys.argv[1]).read_text(encoding='utf-8'))
+Path(sys.argv[2]).write_text(payload['markdown'].rstrip() + '\n', encoding='utf-8')
+PY
+
+if git -C "$SOURCE_DIR" ls-files --error-unmatch "$OUTPUT_REL_PATH" >/dev/null 2>&1; then
+  EFFECTIVE_ACTION="update"
+  if git -C "$SOURCE_DIR" diff --quiet -- "$OUTPUT_REL_PATH"; then
+    echo "No content change detected for $OUTPUT_REL_PATH"
+    exit 0
+  fi
+else
+  EFFECTIVE_ACTION="add"
+fi
+
+BASENAME="$(basename "$OUTPUT_REL_PATH" .md)"
+COMMIT_MSG="docs(${PREFERRED_DOMAIN}): ${EFFECTIVE_ACTION} draft ${BASENAME} study pack"
+
+git -C "$SOURCE_DIR" add "$OUTPUT_REL_PATH"
+git -C "$SOURCE_DIR" commit -m "$COMMIT_MSG"
+git -C "$SOURCE_DIR" push origin HEAD
+
+COMMIT_HASH="$(git -C "$SOURCE_DIR" rev-parse HEAD)"
+python3 "$HOME/ai-nodes/_shared/bin/update_artifacts.py" \
+  "$TASK_ROOT/data/generated-artifacts.json" \
+  "$TOPIC" "$OUTPUT_REL_PATH" "$COMMIT_HASH"
+
+echo "Committed and pushed: $COMMIT_MSG ($COMMIT_HASH)"
