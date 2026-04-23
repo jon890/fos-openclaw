@@ -71,11 +71,44 @@ def extract_json_blobs(html):
     for match in re.finditer(r"self\.__next_f\.push\((.*?)\);", html, re.S):
         blob = compact(match.group(1))
         if blob and blob not in blobs:
-            blobs.append(blob[:4000])
+            blobs.append(blob[:12000])
     return blobs[:5]
 
 
-def extract_numeric_signals(text):
+def extract_layer_token(final_url):
+    parsed = urlparse(final_url)
+    qs = parse_qs(parsed.query)
+    token = qs.get("layer", [None])[0]
+    if token:
+        return token
+    m = re.search(r"layer=([^&]+)", final_url)
+    return m.group(1) if m else None
+
+
+def extract_route_signals(final_url, text):
+    signals = {}
+    parsed = urlparse(final_url)
+    path = parsed.path or ""
+    if path:
+        signals["path"] = path
+    token = extract_layer_token(final_url)
+    if token:
+        signals["layerTokenLength"] = len(token)
+        signals["layerTokenPrefix"] = token[:24]
+    if "map" in path:
+        signals["routeType"] = "map"
+    elif "complexes" in path:
+        signals["routeType"] = "complex"
+    route_keywords = []
+    for kw in ["지도", "매물", "시세", "분양", "단지"]:
+        if kw in text:
+            route_keywords.append(kw)
+    if route_keywords:
+        signals["routeKeywords"] = route_keywords
+    return signals
+
+
+def extract_numeric_signals(text, final_url=None):
     numeric = {}
 
     m = re.search(r"(\d{1,4})세대", text)
@@ -103,6 +136,9 @@ def extract_numeric_signals(text):
             article_counts[label] = int(m.group(1))
     if article_counts:
         numeric["articleCounts"] = article_counts
+
+    if final_url:
+        numeric.update(extract_route_signals(final_url, text))
 
     return numeric
 
@@ -148,7 +184,7 @@ def main():
     status = classify_response(selected)
     payload_hints = extract_payload_hints(selected.text)
     map_state = extract_map_state(selected.url)
-    numeric_signals = extract_numeric_signals(text)
+    numeric_signals = extract_numeric_signals(text, selected.url)
     json_blobs = extract_json_blobs(selected.text)
     snippets = build_snippets(text)
 
@@ -159,7 +195,7 @@ def main():
     elif status == "complex-entry-ok":
         note = "Naver Land complexes 진입은 성공했지만, 내부적으로 추가 데이터 로딩이 필요한 구조다."
     elif status == "legacy-map-redirect":
-        note = "complexes 또는 m.land 경로는 fin.land map shell로 연결된다. 유효한 진입점은 확보됐고, 정적 HTML에서 읽히는 신호는 제한적이다."
+        note = "complexes 또는 m.land 경로는 fin.land map shell로 연결된다. 유효한 진입점은 확보됐고, layer token / next-flight 같은 간접 신호를 수집했다."
     elif status == "fallback-404":
         note = "현재 등록된 Naver Land URL은 404 fallback이다."
 
