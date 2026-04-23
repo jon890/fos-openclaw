@@ -5,12 +5,10 @@ description: Generate a daily apartment market report for a target apartment com
 
 # Apartment Daily Report
 
-> **Status: scaffold — NOT a production pipeline.**
-> `scripts/run_report.sh` currently writes a hard-coded sample `raw-search.json`
-> and summarizes that with Claude. Transaction prices and listings are placeholder
-> values (all `matchStatus: "unverified"`). Do not treat generated reports as
-> real market data until the collection step is replaced with real source-fetch
-> logic (Naver Land / Hogangnono / KB Land).
+> **Status: active but still conservative.**
+> The runner now performs real source collection for Naver Land / Hogangnono / KB Land,
+> but data quality is still partial and source-dependent. Treat the output as a cautious
+> automation pipeline, not a perfect market truth feed.
 
 Use this skill when creating or running a repeatable apartment report pipeline.
 
@@ -25,7 +23,7 @@ Default target for this workspace:
 ## Workflow
 
 1. Run the local collection script in `scripts/run_report.sh`.
-2. Save date-stamped outputs under `~/ai-nodes/apartment/YYYY-MM-DD/`.
+2. Save date-stamped outputs under `~/ai-nodes/apartment/data/YYYY-MM-DD/`.
 3. Produce these files when possible:
    - `report.md`
    - `raw-search.json`
@@ -35,6 +33,7 @@ Default target for this workspace:
 6. Use Claude CLI in print mode for final synthesis:
    - `claude --permission-mode bypassPermissions --print`
 7. Be explicit about uncertainty. Do not invent listing counts or prices.
+8. Keep OpenClaw-side wrapper logic thin; this directory is the canonical implementation.
 
 ## Required report sections
 
@@ -65,3 +64,9 @@ Default target for this workspace:
 - `_shared/bin/track_task.sh` — runner self-wraps through this tracker.
 - `_shared/bin/extract_claude_result.py` — pulls `result` out of Claude CLI JSON into `report.md`.
 - `claude` CLI on PATH.
+
+## Architecture note
+
+- Canonical implementation lives in `~/ai-nodes/apartment`.
+- OpenClaw wrapper path: `~/.openclaw/workspace/skills/apartment-daily-report/`
+- Wrapper changes should stay limited to delegation and scheduling glue.

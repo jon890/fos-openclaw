@@ -22,4 +22,6 @@ Current target:
 - Keep this task reusable and isolated from other tasks.
 - Prefer storing durable assets here, not in `~/.openclaw/workspace`.
 - The OpenClaw workspace is the orchestrator layer, not the long-term home for this task.
-- If version control is added later, manage it from this task directory, not from `~/.openclaw/workspace`.
+- This task now lives inside the `~/ai-nodes` mono-repo. Make durable workflow changes here first.
+- OpenClaw workspace skills should remain thin wrappers, not parallel implementations.
+- See `WORKFLOW.md` for the current apartment pipeline contract.
