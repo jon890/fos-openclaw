@@ -34,6 +34,7 @@ Default target for this workspace:
    - `claude --permission-mode bypassPermissions --print`
 7. Be explicit about uncertainty. Do not invent listing counts or prices.
 8. Keep OpenClaw-side wrapper logic thin; this directory is the canonical implementation.
+9. Naver collection may use an optional Claude/browser fallback when static extraction is too weak.
 
 ## Required report sections
 
@@ -58,7 +59,9 @@ Default target for this workspace:
 - Main runner: `scripts/run_report.sh` (self-wraps through `_shared/bin/track_task.sh` via `TRACK_TASK_WRAPPED` guard)
 - Smoke test: `scripts/run_smoke_test.sh`
 - Normalizer: `scripts/normalize_results.py`
+- Naver browser fallback: `scripts/collect_naver_browser.py`
 - Claude synthesis prompt: `references/claude-prompt.md`
+- Naver browser prompt: `references/naver-browser-prompt.md`
 
 ## External dependencies
 

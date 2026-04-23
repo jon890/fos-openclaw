@@ -24,7 +24,8 @@ OpenClaw workspace files should only provide thin delegation or scheduling glue.
 1. `skills/apartment-daily-report/scripts/run_report.sh`
 2. self-wrap through `_shared/bin/track_task.sh`
 3. collect source data from:
-   - Naver Land
+   - Naver Land (static collector)
+   - optional Naver browser fallback
    - Hogangnono
    - KB Land
 4. normalize into `summary.json`
@@ -58,6 +59,9 @@ OpenClaw workspace files should only provide thin delegation or scheduling glue.
 
 Quick collector/normalizer health check:
 - `skills/apartment-daily-report/scripts/run_smoke_test.sh`
+
+Optional browser mode example:
+- `NAVER_BROWSER_ENABLED=1 NAVER_BROWSER_CLAUDE_COMMAND='...' skills/apartment-daily-report/scripts/run_smoke_test.sh`
 
 Current expectation:
 - Naver collector should at least return a non-error status plus limited static signals.

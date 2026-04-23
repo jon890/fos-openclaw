@@ -32,6 +32,8 @@ assert isinstance((summary.get('listingSummary') or {}).get('notes', []), list),
 print('smoke ok')
 print('naver status:', sources['Naver Land'].get('status'))
 print('naver articleCounts:', (sources['Naver Land'].get('numericSignals') or {}).get('articleCounts'))
+if 'Naver Land Browser' in sources:
+    print('naver browser status:', sources['Naver Land Browser'].get('status'))
 print('recentTransactions:', len(summary.get('recentTransactions') or []))
 PY
 
