@@ -5,6 +5,8 @@
 **/.claude/*
 !.claude/skills/
 !.claude/skills/**
+!**/.claude/skills/
+!**/.claude/skills/**
 
 # Generated task outputs
 **/data/
