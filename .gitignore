@@ -19,6 +19,8 @@ career-os/sources/fos-study/
 # Local env / transient artifacts
 .env
 .env.*
+!.env.example
+!**/.env.example
 *.log
 *.pid
 *.result.json

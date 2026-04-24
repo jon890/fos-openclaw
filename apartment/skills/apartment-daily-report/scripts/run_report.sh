@@ -8,6 +8,16 @@ if [[ "${TRACK_TASK_WRAPPED:-0}" != "1" ]]; then
   exec "$TRACKER" "$TASK_ROOT" "apartment:daily-report" "$0" "$@"
 fi
 
+# Load workspace env if present (NAVER_COOKIE 등 선택적 인증 정보)
+# ADR-001 참조: apartment/docs/decisions/001-naver-api-integration.md
+ENV_FILE="${APARTMENT_ENV_FILE:-$HOME/ai-nodes/apartment/config/.env}"
+if [[ -f "$ENV_FILE" ]]; then
+  set -a
+  # shellcheck disable=SC1090
+  source "$ENV_FILE"
+  set +a
+fi
+
 TARGET_NAME="${TARGET_NAME:-엘지원앙아파트}"
 TARGET_ALIAS="${TARGET_ALIAS:-LG원앙}"
 TARGET_LOCATION="${TARGET_LOCATION:-경기 구리시 수택동 854-2 / 체육관로 54}"
