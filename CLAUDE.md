@@ -11,7 +11,7 @@
 - `apartment/` — 일일 아파트 시세 리포트 파이프라인 (타깃: 엘지원앙아파트 / LG원앙, 59A 타입). `apartment/AGENTS.md`, `apartment/TOOLS.md` 참조.
 - `career-os/` — CJ 올리브영 Wellness Platform Java 백엔드 면접 준비 (면접일 2026-04-21). 해당 서브트리 작업 시 `career-os/CLAUDE.md`가 이 파일을 오버라이드합니다.
 - `_shared/` — 워크스페이스 공통 셸/파이썬 스크립트. 내용: `track_task.sh`(실행 트래커), `extract_claude_result.py`(Claude CLI JSON → 마크다운 리포트), `update_artifacts.py`(`data/generated-artifacts.json` upsert).
-- `skills/` — 워크스페이스 공용 스킬. 현재 `agent-browser`만 존재하며, 로컬에 설치된 `agent-browser` CLI를 통한 브라우저 자동화입니다(Naver Land처럼 JS 렌더 의존도가 높은 페이지 수집에 사용). 스크립트성 공용 코드는 `_shared/bin/`에, 재사용 가능한 스킬 단위는 여기에 둡니다.
+- `skills/` — 워크스페이스 공용 스킬. 현재 `agent-browser`만 존재하며, 로컬에 설치된 `agent-browser` CLI를 통한 브라우저 자동화입니다(Naver Land처럼 JS 렌더 의존도가 높은 페이지 수집에 사용). 스크립트성 공용 코드는 `_shared/bin/`에, 재사용 가능한 스킬 단위는 여기에 둡니다. Claude Code가 자동 로드하도록 `.claude/skills/<name>`에 저장소 상대 심링크를 두며, `.gitignore`는 이 경로만 예외 처리합니다.
 
 모든 워크스페이스는 동일한 레이아웃을 따릅니다: `skills/`, `data/`, `logs/`, `config/`, 그리고 career-os의 경우 ADR을 위한 `docs/decisions/`.
 

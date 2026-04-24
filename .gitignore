@@ -1,8 +1,10 @@
 # Runtime / agent state
 .omc/
-.claude/
 **/.omc/
-**/.claude/
+.claude/*
+**/.claude/*
+!.claude/skills/
+!.claude/skills/**
 
 # Generated task outputs
 **/data/
