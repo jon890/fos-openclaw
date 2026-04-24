@@ -73,3 +73,20 @@ career-os/skills/cj-oliveyoung-java-backend-prep/scripts/run_now.sh smoke
 - 리포트에서 불확실성은 명시적으로 드러냅니다(매물 수, 실거래 매칭 등). 추측으로 공백을 메우지 말고 공백 자체를 기록하세요.
 - 비밀 정보는 저장소 루트가 아닌 `<workspace>/config/.env`에 저장합니다(예: `GITHUB_TOKEN`).
 - career-os 비용 규율: 저장소 전체를 광범위하게 분석하지 않습니다. baseline은 `career-os/config/baseline-core-files.txt`의 큐레이션된 핵심 집합을 사용하고, daily 실행은 더 작게 유지합니다.
+
+## 커밋 메시지 컨벤션
+
+Conventional Commits 포맷을 따르되 subject와 본문은 한글로 작성합니다.
+
+- 헤더: `<type>[(scope)]: <한글 subject>`
+  - `type`은 영어 소문자로 유지 (릴리즈 자동화/CHANGELOG 도구 호환성): `feat`, `fix`, `docs`, `refactor`, `test`, `chore`, `style`, `perf`, `build`, `ci`
+  - `scope`는 워크스페이스 또는 모듈명 (예: `apartment`, `career-os`, `CLAUDE`, `_shared`)
+  - subject는 50자 내외, 마침표 생략
+- 본문은 한 줄 띄우고 한글 서술. 변경 항목은 `-` 불릿으로 나열
+- `Co-Authored-By:` 같은 트레일러는 영어 그대로
+
+예:
+- `docs(CLAUDE): 공용 skills/ 디렉터리와 Claude CLI 호출 패턴 문서화`
+- `fix(apartment): Naver 브라우저 수집 실패 시 fallback 경로 보정`
+
+이 규칙은 제정 이후 신규 커밋부터 적용하며, 기존 영어 커밋 히스토리는 소급 리라이트하지 않습니다.
