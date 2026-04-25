@@ -11,14 +11,13 @@ TARGET_LOCATION = os.environ.get("TARGET_LOCATION", "경기 구리시 수택동 
 TARGET_UNIT_LABEL = os.environ.get("TARGET_UNIT_LABEL", "59A")
 TARGET_UNIT_EXCLUSIVE_AREA_M2 = float(os.environ.get("TARGET_UNIT_EXCLUSIVE_AREA_M2", "59"))
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-NAVER_URL = os.environ.get("NAVER_LAND_URL", "https://new.land.naver.com/complexes/1649?tab=detail&rf=Y")
-NAVER_BROWSER_ENABLED = os.environ.get("NAVER_BROWSER_ENABLED", "0") == "1"
+NAVER_URL = os.environ.get("NAVER_LAND_URL", "https://new.land.naver.com/complexes/1649")
 
 SOURCES = [
     {
         "name": "Naver Land",
         "url": NAVER_URL,
-        "script": os.path.join(SCRIPT_DIR, "collect_naver.py"),
+        "script": os.path.join(SCRIPT_DIR, "collect_naver_api.py"),
     },
     {
         "name": "Hogangnono",
@@ -40,24 +39,6 @@ def run_source(script, url):
 
 def get_source(source_results, name):
     return next((src for src in source_results if src.get("name") == name), {})
-
-
-def maybe_collect_naver_browser(source_results, notes):
-    if not NAVER_BROWSER_ENABLED:
-        return
-
-    naver = get_source(source_results, "Naver Land")
-    weak_static = naver.get("status") == "legacy-map-redirect" and not naver.get("numericSignals", {}).get("articleCounts")
-    if not weak_static:
-        return
-
-    script = os.path.join(SCRIPT_DIR, "collect_naver_browser.py")
-    try:
-        browser_result = run_source(script, NAVER_URL)
-        source_results.append(browser_result)
-        notes.append(f"Naver browser fallback 상태: {browser_result.get('status', 'unknown')}")
-    except Exception as e:
-        notes.append(f"Naver browser fallback 실패: {type(e).__name__}")
 
 
 def classify_focus_against_profiles(type_profiles):
@@ -110,11 +91,11 @@ def build_listing_summary(source_results):
     elif type_profiles:
         notes.append(f"KB Land 타입 프로필상 전용 {int(TARGET_UNIT_EXCLUSIVE_AREA_M2)}㎡ 근사 매칭이 보이지 않음")
 
-    browser = get_source(source_results, "Naver Land Browser")
-    browser_counts = browser.get("numericSignals", {}).get("listingCounts", {}) if browser else {}
-    if browser_counts:
+    naver = get_source(source_results, "Naver Land")
+    naver_counts = naver.get("numericSignals", {}).get("listingCounts", {}) if naver else {}
+    if naver_counts:
         notes.append(
-            f"Naver browser 기준 매물 수: 매매 {browser_counts.get('sale', '?')} / 전세 {browser_counts.get('jeonse', '?')} / 월세 {browser_counts.get('wolse', '?')}"
+            f"Naver API 기준 매물 수: 매매 {naver_counts.get('매매', '?')}건 / 전세 {naver_counts.get('전세', '?')}건"
         )
 
     return {
@@ -130,13 +111,11 @@ def build_listing_summary(source_results):
 
 def build_comparison(source_results):
     naver = get_source(source_results, "Naver Land")
-    browser = get_source(source_results, "Naver Land Browser")
     hogang = get_source(source_results, "Hogangnono")
     kb = get_source(source_results, "KB Land")
 
     return {
         "naver": naver.get("note", "Naver Land 확인 결과 없음"),
-        "naverBrowser": browser.get("note", "Naver browser fallback 결과 없음") if browser else "Naver browser fallback 결과 없음",
         "hogangnono": hogang.get("note", "호갱노노 확인 결과 없음"),
         "kbland": kb.get("note", "KB Land 확인 결과 없음"),
     }
@@ -165,21 +144,20 @@ def main():
             })
             notes.append(f"{src['name']} 수집 실패: {type(e).__name__}")
 
-    maybe_collect_naver_browser(source_results, notes)
-
     hogang = get_source(source_results, "Hogangnono")
     kb = get_source(source_results, "KB Land")
     naver = get_source(source_results, "Naver Land")
-    naver_browser = get_source(source_results, "Naver Land Browser")
 
-    if naver.get("numericSignals", {}).get("articleCounts"):
-        counts = naver["numericSignals"]["articleCounts"]
-        notes.append(f"Naver Land 정적 HTML 기준 매물 수 일부 추출: 매매 {counts.get('매매', '?')}건, 전세 {counts.get('전세', '?')}건, 월세 {counts.get('월세', '?')}건")
-    elif naver.get("status") == "legacy-map-redirect":
-        notes.append("Naver Land는 new.land 직접 URL 대신 m.land -> fin.land map redirect 경로와 제한적 정적 신호까지만 복구했다.")
-
-    if naver_browser:
-        notes.append(f"Naver browser fallback note: {naver_browser.get('note', '없음')}")
+    naver_status = naver.get("status")
+    if naver_status == "api-ok":
+        counts = naver.get("numericSignals", {}).get("listingCounts", {})
+        notes.append(f"Naver API 매물 수집 성공: 매매 {counts.get('매매', '?')}건 / 전세 {counts.get('전세', '?')}건")
+    elif naver_status == "skipped-no-cookie":
+        notes.append("Naver API 수집은 NAVER_COOKIE 부재로 건너뛰었다 — apartment/config/.env에 쿠키를 설정하라.")
+    elif naver_status in ("auth-failed", "rate-limited"):
+        notes.append(f"Naver API 수집 실패 ({naver_status}) — 쿠키/토큰 갱신이 필요하다.")
+    elif naver_status:
+        notes.append(f"Naver API 상태: {naver_status}.")
 
     if hogang.get("numericSignals", {}).get("areaTradeSummary"):
         area = hogang["numericSignals"]["areaTradeSummary"]

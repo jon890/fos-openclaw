@@ -26,14 +26,14 @@ sources = {src.get('name'): src for src in raw.get('sources', [])}
 assert 'Naver Land' in sources, 'missing Naver Land source'
 assert 'Hogangnono' in sources, 'missing Hogangnono source'
 assert 'KB Land' in sources, 'missing KB Land source'
-assert sources['Naver Land'].get('status') in {'legacy-map-redirect', 'complex-entry-ok', 'ok'}, 'unexpected Naver status'
+allowed = {'api-ok', 'skipped-no-cookie', 'auth-failed', 'rate-limited', 'no-data'}
+naver_status = sources['Naver Land'].get('status')
+assert naver_status in allowed, f'unexpected Naver status: {naver_status}'
 assert isinstance((summary.get('recentTransactions') or []), list), 'recentTransactions must be a list'
 assert isinstance((summary.get('listingSummary') or {}).get('notes', []), list), 'listingSummary.notes must be a list'
 print('smoke ok')
-print('naver status:', sources['Naver Land'].get('status'))
-print('naver articleCounts:', (sources['Naver Land'].get('numericSignals') or {}).get('articleCounts'))
-if 'Naver Land Browser' in sources:
-    print('naver browser status:', sources['Naver Land Browser'].get('status'))
+print('naver status:', naver_status)
+print('naver listingCounts:', (sources['Naver Land'].get('numericSignals') or {}).get('listingCounts'))
 print('recentTransactions:', len(summary.get('recentTransactions') or []))
 PY
 
