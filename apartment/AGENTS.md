@@ -25,3 +25,4 @@ Current target:
 - This task now lives inside the `~/ai-nodes` mono-repo. Make durable workflow changes here first.
 - OpenClaw workspace skills should remain thin wrappers, not parallel implementations.
 - See `WORKFLOW.md` for the current apartment pipeline contract.
+- 아키텍처 결정 사항은 `docs/decisions/`에 ADR로 기록 — 현재 [ADR-001](docs/decisions/001-naver-api-integration.md): 네이버 부동산을 쿠키+Bearer 기반 API로 통합.

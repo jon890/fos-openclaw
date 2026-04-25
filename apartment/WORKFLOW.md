@@ -49,7 +49,7 @@ OpenClaw workspace files should only provide thin delegation or scheduling glue.
 
 ## Improvement priorities
 
-1. Deepen Naver extraction beyond redirect/static shell signals.
+1. Naver 수집은 ADR-001(쿠키+Bearer 기반 API 통합)로 정착했다. 후속: NID_SES 만료 감지/알림, JWT 자동 추출 PoC, 추가 교차검증 소스(국토부 실거래가 등) 검토.
 2. Move target/source config from env defaults into explicit config files where useful.
 3. Expand the smoke-test entrypoint into a routine health check for collector/normalizer changes.
 4. Clarify notification policy vs pure batch mode.
