@@ -17,7 +17,9 @@ status 값: api-ok / skipped-no-cookie / auth-failed / rate-limited / no-data
 import json
 import os
 import re
+import subprocess
 import sys
+import tempfile
 import time
 from urllib.parse import urlparse
 
@@ -31,6 +33,61 @@ USER_AGENT = (
 )
 SLEEP_BETWEEN = 2.0
 BACKOFFS = [2, 4, 8]
+
+
+def extract_bearer_via_har(cookie, complex_no):
+    """agent-browser HAR 캡처로 Naver SPA가 발급하는 JWT를 자동 추출.
+
+    NAVER_BEARER 환경변수가 비어있을 때만 호출한다. Naver SPA는 페이지가 /404로
+    리다이렉트되더라도 백그라운드 JS가 첫 API 호출에 Authorization: Bearer ...
+    헤더를 자동 inject한다. HAR 기록을 켜둔 채 잠시 대기하면 그 헤더를 회수할 수
+    있다. 실패 시 None을 반환해 호출자가 폴백 처리하도록 한다.
+    """
+    if not cookie:
+        return None
+    session = f"naver-bearer-{os.getpid()}"
+    env = os.environ.copy()
+    env.setdefault("AGENT_BROWSER_ARGS", "--no-sandbox")
+    env.setdefault("AGENT_BROWSER_USER_AGENT", USER_AGENT)
+    headers_json = json.dumps({"Cookie": cookie})
+    har_fd, har_path = tempfile.mkstemp(suffix=".har", prefix="naver-bearer-")
+    os.close(har_fd)
+
+    def run(*args, timeout=30):
+        return subprocess.run(
+            ["agent-browser", *args],
+            env=env,
+            capture_output=True,
+            text=True,
+            timeout=timeout,
+        )
+
+    try:
+        run("open", "about:blank", "--session", session)
+        run("network", "har", "start", "--session", session)
+        url = f"https://new.land.naver.com/complexes/{complex_no}"
+        run("open", url, "--session", session, "--headers", headers_json)
+        time.sleep(8)
+        run("network", "har", "stop", har_path, "--session", session)
+        with open(har_path, encoding="utf-8") as f:
+            har = json.load(f)
+        for entry in har.get("log", {}).get("entries", []):
+            req = entry.get("request", {})
+            if "new.land.naver.com/api" not in (req.get("url") or ""):
+                continue
+            for h in req.get("headers") or []:
+                if (h.get("name") or "").lower() == "authorization":
+                    val = h.get("value") or ""
+                    if val.lower().startswith("bearer "):
+                        return val.split(None, 1)[1].strip()
+        return None
+    except (subprocess.TimeoutExpired, FileNotFoundError, OSError, json.JSONDecodeError, KeyError):
+        return None
+    finally:
+        try:
+            os.unlink(har_path)
+        except OSError:
+            pass
 
 
 def build_headers(cookie, bearer, referer):
@@ -226,6 +283,13 @@ def main():
         })
         print(json.dumps(base_result, ensure_ascii=False))
         return
+
+    bearer_source = "env" if bearer else "none"
+    if not bearer:
+        extracted = extract_bearer_via_har(cookie, complex_no)
+        if extracted:
+            bearer = extracted
+            bearer_source = "auto"
 
     referer = f"https://new.land.naver.com/complexes/{complex_no}"
     headers = build_headers(cookie, bearer, referer)
