@@ -3,26 +3,33 @@ set -euo pipefail
 TASK_ROOT="${TASK_ROOT:-$HOME/ai-nodes/career-os}"
 NOTIFY_SCRIPT="$TASK_ROOT/skills/cj-oliveyoung-java-backend-prep/scripts/notify_discord.sh"
 SEED_CONFIG="$TASK_ROOT/config/live-coding-seed-pool.json"
+CANDIDATE_CONFIG="$TASK_ROOT/config/live-coding-seed-candidates.json"
 TEMP_CONFIG="$TASK_ROOT/data/runtime/live-coding-generated-topic.json"
 mkdir -p "$(dirname "$TEMP_CONFIG")"
 
-SELECTION_JSON="$(python3 - <<"PY" "$SEED_CONFIG" "$TASK_ROOT/data/generated-artifacts.json"
+SELECTION_JSON="$(python3 - <<"PY" "$SEED_CONFIG" "$CANDIDATE_CONFIG" "$TASK_ROOT/data/generated-artifacts.json"
 import json, sys
 from pathlib import Path
 seed_cfg = json.loads(Path(sys.argv[1]).read_text(encoding='utf-8'))
-artifacts = json.loads(Path(sys.argv[2]).read_text(encoding='utf-8'))
+candidate_cfg = json.loads(Path(sys.argv[2]).read_text(encoding='utf-8'))
+artifacts = json.loads(Path(sys.argv[3]).read_text(encoding='utf-8'))
 covered = {a.get('outputPath') for a in artifacts.get('artifacts', []) if a.get('kind') == 'live-coding'}
 selected = None
 for seed in seed_cfg.get('seeds', []):
     if seed.get('outputPath') not in covered:
-        selected = seed
+        selected = {**seed, 'source': 'primary'}
         break
+if selected is None:
+    for seed in candidate_cfg.get('seeds', []):
+        if seed.get('outputPath') not in covered:
+            selected = {**seed, 'source': 'candidate'}
+            break
 print(json.dumps(selected or {}, ensure_ascii=False))
 PY
 )"
 
 if [[ "$SELECTION_JSON" == "{}" ]]; then
-  "$NOTIFY_SCRIPT" "[안내] 새 live-coding 주제가 없어 생성하지 않았습니다. seed pool 보강이 필요합니다."
+  "$NOTIFY_SCRIPT" "[안내] 새 live-coding 주제가 없어 생성하지 않았습니다. primary/candidate seed pool 모두 보강이 필요합니다."
   exit 0
 fi
 

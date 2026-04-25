@@ -87,6 +87,9 @@ PY
     exec "$TRACKER" "$TASK_ROOT" "career-os:question-bank:$TOPIC" \
       "$TASK_ROOT/skills/experience-question-bank-writer/scripts/run_question_bank.sh"
     ;;
+  recommend-topics)
+    exec "$TASK_ROOT/skills/cj-oliveyoung-java-backend-prep/scripts/run_morning_topic_recommendation.sh"
+    ;;
   maintain-study-pack)
     TOPIC="${2:-}"
     if [[ -z "$TOPIC" ]]; then
@@ -117,7 +120,7 @@ PY
       "$TASK_ROOT/skills/cj-oliveyoung-java-backend-prep/scripts/run_smoke_test.sh"
     ;;
   *)
-    echo "usage: run_now.sh [baseline | daily [topic] | study-pack <topic> | question-bank <topic> | maintain-study-pack <topic> | master [topic] | smoke]" >&2
+    echo "usage: run_now.sh [baseline | daily [topic] | study-pack <topic> | question-bank <topic> | recommend-topics | maintain-study-pack <topic> | master [topic] | smoke]" >&2
     echo "  daily topic keys: see config/topic-file-map.json" >&2
     echo "  study-pack topic keys: see config/study-pack-topics.json" >&2
     echo "  question-bank topic keys: see config/experience-question-bank-topics.json" >&2
