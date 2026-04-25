@@ -8,18 +8,45 @@ TASK_ROOT = Path.home() / 'ai-nodes' / 'career-os'
 CONFIG = TASK_ROOT / 'config'
 RUNTIME = TASK_ROOT / 'data' / 'runtime'
 RUNTIME.mkdir(parents=True, exist_ok=True)
+HISTORY_PATH = RUNTIME / 'topic-inventory-history.jsonl'
+
+# ADR-010: 추천 점수 기반 + mix target
+MIX_TARGET = {'new': 2, 'deepen': 1, 'review': 1, 'live-coding': 1}
+WEAK_AREAS = {'mysql', 'redis'}
+WEAK_AREA_BONUS = 3
+RECENT_PENALTY_PER = 2
+CARRYOVER_PENALTY = 1
+TAG_PRIORITY = {'new': 0, 'deepen': -1, 'review': -2, 'live-coding': 0}
 
 
 def read_json(path: Path):
     return json.loads(path.read_text(encoding='utf-8'))
 
 
-def sort_key(item):
-    return (
-        {'new': 0, 'deepen': 1, 'review': 2}.get(item.get('tag'), 9),
-        item.get('domain', 'zzz'),
-        item.get('title', 'zzz'),
-    )
+def load_yesterday_keys():
+    if not HISTORY_PATH.exists():
+        return set()
+    last = None
+    try:
+        with HISTORY_PATH.open(encoding='utf-8') as f:
+            for line in f:
+                line = line.strip()
+                if line:
+                    last = line
+    except OSError:
+        return set()
+    if not last:
+        return set()
+    try:
+        return set(json.loads(last).get('keys', []))
+    except json.JSONDecodeError:
+        return set()
+
+
+def append_history(keys):
+    entry = {'generatedAt': datetime.now(timezone.utc).isoformat(), 'keys': list(keys)}
+    with HISTORY_PATH.open('a', encoding='utf-8') as f:
+        f.write(json.dumps(entry, ensure_ascii=False) + '\n')
 
 
 study_topics = read_json(CONFIG / 'study-pack-topics.json')
@@ -89,18 +116,27 @@ for item in study_candidates:
 
 
 def pick_recommendations():
-    chosen = []
-    used_domains = Counter()
-    target_order = ['database', 'architecture', 'spring', 'message-queue', 'search', 'redis', 'interview']
-    pool = sorted(candidate_recommendations, key=sort_key)
+    """ADR-010: 점수 기반 + mix target 강제.
 
-    live_item_source = remaining_live[:1] or remaining_live_candidates[:1]
+    score = -RECENT_PENALTY_PER * recent10_domain_count
+          + WEAK_AREA_BONUS (mysql/redis)
+          + TAG_PRIORITY[tag]
+          - CARRYOVER_PENALTY (어제 추천에 있었으면)
+
+    1차: MIX_TARGET(new 2 / deepen 1 / review 1 / live-coding 1)을 점수 순으로 채움.
+    2차: 부족하면 mix 위반 허용하고 남은 점수 상위로 채움.
+    """
+    yesterday_keys = load_yesterday_keys()
+
+    pool = [dict(item) for item in candidate_recommendations]
+
+    live_item_source = remaining_live[:3] or remaining_live_candidates[:3]
     for seed in live_item_source:
         pool.append({
             'key': f"live-coding-{seed['slug']}",
             'title': f"라이브코딩 — {seed['title']}",
             'domain': 'live-coding',
-            'tag': 'new',
+            'tag': 'live-coding',
             'difficulty': seed.get('difficulty', '중'),
             'estMinutes': 40,
             'whyNow': [
@@ -109,42 +145,42 @@ def pick_recommendations():
             ],
         })
 
-    def already(key):
-        return any(existing.get('key') == key for existing in chosen)
+    for item in pool:
+        domain = item.get('domain', '')
+        tag = item.get('tag', 'new')
+        score = -RECENT_PENALTY_PER * recent_domain_counts.get(domain, 0)
+        if domain in WEAK_AREAS:
+            score += WEAK_AREA_BONUS
+        score += TAG_PRIORITY.get(tag, -3)
+        if item.get('key') in yesterday_keys:
+            score -= CARRYOVER_PENALTY
+        item['_score'] = score
 
-    for target in target_order:
-        if len(chosen) >= 5:
-            break
-        for item in pool:
-            key = item.get('key')
-            domain = item.get('domain')
-            if already(key):
-                continue
-            if domain == target and used_domains[domain] == 0:
-                chosen.append(item)
-                used_domains[domain] += 1
+    pool.sort(key=lambda x: -x['_score'])
+
+    chosen = []
+    used_tags = Counter()
+    chosen_keys = set()
+
+    # 1차: mix target 충족 (점수 순)
+    for item in pool:
+        tag = item.get('tag', 'new')
+        if used_tags[tag] < MIX_TARGET.get(tag, 0):
+            chosen.append(item)
+            chosen_keys.add(item.get('key'))
+            used_tags[tag] += 1
+            if len(chosen) >= 5:
                 break
 
-    for item in pool:
-        if len(chosen) >= 5:
-            break
-        key = item.get('key')
-        domain = item.get('domain')
-        if already(key):
-            continue
-        if used_domains[domain] == 0 or recent_domain_counts.get(domain, 0) == 0:
+    # 2차: mix 위반 허용, 점수 상위로 5개까지 채움
+    if len(chosen) < 5:
+        for item in pool:
+            if item.get('key') in chosen_keys:
+                continue
             chosen.append(item)
-            used_domains[domain] += 1
-
-    for item in pool:
-        if len(chosen) >= 5:
-            break
-        key = item.get('key')
-        domain = item.get('domain')
-        if already(key):
-            continue
-        chosen.append(item)
-        used_domains[domain] += 1
+            chosen_keys.add(item.get('key'))
+            if len(chosen) >= 5:
+                break
 
     return chosen[:5]
 
@@ -197,8 +233,10 @@ lines.append('')
 lines.append('마음에 드는 주제를 고르면 study-pack으로 바로 만들어줄게.')
 
 (RUNTIME / 'morning-topic-recommendation.md').write_text('\n'.join(lines) + '\n', encoding='utf-8')
+append_history(r.get('key') for r in recommendations if r.get('key'))
 print(json.dumps({
     'inventory': str(RUNTIME / 'topic-inventory.json'),
     'recommendation': str(RUNTIME / 'morning-topic-recommendation.md'),
     'recommendationCount': len(recommendations),
+    'history': str(HISTORY_PATH),
 }, ensure_ascii=False))
