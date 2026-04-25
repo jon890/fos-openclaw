@@ -61,6 +61,8 @@ Design rationale is in `docs/decisions/`. Key ADRs:
 | [007a](docs/decisions/007-experience-question-bank-workflow.md) | 경험 기반 인터뷰 Q&A 워크플로 (⚠ 번호 충돌 — 리넘버링 예정) |
 | [007b](docs/decisions/007-study-pack-stdout-capture.md) | study-pack 생성: 파일 쓰기 → stdout 캡처 (⚠ 번호 충돌 — 리넘버링 예정) |
 | [008](docs/decisions/008-generation-status-notifications.md) | 문서 생성 상태 알림 정책 |
+| [009](docs/decisions/009-morning-topic-reservoir-and-recommendation-pipeline.md) | morning topic 추천 reservoir 파이프라인 |
+| [010](docs/decisions/010-recommendation-scoring-and-mix-targets.md) | 추천 점수 기반 + mix target |
 
 ## Rules
 
