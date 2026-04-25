@@ -131,11 +131,11 @@
       "key": "api-versioning-backward-compatibility",
       "title": "API Versioning과 Backward Compatibility 설계",
       "domain": "architecture",
-      "tag": "review",
+      "tag": "new",
       "difficulty": "중",
       "estMinutes": 40,
       "whyNow": [
-        "실무 서비스 운영 관점 질문에 안정적으로 답할 수 있는 review용 축이다",
+        "실무 서비스 운영 관점 질문에 안정적으로 답할 수 있는 축이다",
         "전시/주문/검색 API가 많은 커머스 환경에서 잘 맞는다"
       ],
       "promotionTarget": {
@@ -203,11 +203,11 @@
       "key": "interview-pressure-question-defense",
       "title": "압박 질문 대응 플레이북",
       "domain": "interview",
-      "tag": "review",
+      "tag": "new",
       "difficulty": "중",
       "estMinutes": 30,
       "whyNow": [
-        "면접 후 회고나 2차/추가 면접 대비에 review 형태로 빠르게 복기 가능하다",
+        "면접 후 회고나 2차/추가 면접 대비용 새 플레이북이 필요하다",
         "기술 답변과 별개로 압박 질문 대응 패턴을 정리하면 안정감이 올라간다"
       ],
       "promotionTarget": {
@@ -215,6 +215,60 @@
         "outputPath": "interview/experience-based/pressure-question-defense.md",
         "commitTopic": "interview-pressure-question-defense",
         "appendPrompt": "면접에서 받기 쉬운 압박 질문(약점 캐묻기, 경험 검증, why-this-company, 부정적 가정 시나리오)을 1분 답변과 꼬리 질문 대응 형태로 정리한다. 후보자 실제 경험과 자기평가 약점(DB 등)을 활용해 솔직-방어 균형을 잡는 패턴을 코칭한다. 문서 제목은 반드시 [초안]으로 시작한다."
+      }
+    },
+    {
+      "key": "redis-distributed-lock-deepen",
+      "title": "Redis 분산 락 운영 디테일",
+      "domain": "redis",
+      "tag": "deepen",
+      "difficulty": "중상",
+      "estMinutes": 45,
+      "whyNow": [
+        "Redis는 후보자 자기평가 weak area라 분산 락 운영 디테일을 강화하면 ROI가 크다",
+        "후보자의 Redis Streams/RediSearch 실전 경험을 분산 락 답변으로 자연스럽게 확장할 수 있다"
+      ],
+      "promotionTarget": {
+        "domain": "redis",
+        "outputPath": "database/redis/redis-distributed-lock.md",
+        "commitTopic": "redis-distributed-lock",
+        "appendPrompt": "Redis 분산 락(SETNX/Lua/Redlock)을 백엔드 면접 대비용으로 정리한다. 단순 구현 소개를 넘어 fencing token 필요성, RedLock 비판(Martin Kleppmann vs antirez), 락 만료/갱신, 클라이언트 장애 시나리오, 단일 인스턴스 vs 클러스터, Redisson과의 비교까지 다룬다. 후보자가 실전 운영 경험이 있는 Redis Streams/RediSearch와 자연스럽게 연결되는 톤으로 쓴다. 기존 redis-advanced-patterns 문서와 지나치게 중복하지 말고 분산 락 단일 주제 심화로 쓴다. 문서 제목은 반드시 [초안]으로 시작한다."
+      }
+    },
+    {
+      "key": "review-cache-coherency-cluster",
+      "title": "(Review) 클러스터 캐시 정합성 1분 답변",
+      "domain": "redis",
+      "tag": "review",
+      "difficulty": "중",
+      "estMinutes": 25,
+      "whyNow": [
+        "이미 작성된 cache-aside / redis-advanced-patterns study-pack을 후보자의 실전 경험(Ehcache+RabbitMQ Fanout)과 묶어 1분 답변으로 압축할 review 슬롯이 비어 있다",
+        "면접 직전·다음 면접 대비에 ROI가 가장 높은 형태가 압축 review다"
+      ],
+      "promotionTarget": {
+        "domain": "interview",
+        "outputPath": "interview/experience-based/review-cache-coherency-cluster.md",
+        "commitTopic": "review-cache-coherency-cluster",
+        "appendPrompt": "이미 작성된 study-pack(database/redis/cache-aside.md, database/redis/redis-advanced-patterns.md)과 후보자의 실전 경험(Ehcache JSR-107 + RabbitMQ Fanout 기반 다중 서버 캐시 정합성, NSC 슬롯팀 RCC 백그라운드 캐시)을 한 시야로 묶어 1분 답변/꼬리 질문/실패 시나리오까지 review 형태로 정리한다. 새 개념을 도입하지 말고 기존 문서를 짧게 인용·연결한다. 문서 제목은 반드시 [초안]으로 시작한다."
+      }
+    },
+    {
+      "key": "review-jpa-transaction-pitfalls",
+      "title": "(Review) JPA·트랜잭션 함정 1분 답변",
+      "domain": "spring",
+      "tag": "review",
+      "difficulty": "중",
+      "estMinutes": 25,
+      "whyNow": [
+        "이미 작성된 jpa-n-plus-one / transaction-propagation-isolation-after-commit study-pack을 1분 답변으로 압축한 review 자료가 없다",
+        "Spring 트랜잭션은 1차 면접 단골 주제라 review 형태 ROI가 높다"
+      ],
+      "promotionTarget": {
+        "domain": "interview",
+        "outputPath": "interview/experience-based/review-jpa-transaction-pitfalls.md",
+        "commitTopic": "review-jpa-transaction-pitfalls",
+        "appendPrompt": "이미 작성된 study-pack(java/spring/jpa-n-plus-one.md, java/spring/transaction-propagation-isolation-after-commit.md, java/spring/transaction-synchronization.md)을 1분 답변과 꼬리 질문 대응 형태로 review 압축한다. 후보자가 운영해 본 PostCommitUpdateEventListener / @TransactionalEventListener(AFTER_COMMIT) / Propagation.REQUIRES_NEW 사용 사례와 자연스럽게 연결한다. 새 개념 도입 금지, 기존 문서를 짧게 인용·연결한다. 문서 제목은 반드시 [초안]으로 시작한다."
       }
     }
   ]
