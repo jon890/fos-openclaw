@@ -110,24 +110,6 @@
       }
     },
     {
-      "key": "redis-hotkey-stampede-session-patterns",
-      "title": "Redis Hot Key·Stampede·Session 패턴 정리",
-      "domain": "redis",
-      "tag": "deepen",
-      "difficulty": "중상",
-      "estMinutes": 45,
-      "whyNow": [
-        "Cache-Aside 이후 운영형 꼬리 질문을 대비하기 좋다",
-        "Redis를 단순 캐시가 아니라 트래픽 제어 도구로 설명할 수 있게 해준다"
-      ],
-      "promotionTarget": {
-        "domain": "redis",
-        "outputPath": "database/redis/hotkey-stampede-session-patterns.md",
-        "commitTopic": "redis-hotkey-stampede-session-patterns",
-        "appendPrompt": "Redis Hot Key, cache stampede, session/token 저장, TTL 설계, warming, multi-level cache, 장애 대응까지 백엔드 면접 대비용으로 정리한다. 기존 cache-aside/advanced 문서와 자연스럽게 연결한다. 문서 제목은 반드시 [초안]으로 시작한다."
-      }
-    },
-    {
       "key": "spring-batch-vs-event-driven",
       "title": "Spring Batch vs Event-Driven 처리 선택 기준",
       "domain": "spring",
@@ -149,11 +131,11 @@
       "key": "api-versioning-backward-compatibility",
       "title": "API Versioning과 Backward Compatibility 설계",
       "domain": "architecture",
-      "tag": "new",
+      "tag": "review",
       "difficulty": "중",
       "estMinutes": 40,
       "whyNow": [
-        "실무 서비스 운영 관점 질문에 안정적으로 답할 수 있는 축이다",
+        "실무 서비스 운영 관점 질문에 안정적으로 답할 수 있는 review용 축이다",
         "전시/주문/검색 API가 많은 커머스 환경에서 잘 맞는다"
       ],
       "promotionTarget": {
@@ -171,7 +153,7 @@
       "difficulty": "중",
       "estMinutes": 35,
       "whyNow": [
-        "면접 직전에는 아는 내용을 짧고 강하게 말하는 연습이 ROI가 높다",
+        "면접 직전이나 회고 시 아는 내용을 짧고 강하게 말하는 연습이 ROI가 높다",
         "기술 문서 공부와 실제 구술 답변 사이를 연결해준다"
       ],
       "promotionTarget": {
@@ -179,6 +161,60 @@
         "outputPath": "interview/experience-based/one-minute-answer-playbook.md",
         "commitTopic": "resume-experience-one-minute-answers",
         "appendPrompt": "후보자의 주요 경험(캐시 정합성, Outbox, RAG 배치)을 1분 답변과 꼬리 질문 대응 형태로 정리한 면접용 문서를 작성한다. 기술 설명과 경험 설명이 함께 보이게 구성한다. 문서 제목은 반드시 [초안]으로 시작한다."
+      }
+    },
+    {
+      "key": "mysql-replication-and-failover-deepen",
+      "title": "MySQL 복제·페일오버 운영 디테일",
+      "domain": "mysql",
+      "tag": "deepen",
+      "difficulty": "중상",
+      "estMinutes": 50,
+      "whyNow": [
+        "DB는 후보자 자기평가상 약점 영역이라 운영 디테일 답변을 강화하면 ROI가 크다",
+        "Aurora/RDS 환경에서 read/write 분리, 장애 전파, replica lag 같은 꼬리 질문에 대응한다"
+      ],
+      "promotionTarget": {
+        "domain": "mysql",
+        "outputPath": "database/mysql/mysql-replication-and-failover.md",
+        "commitTopic": "mysql-replication-and-failover",
+        "appendPrompt": "MySQL 복제 토폴로지(async / semi-sync / GTID), read replica, replica lag 모니터링, failover 시 데이터 일관성, split-brain 방지, Aurora의 storage-level replication 차이까지 백엔드 면접 대비용으로 정리한다. 개념 설명을 넘어 장애 시 운영 의사결정에 필요한 신호를 함께 다룬다. 문서 제목은 반드시 [초안]으로 시작한다."
+      }
+    },
+    {
+      "key": "mysql-isolation-mvcc-deepen",
+      "title": "MySQL 격리수준·MVCC·gap lock 심화",
+      "domain": "mysql",
+      "tag": "deepen",
+      "difficulty": "상",
+      "estMinutes": 55,
+      "whyNow": [
+        "DB 약점 영역에서 InnoDB 락 동작을 풀어서 답할 수 있으면 면접 인상이 크게 바뀐다",
+        "Spring 트랜잭션 답변에 MySQL 레벨 detail을 더하면 풀스택 답변이 된다"
+      ],
+      "promotionTarget": {
+        "domain": "mysql",
+        "outputPath": "database/mysql/mysql-isolation-mvcc-gaplock.md",
+        "commitTopic": "mysql-isolation-mvcc-gaplock",
+        "appendPrompt": "MySQL InnoDB의 격리수준(REPEATABLE READ 디폴트), MVCC 동작, undo log 기반 스냅샷, gap lock / next-key lock, phantom read의 실제 발생 조건, RC vs RR에서 동작 차이, 인덱스가 락 범위에 미치는 영향까지 백엔드 면접 대비용으로 정리한다. Spring `@Transactional`과 함께 동작할 때 흔히 빠지는 함정도 짧게 짚는다. 문서 제목은 반드시 [초안]으로 시작한다."
+      }
+    },
+    {
+      "key": "interview-pressure-question-defense",
+      "title": "압박 질문 대응 플레이북",
+      "domain": "interview",
+      "tag": "review",
+      "difficulty": "중",
+      "estMinutes": 30,
+      "whyNow": [
+        "면접 후 회고나 2차/추가 면접 대비에 review 형태로 빠르게 복기 가능하다",
+        "기술 답변과 별개로 압박 질문 대응 패턴을 정리하면 안정감이 올라간다"
+      ],
+      "promotionTarget": {
+        "domain": "interview",
+        "outputPath": "interview/experience-based/pressure-question-defense.md",
+        "commitTopic": "interview-pressure-question-defense",
+        "appendPrompt": "면접에서 받기 쉬운 압박 질문(약점 캐묻기, 경험 검증, why-this-company, 부정적 가정 시나리오)을 1분 답변과 꼬리 질문 대응 형태로 정리한다. 후보자 실제 경험과 자기평가 약점(DB 등)을 활용해 솔직-방어 균형을 잡는 패턴을 코칭한다. 문서 제목은 반드시 [초안]으로 시작한다."
       }
     }
   ]
