@@ -5,7 +5,18 @@ NOTIFY_SCRIPT="$TASK_ROOT/skills/cj-oliveyoung-java-backend-prep/scripts/notify_
 SEED_CONFIG="$TASK_ROOT/config/live-coding-seed-pool.json"
 CANDIDATE_CONFIG="$TASK_ROOT/config/live-coding-seed-candidates.json"
 TEMP_CONFIG="$TASK_ROOT/data/runtime/live-coding-generated-topic.json"
-mkdir -p "$(dirname "$TEMP_CONFIG")"
+LOCK_DIR="$TASK_ROOT/data/runtime/locks"
+LOCK_FILE="$LOCK_DIR/morning-live-coding.lock"
+mkdir -p "$(dirname "$TEMP_CONFIG")" "$LOCK_DIR"
+
+# Single-dispatch guard: if the morning live-coding wrapper is re-entered while an
+# earlier run is still active, skip the duplicate before it can select the same seed
+# and emit a second notification sequence.
+exec 9>"$LOCK_FILE"
+if ! flock -n 9; then
+  echo "[run_morning_live_coding] another run is already active; skipping duplicate dispatch" >&2
+  exit 0
+fi
 
 SELECTION_JSON="$(python3 - <<"PY" "$SEED_CONFIG" "$CANDIDATE_CONFIG" "$TASK_ROOT/data/generated-artifacts.json"
 import json, sys
@@ -61,19 +72,6 @@ config = {
 out.write_text(json.dumps(config, ensure_ascii=False, indent=2) + "\n", encoding='utf-8')
 PY
 
-"$NOTIFY_SCRIPT" "[시작] ${TOPIC_KEY} 라이브코딩 스터디팩 생성 시작"
-set +e
-TOPIC_CONFIG_OVERRIDE="$TEMP_CONFIG" bash "$TASK_ROOT/skills/cj-oliveyoung-java-backend-prep/scripts/run_now.sh" study-pack "$TOPIC_KEY"
-code=$?
-set -e
-if (( code == 0 )); then
-  OUTPUT_PATH="$(python3 - <<"PY" "$SELECTION_JSON"
-import json, sys
-print(json.loads(sys.argv[1])["outputPath"])
-PY
-)"
-  "$NOTIFY_SCRIPT" "[완료] ${TOPIC_KEY} 라이브코딩 스터디팩 생성 완료 (${OUTPUT_PATH})"
-else
-  "$NOTIFY_SCRIPT" "[실패] ${TOPIC_KEY} 라이브코딩 스터디팩 생성 실패 (exit ${code})"
-  exit "$code"
-fi
+# Notification ownership lives in run_now.sh study-pack.
+# This wrapper should only select/prepare the live-coding topic and dispatch once.
+exec env TOPIC_CONFIG_OVERRIDE="$TEMP_CONFIG" bash "$TASK_ROOT/skills/cj-oliveyoung-java-backend-prep/scripts/run_now.sh" study-pack "$TOPIC_KEY"

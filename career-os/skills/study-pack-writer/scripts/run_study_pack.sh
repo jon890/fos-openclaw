@@ -15,15 +15,11 @@ PROFILE="$TASK_ROOT/config/candidate-profile.md"
 OUTPUT_MD="$SOURCE_DIR/$OUTPUT_REL_PATH"
 INPUT_NOTE="$OUTDIR/analysis-input.md"
 RAW_RESULT_JSON="$OUTDIR/claude.result.json"
+GENERATED_MD="$OUTDIR/generated.md"
+LOCK_DIR="$TASK_ROOT/data/runtime/locks"
+LOCK_FILE="$LOCK_DIR/fos-study-write.lock"
 
-mkdir -p "$OUTDIR"
-mkdir -p "$(dirname "$OUTPUT_MD")"
-
-if [[ ! -d "$SOURCE_DIR/.git" ]]; then
-  git clone --depth=1 https://github.com/jon890/fos-study.git "$SOURCE_DIR"
-else
-  git -C "$SOURCE_DIR" pull --ff-only
-fi
+mkdir -p "$OUTDIR" "$LOCK_DIR"
 
 cat > "$INPUT_NOTE" <<EOF
 $(cat "$PROMPT_FILE")
@@ -73,7 +69,8 @@ run_once() {
 EXTRACTOR="$TASK_ROOT/skills/study-pack-writer/scripts/extract_and_validate_study_pack.py"
 
 extract_and_validate() {
-  python3 "$EXTRACTOR" "$RAW_RESULT_JSON" "$OUTPUT_MD"
+  rm -f "$GENERATED_MD"
+  python3 "$EXTRACTOR" "$RAW_RESULT_JSON" "$GENERATED_MD"
 }
 
 attempt() {
@@ -97,6 +94,18 @@ EOF
     exit 1
   fi
 fi
+
+exec 9>"$LOCK_FILE"
+flock 9
+
+if [[ ! -d "$SOURCE_DIR/.git" ]]; then
+  git clone --depth=1 https://github.com/jon890/fos-study.git "$SOURCE_DIR"
+else
+  git -C "$SOURCE_DIR" pull --ff-only
+fi
+
+mkdir -p "$(dirname "$OUTPUT_MD")"
+cp "$GENERATED_MD" "$OUTPUT_MD"
 
 if git -C "$SOURCE_DIR" ls-files --error-unmatch "$OUTPUT_REL_PATH" >/dev/null 2>&1; then
   EFFECTIVE_ACTION="update"
