@@ -6,7 +6,10 @@ set -euo pipefail
 TASK_ROOT="${TASK_ROOT:-$HOME/ai-nodes/career-os}"
 TRACKER="${TRACKER:-$HOME/ai-nodes/_shared/bin/track_task.sh}"
 NOTIFY_SCRIPT="$TASK_ROOT/skills/cj-oliveyoung-java-backend-prep/scripts/notify_discord.sh"
+LOCK_DIR="$TASK_ROOT/data/runtime/locks"
 MODE="${1:-baseline}"
+
+mkdir -p "$LOCK_DIR"
 
 case "$MODE" in
   baseline)
@@ -26,6 +29,13 @@ case "$MODE" in
       echo "usage: run_now.sh study-pack <topic>" >&2
       echo "  topic keys: see config/study-pack-topics.json" >&2
       exit 1
+    fi
+
+    TOPIC_LOCK_FILE="$LOCK_DIR/study-pack-${TOPIC}.lock"
+    exec 9>"$TOPIC_LOCK_FILE"
+    if ! flock -n 9; then
+      echo "[run_now] study-pack topic already active; skipping duplicate run for ${TOPIC}" >&2
+      exit 0
     fi
 
     "$NOTIFY_SCRIPT" "[시작] ${TOPIC} 스터디팩 생성 시작"
