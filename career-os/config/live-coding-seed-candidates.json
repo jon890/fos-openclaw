@@ -26,42 +26,6 @@
       ]
     },
     {
-      "slug": "monotonic-stack",
-      "title": "Monotonic Stack",
-      "outputPath": "algorithm/live-coding/monotonic-stack.md",
-      "difficulty": "중상",
-      "focus": [
-        "다음 큰 수/작은 수 패턴",
-        "인덱스 저장 vs 값 저장",
-        "while-pop 조건 실수",
-        "배열 한 번 순회로 푸는 이유"
-      ]
-    },
-    {
-      "slug": "deque-sliding-window",
-      "title": "Deque 기반 Sliding Window",
-      "outputPath": "algorithm/live-coding/deque-sliding-window.md",
-      "difficulty": "상",
-      "focus": [
-        "window max/min 유지",
-        "인덱스 만료 처리",
-        "deque 단조성 유지",
-        "O(n)으로 떨어지는 이유"
-      ]
-    },
-    {
-      "slug": "binary-tree",
-      "title": "Binary Tree",
-      "outputPath": "algorithm/live-coding/binary-tree.md",
-      "difficulty": "중",
-      "focus": [
-        "전위/중위/후위 순회",
-        "재귀 종료 조건",
-        "BFS vs DFS 선택 기준",
-        "트리 높이/균형 질문 대응"
-      ]
-    },
-    {
       "slug": "linked-list",
       "title": "Linked List",
       "outputPath": "algorithm/live-coding/linked-list.md",

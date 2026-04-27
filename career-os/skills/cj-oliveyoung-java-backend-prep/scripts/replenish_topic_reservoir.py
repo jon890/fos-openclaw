@@ -13,6 +13,7 @@ RUNTIME.mkdir(parents=True, exist_ok=True)
 
 PRIMARY_TARGET = 8
 CANDIDATE_TARGET = 18
+LIVE_PRIMARY_TARGET = 3
 MAX_GENERATION_BATCH = 12
 RECENT_ARTIFACT_LIMIT = 24
 MODEL = "claude-sonnet-4-5"
@@ -313,6 +314,25 @@ def promote_candidates(primary_cfg, candidates_doc, artifacts):
     return promoted
 
 
+def promote_live_coding_candidates(live_primary_doc, live_candidate_doc, artifacts):
+    covered = {a.get("outputPath") for a in artifacts if a.get("kind") == "live-coding"}
+    remaining_primary = [s for s in live_primary_doc.get("seeds", []) if s.get("outputPath") not in covered]
+    need = max(0, LIVE_PRIMARY_TARGET - len(remaining_primary))
+    if need <= 0:
+        return []
+
+    promoted = []
+    kept_candidates = []
+    for seed in live_candidate_doc.get("seeds", []):
+        if len(promoted) < need and seed.get("outputPath") not in covered:
+            live_primary_doc.setdefault("seeds", []).append(seed)
+            promoted.append(seed.get("slug"))
+        else:
+            kept_candidates.append(seed)
+    live_candidate_doc["seeds"] = kept_candidates
+    return promoted
+
+
 def refresh_inventory():
     script = TASK_ROOT / "skills" / "cj-oliveyoung-java-backend-prep" / "scripts" / "refresh_topic_inventory.py"
     subprocess.run(["python3", str(script)], check=True, cwd=TASK_ROOT)
@@ -321,17 +341,24 @@ def refresh_inventory():
 def main():
     primary_path = CONFIG / "study-pack-topics.json"
     candidates_path = CONFIG / "study-topic-candidates.json"
+    live_primary_path = CONFIG / "live-coding-seed-pool.json"
+    live_candidate_path = CONFIG / "live-coding-seed-candidates.json"
     artifacts_path = TASK_ROOT / "data" / "generated-artifacts.json"
     report_json_path = RUNTIME / "topic-replenishment.json"
     report_md_path = RUNTIME / "topic-replenishment.md"
 
     primary_cfg = read_json(primary_path)
     candidates_doc = read_json(candidates_path)
+    live_primary_doc = read_json(live_primary_path)
+    live_candidate_doc = read_json(live_candidate_path)
     artifacts = read_json(artifacts_path).get("artifacts", [])
 
     study_paths = {a.get("outputPath") for a in artifacts if a.get("kind") == "study-pack"}
+    live_paths = {a.get("outputPath") for a in artifacts if a.get("kind") == "live-coding"}
     before_candidate_count = len(candidates_doc.get("topics", []))
     before_primary_uncovered = sum(1 for v in primary_cfg.values() if v.get("outputPath") not in study_paths)
+    before_live_primary_remaining = sum(1 for s in live_primary_doc.get("seeds", []) if s.get("outputPath") not in live_paths)
+    before_live_candidate_remaining = sum(1 for s in live_candidate_doc.get("seeds", []) if s.get("outputPath") not in live_paths)
 
     cleaned, _, _, _, _ = clean_existing_candidates(primary_cfg, candidates_doc, artifacts)
     context = build_context(primary_cfg, candidates_doc, artifacts)
@@ -350,13 +377,18 @@ def main():
         cleaned.extend(cleaned_again)
 
     promoted = promote_candidates(primary_cfg, candidates_doc, artifacts)
+    promoted_live_coding = promote_live_coding_candidates(live_primary_doc, live_candidate_doc, artifacts)
 
     write_json(primary_path, primary_cfg)
     write_json(candidates_path, candidates_doc)
+    write_json(live_primary_path, live_primary_doc)
+    write_json(live_candidate_path, live_candidate_doc)
     refresh_inventory()
 
     after_candidate_count = len(candidates_doc.get("topics", []))
     after_primary_uncovered = sum(1 for v in primary_cfg.values() if v.get("outputPath") not in study_paths)
+    after_live_primary_remaining = sum(1 for s in live_primary_doc.get("seeds", []) if s.get("outputPath") not in live_paths)
+    after_live_candidate_remaining = sum(1 for s in live_candidate_doc.get("seeds", []) if s.get("outputPath") not in live_paths)
 
     report = {
         "generatedAt": utc_now(),
@@ -366,15 +398,20 @@ def main():
         "before": {
             "candidateCount": before_candidate_count,
             "primaryUncovered": before_primary_uncovered,
+            "livePrimaryRemaining": before_live_primary_remaining,
+            "liveCandidateRemaining": before_live_candidate_remaining,
         },
         "after": {
             "candidateCount": after_candidate_count,
             "primaryUncovered": after_primary_uncovered,
+            "livePrimaryRemaining": after_live_primary_remaining,
+            "liveCandidateRemaining": after_live_candidate_remaining,
         },
         "accepted": [item["key"] for item in accepted],
         "rejected": rejected,
         "cleaned": cleaned,
         "promoted": promoted,
+        "promotedLiveCoding": promoted_live_coding,
     }
     write_json(report_json_path, report)
 
@@ -387,8 +424,11 @@ def main():
         f"- requestedPromotionGap: {promote_need}",
         f"- candidateCount: {before_candidate_count} -> {after_candidate_count}",
         f"- primaryUncovered: {before_primary_uncovered} -> {after_primary_uncovered}",
+        f"- livePrimaryRemaining: {before_live_primary_remaining} -> {after_live_primary_remaining}",
+        f"- liveCandidateRemaining: {before_live_candidate_remaining} -> {after_live_candidate_remaining}",
         f"- accepted: {', '.join(report['accepted']) if report['accepted'] else '-'}",
         f"- promoted: {', '.join(promoted) if promoted else '-'}",
+        f"- promotedLiveCoding: {', '.join(promoted_live_coding) if promoted_live_coding else '-'}",
         "",
         "## cleaned",
     ]
