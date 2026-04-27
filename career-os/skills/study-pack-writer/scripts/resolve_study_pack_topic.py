@@ -21,8 +21,8 @@ exports = {
     "STUDY_TOPIC": topic,
     "STUDY_DOMAIN": entry["domain"],
     "OUTPUT_REL_PATH": entry["outputPath"],
-    "COMMIT_TOPIC": topic,
-    "STUDY_APPEND_PROMPT": entry.get("promptAppend", ""),
+    "COMMIT_TOPIC": entry.get("commitTopic", topic),
+    "STUDY_APPEND_PROMPT": entry.get("appendPrompt", entry.get("promptAppend", "")),
 }
 for key, value in exports.items():
     print(f"export {key}={shlex.quote(value)}")
