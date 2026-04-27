@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
-CHANNEL_ID="${DISCORD_CHANNEL_ID:-1492521172099666021}"
+CHANNEL_ID="${DISCORD_CHANNEL_ID:-1496746450468733038}"
 MESSAGE="${1:-}"
 if [[ -z "$MESSAGE" ]]; then
   echo "usage: notify_discord.sh <message>" >&2
