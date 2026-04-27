@@ -74,42 +74,6 @@
       }
     },
     {
-      "key": "kafka-operations-deepen",
-      "title": "Kafka 설계/운영 디테일 심화",
-      "domain": "message-queue",
-      "tag": "deepen",
-      "difficulty": "중상",
-      "estMinutes": 40,
-      "whyNow": [
-        "Outbox와 비동기 설계 경험을 더 설득력 있게 말하려면 운영 디테일이 중요하다",
-        "파티션 키, rebalance, exactly-once 기대치 같은 꼬리 질문 대응력을 높인다"
-      ],
-      "promotionTarget": {
-        "domain": "kafka",
-        "outputPath": "kafka/kafka-operations-deepen.md",
-        "commitTopic": "kafka-operations-deepen",
-        "appendPrompt": "Kafka 운영 디테일을 백엔드 면접 대비용으로 정리한다. 파티션 키 선택, consumer rebalance, lag 관찰, retry, DLQ, ordering trade-off, exactly-once 기대치, 장애 복구를 중심으로 설명한다. 기존 kafka-design 문서와 과도하게 중복하지 말고 심화 문서 역할로 쓴다. 문서 제목은 반드시 [초안]으로 시작한다."
-      }
-    },
-    {
-      "key": "opensearch-query-design",
-      "title": "OpenSearch 쿼리 설계와 relevance 튜닝",
-      "domain": "search",
-      "tag": "new",
-      "difficulty": "중상",
-      "estMinutes": 50,
-      "whyNow": [
-        "기본기 문서에서 한 단계 나아가 검색 실무 답변 축을 만든다",
-        "상품/검색/전시 맥락이 있는 커머스 면접에서 차별화 포인트가 된다"
-      ],
-      "promotionTarget": {
-        "domain": "opensearch",
-        "outputPath": "search/opensearch-query-design.md",
-        "commitTopic": "opensearch-query-design",
-        "appendPrompt": "OpenSearch 쿼리 설계, analyzer 선택, relevance tuning, bool query, filter vs must, boosting, synonym, pagination, shard 영향까지 백엔드 면접 대비용으로 정리한다. 상품 검색 실무 예시를 포함한다. 문서 제목은 반드시 [초안]으로 시작한다."
-      }
-    },
-    {
       "key": "spring-batch-vs-event-driven",
       "title": "Spring Batch vs Event-Driven 처리 선택 기준",
       "domain": "spring",
@@ -125,42 +89,6 @@
         "outputPath": "java/spring/spring-batch-vs-event-driven.md",
         "commitTopic": "spring-batch-vs-event-driven",
         "appendPrompt": "Spring Batch와 Event-Driven 처리를 언제 선택할지 백엔드 면접 대비용으로 정리한다. 처리 지연 허용도, 재시도, 운영 복잡도, 데이터 정합성, 스케줄링, 관찰성 관점으로 비교한다. 문서 제목은 반드시 [초안]으로 시작한다."
-      }
-    },
-    {
-      "key": "api-versioning-backward-compatibility",
-      "title": "API Versioning과 Backward Compatibility 설계",
-      "domain": "architecture",
-      "tag": "new",
-      "difficulty": "중",
-      "estMinutes": 40,
-      "whyNow": [
-        "실무 서비스 운영 관점 질문에 안정적으로 답할 수 있는 축이다",
-        "전시/주문/검색 API가 많은 커머스 환경에서 잘 맞는다"
-      ],
-      "promotionTarget": {
-        "domain": "architecture",
-        "outputPath": "architecture/api-versioning-backward-compatibility.md",
-        "commitTopic": "api-versioning-backward-compatibility",
-        "appendPrompt": "API versioning, backward compatibility, consumer-driven change, deprecation, schema evolution, 모바일 앱 호환성까지 백엔드 면접 대비용으로 정리한다. 문서 제목은 반드시 [초안]으로 시작한다."
-      }
-    },
-    {
-      "key": "resume-experience-one-minute-answers",
-      "title": "경험기반 1분 답변 압축: 캐시 정합성·Outbox·RAG 배치",
-      "domain": "interview",
-      "tag": "review",
-      "difficulty": "중",
-      "estMinutes": 35,
-      "whyNow": [
-        "면접 직전이나 회고 시 아는 내용을 짧고 강하게 말하는 연습이 ROI가 높다",
-        "기술 문서 공부와 실제 구술 답변 사이를 연결해준다"
-      ],
-      "promotionTarget": {
-        "domain": "interview",
-        "outputPath": "interview/experience-based/one-minute-answer-playbook.md",
-        "commitTopic": "resume-experience-one-minute-answers",
-        "appendPrompt": "후보자의 주요 경험(캐시 정합성, Outbox, RAG 배치)을 1분 답변과 꼬리 질문 대응 형태로 정리한 면접용 문서를 작성한다. 기술 설명과 경험 설명이 함께 보이게 구성한다. 문서 제목은 반드시 [초안]으로 시작한다."
       }
     },
     {
@@ -200,60 +128,6 @@
       }
     },
     {
-      "key": "interview-pressure-question-defense",
-      "title": "압박 질문 대응 플레이북",
-      "domain": "interview",
-      "tag": "new",
-      "difficulty": "중",
-      "estMinutes": 30,
-      "whyNow": [
-        "면접 후 회고나 2차/추가 면접 대비용 새 플레이북이 필요하다",
-        "기술 답변과 별개로 압박 질문 대응 패턴을 정리하면 안정감이 올라간다"
-      ],
-      "promotionTarget": {
-        "domain": "interview",
-        "outputPath": "interview/experience-based/pressure-question-defense.md",
-        "commitTopic": "interview-pressure-question-defense",
-        "appendPrompt": "면접에서 받기 쉬운 압박 질문(약점 캐묻기, 경험 검증, why-this-company, 부정적 가정 시나리오)을 1분 답변과 꼬리 질문 대응 형태로 정리한다. 후보자 실제 경험과 자기평가 약점(DB 등)을 활용해 솔직-방어 균형을 잡는 패턴을 코칭한다. 문서 제목은 반드시 [초안]으로 시작한다."
-      }
-    },
-    {
-      "key": "redis-distributed-lock-deepen",
-      "title": "Redis 분산 락 운영 디테일",
-      "domain": "redis",
-      "tag": "deepen",
-      "difficulty": "중상",
-      "estMinutes": 45,
-      "whyNow": [
-        "Redis는 후보자 자기평가 weak area라 분산 락 운영 디테일을 강화하면 ROI가 크다",
-        "후보자의 Redis Streams/RediSearch 실전 경험을 분산 락 답변으로 자연스럽게 확장할 수 있다"
-      ],
-      "promotionTarget": {
-        "domain": "redis",
-        "outputPath": "database/redis/redis-distributed-lock.md",
-        "commitTopic": "redis-distributed-lock",
-        "appendPrompt": "Redis 분산 락(SETNX/Lua/Redlock)을 백엔드 면접 대비용으로 정리한다. 단순 구현 소개를 넘어 fencing token 필요성, RedLock 비판(Martin Kleppmann vs antirez), 락 만료/갱신, 클라이언트 장애 시나리오, 단일 인스턴스 vs 클러스터, Redisson과의 비교까지 다룬다. 후보자가 실전 운영 경험이 있는 Redis Streams/RediSearch와 자연스럽게 연결되는 톤으로 쓴다. 기존 redis-advanced-patterns 문서와 지나치게 중복하지 말고 분산 락 단일 주제 심화로 쓴다. 문서 제목은 반드시 [초안]으로 시작한다."
-      }
-    },
-    {
-      "key": "review-cache-coherency-cluster",
-      "title": "(Review) 클러스터 캐시 정합성 1분 답변",
-      "domain": "redis",
-      "tag": "review",
-      "difficulty": "중",
-      "estMinutes": 25,
-      "whyNow": [
-        "이미 작성된 cache-aside / redis-advanced-patterns study-pack을 후보자의 실전 경험(Ehcache+RabbitMQ Fanout)과 묶어 1분 답변으로 압축할 review 슬롯이 비어 있다",
-        "면접 직전·다음 면접 대비에 ROI가 가장 높은 형태가 압축 review다"
-      ],
-      "promotionTarget": {
-        "domain": "interview",
-        "outputPath": "interview/experience-based/review-cache-coherency-cluster.md",
-        "commitTopic": "review-cache-coherency-cluster",
-        "appendPrompt": "이미 작성된 study-pack(database/redis/cache-aside.md, database/redis/redis-advanced-patterns.md)과 후보자의 실전 경험(Ehcache JSR-107 + RabbitMQ Fanout 기반 다중 서버 캐시 정합성, NSC 슬롯팀 RCC 백그라운드 캐시)을 한 시야로 묶어 1분 답변/꼬리 질문/실패 시나리오까지 review 형태로 정리한다. 새 개념을 도입하지 말고 기존 문서를 짧게 인용·연결한다. 문서 제목은 반드시 [초안]으로 시작한다."
-      }
-    },
-    {
       "key": "review-jpa-transaction-pitfalls",
       "title": "(Review) JPA·트랜잭션 함정 1분 답변",
       "domain": "spring",
@@ -269,6 +143,186 @@
         "outputPath": "interview/experience-based/review-jpa-transaction-pitfalls.md",
         "commitTopic": "review-jpa-transaction-pitfalls",
         "appendPrompt": "이미 작성된 study-pack(java/spring/jpa-n-plus-one.md, java/spring/transaction-propagation-isolation-after-commit.md, java/spring/transaction-synchronization.md)을 1분 답변과 꼬리 질문 대응 형태로 review 압축한다. 후보자가 운영해 본 PostCommitUpdateEventListener / @TransactionalEventListener(AFTER_COMMIT) / Propagation.REQUIRES_NEW 사용 사례와 자연스럽게 연결한다. 새 개념 도입 금지, 기존 문서를 짧게 인용·연결한다. 문서 제목은 반드시 [초안]으로 시작한다."
+      }
+    },
+    {
+      "key": "mysql-query-optimizer-execution-plan",
+      "title": "MySQL Query Optimizer와 실행 계획 읽기",
+      "domain": "mysql",
+      "tag": "deepen",
+      "difficulty": "상",
+      "estMinutes": 50,
+      "whyNow": [
+        "EXPLAIN 결과를 읽을 수 있다고 답했지만 실제 type(ref/range/index), Extra(Using filesort/temporary), rows 해석과 최적화 힌트까지 연결하는 depth가 부족한 상태임",
+        "면접관이 \"이 쿼리가 느린 이유를 EXPLAIN으로 설명해보라\"고 물었을 때 단순히 인덱스 유무만 보는 게 아니라 옵티마이저 선택 과정과 cost 모델까지 이해하고 있어야 신뢰를 얻을 수 있음"
+      ],
+      "promotionTarget": {
+        "domain": "mysql",
+        "outputPath": "database/mysql/query-optimizer-execution-plan.md",
+        "commitTopic": "mysql-query-optimizer-execution-plan",
+        "appendPrompt": "MySQL Query Optimizer의 동작 원리(cost 기반 선택, 통계 정보 활용)와 EXPLAIN 실행 계획 읽기 실전 기법을 다루는 study-pack을 작성하라. type 필드(ALL/index/range/ref/eq_ref/const), key/key_len, rows, filtered, Extra(Using index/filesort/temporary/where) 각각의 의미와 최적화 포인트를 설명하고, 실무에서 자주 나타나는 안티패턴(filesort on large table, 잘못된 인덱스 선택, join order 문제)과 해결 방법(인덱스 힌트, 통계 갱신, 쿼리 재작성)을 제시하라. 문서 제목은 반드시 [초안]으로 시작하며, InnoDB 기준으로 작성한다."
+      }
+    },
+    {
+      "key": "redis-cluster-operations",
+      "title": "Redis Cluster 샤딩·슬롯 할당·페일오버 운영",
+      "domain": "redis",
+      "tag": "new",
+      "difficulty": "중상",
+      "estMinutes": 40,
+      "whyNow": [
+        "CJ OliveYoung 같은 대규모 커머스에서는 Redis 단일 노드 한계를 넘어 Cluster 구성이 필수적",
+        "슬롯 재분배·노드 추가·페일오버 시나리오는 실무 운영 면접에서 자주 물어보는 주제"
+      ],
+      "promotionTarget": {
+        "domain": "redis",
+        "outputPath": "database/redis/redis-cluster-operations.md",
+        "commitTopic": "redis-cluster",
+        "appendPrompt": "Redis Cluster의 샤딩 메커니즘(16384 슬롯), 노드 추가/제거 절차, 자동 페일오버와 수동 페일오버 시나리오, 그리고 운영 시 주의사항(네트워크 파티션, 슬롯 마이그레이션 중 트래픽 처리)을 다루는 study-pack을 작성하세요. 문서 제목은 반드시 [초안]으로 시작하며, CJ OliveYoung 같은 대규모 커머스 환경에서 Redis Cluster를 운영할 때 알아야 할 핵심 내용을 담아야 합니다."
+      }
+    },
+    {
+      "key": "mysql-optimizer-hints",
+      "title": "MySQL Query Optimizer Hint와 실행계획 유도",
+      "domain": "mysql",
+      "tag": "deepen",
+      "difficulty": "중상",
+      "estMinutes": 35,
+      "whyNow": [
+        "기존 실행계획 읽기 문서는 있지만, Optimizer가 잘못된 계획을 선택할 때 힌트로 유도하는 실전 기법이 부족",
+        "복잡한 JOIN 쿼리에서 인덱스 선택을 제어하는 능력은 면접에서 SQL 튜닝 역량을 입증하는 핵심 포인트"
+      ],
+      "promotionTarget": {
+        "domain": "mysql",
+        "outputPath": "database/mysql/optimizer-hints.md",
+        "commitTopic": "mysql-optimizer-hint",
+        "appendPrompt": "MySQL Optimizer Hint(FORCE INDEX, USE INDEX, IGNORE INDEX, STRAIGHT_JOIN 등)의 종류와 사용 시나리오, Optimizer가 잘못된 인덱스를 선택하는 사례, 그리고 힌트를 사용한 실행계획 유도 과정을 다루는 study-pack을 작성하세요. 문서 제목은 반드시 [초안]으로 시작하며, 실무에서 복잡한 쿼리 튜닝 시 힌트를 활용하는 구체적인 예시를 포함해야 합니다."
+      }
+    },
+    {
+      "key": "spring-batch-chunk-processing",
+      "title": "Spring Batch 청크·재시도·Skip 패턴",
+      "domain": "spring",
+      "tag": "new",
+      "difficulty": "중",
+      "estMinutes": 35,
+      "whyNow": [
+        "대규모 데이터 배치 처리는 커머스 백엔드의 핵심 요구사항 중 하나 (주문 정산, 재고 동기화 등)",
+        "청크 크기 설정, 재시도 정책, Skip 전략은 안정적인 배치 운영의 핵심이며 면접에서 자주 다뤄지는 주제"
+      ],
+      "promotionTarget": {
+        "domain": "spring",
+        "outputPath": "java/spring/spring-batch-chunk-processing.md",
+        "commitTopic": "spring-batch",
+        "appendPrompt": "Spring Batch의 청크 기반 처리 모델(ItemReader, ItemProcessor, ItemWriter), 청크 크기 설정 기준, 재시도(Retry) 정책과 Skip 정책, 그리고 트랜잭션 경계와의 관계를 다루는 study-pack을 작성하세요. 문서 제목은 반드시 [초안]으로 시작하며, 커머스 환경에서 대량 데이터를 안정적으로 처리하는 실전 패턴을 포함해야 합니다."
+      }
+    },
+    {
+      "key": "event-sourcing-cqrs",
+      "title": "이벤트 소싱과 CQRS 패턴 입문",
+      "domain": "architecture",
+      "tag": "new",
+      "difficulty": "중상",
+      "estMinutes": 45,
+      "whyNow": [
+        "마이크로서비스 아키텍처에서 읽기/쓰기 분리와 이벤트 기반 상태 관리는 점점 더 중요해지는 패턴",
+        "CJ OliveYoung 같은 대규모 시스템에서 주문·재고 도메인을 이벤트 소싱으로 설계하는 사례가 늘고 있으며 면접에서도 자주 다뤄짐"
+      ],
+      "promotionTarget": {
+        "domain": "architecture",
+        "outputPath": "architecture/event-sourcing-cqrs.md",
+        "commitTopic": "event-sourcing",
+        "appendPrompt": "이벤트 소싱의 기본 개념(이벤트 저장소, 이벤트 리플레이), CQRS 패턴(Command/Query 분리), 두 패턴을 함께 사용하는 이유와 트레이드오프, 그리고 실무 적용 시 주의사항(이벤트 스키마 버전 관리, 스냅샷)을 다루는 study-pack을 작성하세요. 문서 제목은 반드시 [초안]으로 시작하며, 주문이나 재고 같은 커머스 도메인에 적용 가능한 구체적인 예시를 포함해야 합니다."
+      }
+    },
+    {
+      "key": "redis-persistence-rdb-aof",
+      "title": "Redis Persistence RDB·AOF 전략과 트레이드오프",
+      "domain": "redis",
+      "tag": "new",
+      "difficulty": "중",
+      "estMinutes": 30,
+      "whyNow": [
+        "캐시로만 사용할 때와 달리, 세션 저장소나 Rate Limiter로 쓸 때는 영속성 전략이 필수",
+        "RDB와 AOF의 차이, 복구 시간, 성능 영향은 Redis 운영 면접에서 자주 물어보는 주제"
+      ],
+      "promotionTarget": {
+        "domain": "redis",
+        "outputPath": "database/redis/persistence-rdb-aof.md",
+        "commitTopic": "redis-persistence",
+        "appendPrompt": "Redis의 영속성 옵션인 RDB(스냅샷)와 AOF(Append-Only File)의 동작 방식, 각각의 장단점과 성능 트레이드오프, 두 방식을 함께 사용하는 하이브리드 전략, 그리고 복구 시간과 디스크 사용량 비교를 다루는 study-pack을 작성하세요. 문서 제목은 반드시 [초안]으로 시작하며, 세션 저장소나 Rate Limiter 같은 실무 유스케이스별 적합한 전략을 제시해야 합니다."
+      }
+    },
+    {
+      "key": "mysql-slow-query-workflow",
+      "title": "MySQL Slow Query 분석과 튜닝 워크플로",
+      "domain": "mysql",
+      "tag": "deepen",
+      "difficulty": "중",
+      "estMinutes": 35,
+      "whyNow": [
+        "기존 실행계획 문서는 있지만, 실제 slow log를 수집하고 분석하는 실무 워크플로가 부족",
+        "pt-query-digest 같은 도구를 활용한 분석 능력은 MySQL 운영 경험을 입증하는 핵심 포인트"
+      ],
+      "promotionTarget": {
+        "domain": "mysql",
+        "outputPath": "database/mysql/slow-query-workflow.md",
+        "commitTopic": "mysql-slow-query",
+        "appendPrompt": "MySQL Slow Query Log 수집 설정(long_query_time), pt-query-digest를 활용한 로그 분석, 느린 쿼리 패턴 식별(풀 테이블 스캔, 임시 테이블, 파일 정렬), 그리고 인덱스 추가부터 쿼리 재작성까지의 튜닝 워크플로를 다루는 study-pack을 작성하세요. 문서 제목은 반드시 [초안]으로 시작하며, 실무에서 성능 문제 발생 시 체계적으로 접근하는 절차를 포함해야 합니다."
+      }
+    },
+    {
+      "key": "review-spring-transaction-essentials",
+      "title": "(Review) Spring 트랜잭션·AOP·@Transactional 핵심 정리",
+      "domain": "spring",
+      "tag": "review",
+      "difficulty": "중",
+      "estMinutes": 30,
+      "whyNow": [
+        "기존 트랜잭션 전파, AOP 프록시, @AfterCommit 문서가 여러 개로 흩어져 있어 핵심만 압축 정리 필요",
+        "면접 전 빠르게 복습할 수 있는 1페이지 요약본이 효과적"
+      ],
+      "promotionTarget": {
+        "domain": "spring",
+        "outputPath": "java/spring/review-transaction-essentials.md",
+        "commitTopic": "spring-transaction-review",
+        "appendPrompt": "기존의 transaction-propagation-isolation-after-commit.md, spring-aop-proxies-deep-dive.md, transaction-synchronization.md 문서를 바탕으로, Spring 트랜잭션의 핵심 개념(전파, 격리수준, 프록시 제약, @AfterCommit)만 압축한 1페이지 복습용 study-pack을 작성하세요. 문서 제목은 반드시 [초안]으로 시작하며, 각 항목은 2-3문장으로 요약하고 주의사항을 불릿으로 정리해야 합니다."
+      }
+    },
+    {
+      "key": "review-mysql-index-design",
+      "title": "(Review) MySQL 인덱스 설계: B+Tree·복합·커버링 총정리",
+      "domain": "mysql",
+      "tag": "review",
+      "difficulty": "중",
+      "estMinutes": 30,
+      "whyNow": [
+        "B+Tree, 복합 인덱스, 커버링 인덱스 문서가 별도로 존재하지만 통합 복습 자료가 없음",
+        "면접 전 인덱스 설계 원칙을 빠르게 정리할 수 있는 체크리스트 형태가 효율적"
+      ],
+      "promotionTarget": {
+        "domain": "mysql",
+        "outputPath": "database/mysql/review-index-design.md",
+        "commitTopic": "mysql-index-review",
+        "appendPrompt": "기존의 b-tree-index.md, composite-index 관련 문서, 그리고 커버링 인덱스 내용을 바탕으로, MySQL 인덱스 설계의 핵심 원칙(B+Tree 구조, 복합 인덱스 컬럼 순서, 커버링 인덱스 활용)만 압축한 1페이지 복습용 study-pack을 작성하세요. 문서 제목은 반드시 [초안]으로 시작하며, 인덱스 설계 체크리스트와 흔한 실수를 불릿으로 정리해야 합니다."
+      }
+    },
+    {
+      "key": "redis-memory-eviction-policies",
+      "title": "Redis 메모리 관리와 Eviction 정책 선택",
+      "domain": "redis",
+      "tag": "new",
+      "difficulty": "중",
+      "estMinutes": 35,
+      "whyNow": [
+        "대용량 트래픽 환경에서 Redis 메모리 부족 시나리오는 장애로 직결되며, maxmemory-policy 설정은 서비스 특성에 맞는 전략적 선택이 필요하다.",
+        "LRU/LFU/TTL 기반 eviction 알고리즘의 차이와 트레이드오프를 이해하면 캐시 히트율과 응답성을 동시에 최적화할 수 있다."
+      ],
+      "promotionTarget": {
+        "domain": "redis",
+        "outputPath": "database/redis/memory-eviction-policies.md",
+        "commitTopic": "redis-memory-eviction",
+        "appendPrompt": "Redis의 메모리 관리 구조(maxmemory, used_memory_rss, fragmentation)와 8가지 eviction 정책(noeviction, allkeys-lru, volatile-lru, allkeys-lfu, volatile-lfu, allkeys-random, volatile-random, volatile-ttl)을 비교 분석한다. 각 정책의 동작 원리, 적합한 사용 사례(세션 캐시 vs 조회 캐시 vs 메시지 큐), 그리고 실무에서 메모리 부족 장애를 예방하는 모니터링 전략(INFO memory, used_memory_peak, evicted_keys 지표)을 포함한다. 문서 제목은 반드시 [초안]으로 시작하며, CJ OliveYoung 커머스 환경에서 상품 조회 캐시와 장바구니 세션 캐시를 동시에 운영할 때의 정책 선택 근거를 예시로 든다."
       }
     }
   ]

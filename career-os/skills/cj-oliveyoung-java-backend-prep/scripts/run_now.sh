@@ -41,6 +41,20 @@ case "$MODE" in
     "$NOTIFY_SCRIPT" "[시작] ${TOPIC} 스터디팩 생성 시작"
 
     MAINTAINER_CONFIG="$TASK_ROOT/config/study-pack-maintainer-topics.json"
+    PRIMARY_TOPIC_CONFIG="${TOPIC_CONFIG_OVERRIDE:-$TASK_ROOT/config/study-pack-topics.json}"
+    if [[ -z "${TOPIC_CONFIG_OVERRIDE:-}" ]] && ! python3 - <<'PY' "$PRIMARY_TOPIC_CONFIG" "$TOPIC"
+import json, sys
+from pathlib import Path
+cfg = json.loads(Path(sys.argv[1]).read_text(encoding='utf-8'))
+sys.exit(0 if sys.argv[2] in cfg else 1)
+PY
+    then
+      CANDIDATE_PROMOTER="$TASK_ROOT/skills/cj-oliveyoung-java-backend-prep/scripts/promote_candidate_topics.py"
+      if python3 "$CANDIDATE_PROMOTER" study "$TOPIC" >/dev/null 2>&1; then
+        echo "[run_now] promoted study candidate into primary config: ${TOPIC}" >&2
+      fi
+    fi
+
     if [[ -z "${TOPIC_CONFIG_OVERRIDE:-}" && -f "$MAINTAINER_CONFIG" ]] && python3 - <<'PY' "$MAINTAINER_CONFIG" "$TOPIC"
 import json, sys
 from pathlib import Path
@@ -100,6 +114,9 @@ PY
   recommend-topics)
     exec "$TASK_ROOT/skills/cj-oliveyoung-java-backend-prep/scripts/run_morning_topic_recommendation.sh"
     ;;
+  replenish-topics)
+    exec "$TASK_ROOT/skills/cj-oliveyoung-java-backend-prep/scripts/run_replenish_topic_reservoir.sh"
+    ;;
   maintain-study-pack)
     TOPIC="${2:-}"
     if [[ -z "$TOPIC" ]]; then
@@ -130,7 +147,7 @@ PY
       "$TASK_ROOT/skills/cj-oliveyoung-java-backend-prep/scripts/run_smoke_test.sh"
     ;;
   *)
-    echo "usage: run_now.sh [baseline | daily [topic] | study-pack <topic> | question-bank <topic> | recommend-topics | maintain-study-pack <topic> | master [topic] | smoke]" >&2
+    echo "usage: run_now.sh [baseline | daily [topic] | study-pack <topic> | question-bank <topic> | recommend-topics | replenish-topics | maintain-study-pack <topic> | master [topic] | smoke]" >&2
     echo "  daily topic keys: see config/topic-file-map.json" >&2
     echo "  study-pack topic keys: see config/study-pack-topics.json" >&2
     echo "  question-bank topic keys: see config/experience-question-bank-topics.json" >&2

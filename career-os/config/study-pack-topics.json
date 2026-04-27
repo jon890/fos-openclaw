@@ -94,5 +94,65 @@
     "outputPath": "database/redis/redis-advanced-patterns.md",
     "commitTopic": "redis-advanced-patterns",
     "appendPrompt": "Redis 심화 패턴을 백엔드 면접 대비용으로 정리한다. 단순 자료구조 소개가 아니라 Redis를 실무 시스템에서 어떻게 패턴으로 쓰는지 중심으로 설명한다. Cache-Aside 이후 단계로서 distributed lock, rate limiting, idempotency key, delayed queue/stream, pub-sub vs stream, leaderboard/sorted set, session/token 저장, hot key 대응, cache stampede 방어, write-through/write-behind를 언제 고려할지까지 포함한다. 각 패턴마다 무엇을 해결하는지, 어떤 자료구조나 명령이 핵심인지, 흔한 함정은 무엇인지, 언제 Redis를 쓰면 안 되는지도 넣는다. 기존 cache-aside 문서와 지나치게 겹치지 말고 필요하면 짧게 연결하고 링크로 넘겨라. 커머스/플랫폼 백엔드 실무 예시와 면접 답변 프레임도 포함한다. 문서 제목은 반드시 [초안]으로 시작한다."
+  },
+  "api-versioning-backward-compatibility": {
+    "domain": "architecture",
+    "outputPath": "architecture/api-versioning-backward-compatibility.md",
+    "commitTopic": "api-versioning-backward-compatibility",
+    "appendPrompt": "API versioning, backward compatibility, consumer-driven change, deprecation, schema evolution, 모바일 앱 호환성까지 백엔드 면접 대비용으로 정리한다. 문서 제목은 반드시 [초안]으로 시작한다."
+  },
+  "aurora-serverless-connection-pool-transaction-budget": {
+    "domain": "mysql",
+    "outputPath": "database/mysql/aurora-serverless-connection-pool-transaction-budget.md",
+    "commitTopic": "aurora-serverless-connection-pool-transaction-budget",
+    "appendPrompt": "Aurora Serverless 환경의 커넥션 풀·트랜잭션 예산 설계를 백엔드 면접 대비용으로 정리한다. 단순히 커넥션 풀 개념만 설명하지 말고 Aurora Serverless(v1/v2 차이 포함) 특성과 max_connections 제약, scale-up/scale-down 지연, cold start/ACU 관점, HikariCP 같은 애플리케이션 풀과 RDS Proxy 조합 이유, 읽기/쓰기 부하와 짧은 트랜잭션 유지 원칙까지 연결한다. 또한 트랜잭션 예산이라는 표현을 실제 운영 감각으로 풀어서 lock 유지 시간, 외부 IO 분리, timeout, retry, burst traffic 상황에서 어떤 예산 감각으로 설계하는지 설명한다. 올리브영처럼 커머스 트래픽과 실시간성이 중요한 환경 예시를 포함하고, 면접에서 답변할 수 있는 실무형 프레임으로 정리한다. 문서 제목은 반드시 [초안]으로 시작한다."
+  },
+  "kafka-operations-deepen": {
+    "domain": "kafka",
+    "outputPath": "kafka/kafka-operations-deepen.md",
+    "commitTopic": "kafka-operations-deepen",
+    "appendPrompt": "Kafka 운영 디테일을 백엔드 면접 대비용으로 정리한다. 파티션 키 선택, consumer rebalance, lag 관찰, retry, DLQ, ordering trade-off, exactly-once 기대치, 장애 복구를 중심으로 설명한다. 기존 kafka-design 문서와 과도하게 중복하지 말고 심화 문서 역할로 쓴다. 문서 제목은 반드시 [초안]으로 시작한다."
+  },
+  "opensearch-query-design": {
+    "domain": "opensearch",
+    "outputPath": "search/opensearch-query-design.md",
+    "commitTopic": "opensearch-query-design",
+    "appendPrompt": "OpenSearch 쿼리 설계, analyzer 선택, relevance tuning, bool query, filter vs must, boosting, synonym, pagination, shard 영향까지 백엔드 면접 대비용으로 정리한다. 상품 검색 실무 예시를 포함한다. 문서 제목은 반드시 [초안]으로 시작한다."
+  },
+  "resume-experience-one-minute-answers": {
+    "domain": "interview",
+    "outputPath": "interview/experience-based/one-minute-answer-playbook.md",
+    "commitTopic": "resume-experience-one-minute-answers",
+    "appendPrompt": "후보자의 주요 경험(캐시 정합성, Outbox, RAG 배치)을 1분 답변과 꼬리 질문 대응 형태로 정리한 면접용 문서를 작성한다. 기술 설명과 경험 설명이 함께 보이게 구성한다. 문서 제목은 반드시 [초안]으로 시작한다."
+  },
+  "interview-pressure-question-defense": {
+    "domain": "interview",
+    "outputPath": "interview/experience-based/pressure-question-defense.md",
+    "commitTopic": "interview-pressure-question-defense",
+    "appendPrompt": "면접에서 받기 쉬운 압박 질문(약점 캐묻기, 경험 검증, why-this-company, 부정적 가정 시나리오)을 1분 답변과 꼬리 질문 대응 형태로 정리한다. 후보자 실제 경험과 자기평가 약점(DB 등)을 활용해 솔직-방어 균형을 잡는 패턴을 코칭한다. 문서 제목은 반드시 [초안]으로 시작한다."
+  },
+  "redis-distributed-lock-deepen": {
+    "domain": "redis",
+    "outputPath": "database/redis/redis-distributed-lock.md",
+    "commitTopic": "redis-distributed-lock",
+    "appendPrompt": "Redis 분산 락(SETNX/Lua/Redlock)을 백엔드 면접 대비용으로 정리한다. 단순 구현 소개를 넘어 fencing token 필요성, RedLock 비판(Martin Kleppmann vs antirez), 락 만료/갱신, 클라이언트 장애 시나리오, 단일 인스턴스 vs 클러스터, Redisson과의 비교까지 다룬다. 후보자가 실전 운영 경험이 있는 Redis Streams/RediSearch와 자연스럽게 연결되는 톤으로 쓴다. 기존 redis-advanced-patterns 문서와 지나치게 중복하지 말고 분산 락 단일 주제 심화로 쓴다. 문서 제목은 반드시 [초안]으로 시작한다."
+  },
+  "review-cache-coherency-cluster": {
+    "domain": "interview",
+    "outputPath": "interview/experience-based/review-cache-coherency-cluster.md",
+    "commitTopic": "review-cache-coherency-cluster",
+    "appendPrompt": "이미 작성된 study-pack(database/redis/cache-aside.md, database/redis/redis-advanced-patterns.md)과 후보자의 실전 경험(Ehcache JSR-107 + RabbitMQ Fanout 기반 다중 서버 캐시 정합성, NSC 슬롯팀 RCC 백그라운드 캐시)을 한 시야로 묶어 1분 답변/꼬리 질문/실패 시나리오까지 review 형태로 정리한다. 새 개념을 도입하지 말고 기존 문서를 짧게 인용·연결한다. 문서 제목은 반드시 [초안]으로 시작한다."
+  },
+  "redis-pub-sub-patterns": {
+    "domain": "redis",
+    "outputPath": "database/redis/pub-sub-patterns.md",
+    "commitTopic": "redis-pub-sub-patterns",
+    "appendPrompt": "Redis Pub/Sub의 동작 원리(채널 구독, 메시지 브로드캐스트)와 실전 패턴(캐시 무효화 알림, 실시간 이벤트 전파, 세션 클러스터링)을 중심으로 study-pack을 작성하라. Kafka/RabbitMQ 대비 Redis Pub/Sub의 장단점(영속성 없음, at-most-once 전달, 낮은 레이턴시)을 명확히 구분하고, 커머스 환경에서 어떤 경우 Pub/Sub를 선택하고 어떤 경우 메시지 큐를 선택하는지 판단 기준을 제시하라. 문서 제목은 반드시 [초안]으로 시작하며, 코드 예제는 Spring Data Redis 기준으로 작성한다."
+  },
+  "spring-security-oauth2-jwt-auth": {
+    "domain": "security",
+    "outputPath": "security/spring-security-oauth2-jwt.md",
+    "commitTopic": "spring-security-oauth2-jwt-auth",
+    "appendPrompt": "Spring Security OAuth2와 JWT를 이용한 상용 인증 시스템 설계 전략을 다루는 study-pack을 작성하라. OAuth2 Authorization Code/Client Credentials grant 흐름, JWT access token + refresh token 구조, Spring Security OAuth2 Resource Server 설정, 토큰 검증 필터 체인을 설명하고, 실전 보안 이슈(refresh token rotation, XSS/CSRF 방어, 토큰 탈취 시 대응, 로그아웃 처리)와 해결 방법을 제시하라. 커머스 멀티 클라이언트 환경(모바일 앱, 백오피스, 외부 API 연동)에서 각각 어떤 grant를 선택하는지 판단 기준을 포함하라. 문서 제목은 반드시 [초안]으로 시작하며, Spring Boot 3.x + Spring Security 6.x 기준으로 작성한다."
   }
 }

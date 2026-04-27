@@ -63,6 +63,7 @@ Design rationale is in `docs/decisions/`. Key ADRs:
 | [008](docs/decisions/008-generation-status-notifications.md) | 문서 생성 상태 알림 정책 |
 | [009](docs/decisions/009-morning-topic-reservoir-and-recommendation-pipeline.md) | morning topic 추천 reservoir 파이프라인 |
 | [010](docs/decisions/010-recommendation-scoring-and-mix-targets.md) | 추천 점수 기반 + mix target |
+| [011](docs/decisions/011-automatic-topic-replenishment.md) | study topic 자동 재고 보충 |
 
 ## Rules
 
