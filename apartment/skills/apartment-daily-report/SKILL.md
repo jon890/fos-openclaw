@@ -33,14 +33,17 @@ Default target for this workspace:
 6. Use Claude CLI in print mode for final synthesis:
    - `claude --permission-mode bypassPermissions --print`
 7. Be explicit about uncertainty. Do not invent listing counts or prices.
-8. Keep OpenClaw-side wrapper logic thin; this directory is the canonical implementation.
-9. Naver collection may use an optional Claude/browser fallback when static extraction is too weak.
+8. For location / upside potential and Seoul Station commute commentary, keep judgments cautious and clearly separate verified facts from inference.
+9. Keep OpenClaw-side wrapper logic thin; this directory is the canonical implementation.
+10. Naver collection may use an optional Claude/browser fallback when static extraction is too weak.
 
 ## Required report sections
 
 - Complex overview
 - Area-wise recent transaction summary
 - Current listing price summary
+- Location / upside potential memo
+- Seoul Station commute memo
 - Source comparison
   - Naver Land
   - Hogangnono

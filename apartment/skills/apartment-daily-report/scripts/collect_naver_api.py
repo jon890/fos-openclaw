@@ -302,15 +302,34 @@ def main():
             errors.append({"endpoint": label, "code": code, "error": err[:200]})
         return payload, code
 
+    def hit_article_pages(label, trade_type, max_pages=5):
+        combined = {"articleList": [], "isMoreData": False, "pagesFetched": 0}
+        for page in range(1, max_pages + 1):
+            path = f"/articles/complex/{complex_no}?tradeType={trade_type}&order=rank&complexNo={complex_no}&type=list&page={page}"
+            payload, code, err = call_api(session, f"{API_BASE}{path}", headers)
+            if err:
+                errors.append({"endpoint": f"{label}.page{page}", "code": code, "error": err[:200]})
+                break
+            if not payload:
+                break
+            combined["pagesFetched"] = page
+            combined["articleList"].extend(payload.get("articleList") or [])
+            if not payload.get("isMoreData"):
+                combined["isMoreData"] = False
+                break
+            combined["isMoreData"] = True
+            time.sleep(SLEEP_BETWEEN)
+        return combined if combined["articleList"] else None
+
     overview_raw, _ = hit("overview", f"/complexes/overview/{complex_no}?complexNo={complex_no}")
     time.sleep(SLEEP_BETWEEN)
     prices_a1, _ = hit("prices.A1", f"/complexes/{complex_no}/prices?complexNo={complex_no}&tradeType=A1&year=5&priceChartChange=false&type=summary")
     time.sleep(SLEEP_BETWEEN)
     prices_b1, _ = hit("prices.B1", f"/complexes/{complex_no}/prices?complexNo={complex_no}&tradeType=B1&year=5&priceChartChange=false&type=summary")
     time.sleep(SLEEP_BETWEEN)
-    articles_a1, _ = hit("articles.A1", f"/articles/complex/{complex_no}?tradeType=A1&order=rank&complexNo={complex_no}&type=list&page=1")
+    articles_a1 = hit_article_pages("articles.A1", "A1")
     time.sleep(SLEEP_BETWEEN)
-    articles_b1, _ = hit("articles.B1", f"/articles/complex/{complex_no}?tradeType=B1&order=rank&complexNo={complex_no}&type=list&page=1")
+    articles_b1 = hit_article_pages("articles.B1", "B1")
 
     auth_failed = any(e.get("code") in (401, 403) for e in errors)
     rate_limited = any(e.get("code") == 429 for e in errors)

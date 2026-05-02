@@ -35,10 +35,20 @@ OpenClaw workspace files should only provide thin delegation or scheduling glue.
 
 ## Known behavior
 
-- Naver Land currently resolves to a usable entry path, but extraction is still partial (`legacy-map-redirect`).
-- Hogangnono and KB Land are currently the strongest structured signals.
+- Naver Land API collection uses cookie/Bearer authentication and should paginate article lists until `isMoreData` is false (bounded by the collector's page cap), not just page 1.
+- Hogangnono and KB Land are useful cross-check sources, especially for complex metadata and non-Naver listing context.
 - Focus-unit matching is handled in the normalizer and should stay conservative.
-- Whole-complex values must not be presented as 59A-confirmed unless exact match logic supports it.
+- Whole-complex values must not be presented as focus-unit-confirmed unless exact match logic supports it.
+
+## Guri buy-search preferences
+
+Current buyer-priority scoring for the recurring Guri search:
+- Put location/입지 first: daily infrastructure, transit/bus access, commercial/medical/school convenience, and easy walking routes should outweigh simple price sorting.
+- Penalize steep hill / daily access friction. 수택주공 was visited and felt too uphill, so its price/area appeal should be discounted.
+- Include good-location smaller units instead of filtering them out: keep LG원앙/엘지원앙 전용49/52 and 대림한숲 전용51 candidates visible when they fit the budget.
+- Include 구리럭키 / 럭키아파트 (Naver complexNo `24858`) with direct Naver article links: `https://new.land.naver.com/complexes/24858?articleNo=<articleNo>`.
+- For 구리럭키, separate 실거주+주담대-friendly listings from 세안고/갭투 listings. Treat 세안고, 전세안고, 갭투자, 갱신권, or late-2027/2028 occupancy as high risk for this buyer unless a bank and realtor confirm financing/possession feasibility.
+- Prefer 주인거주, 즉시입주, 공실 인도 가능, or near-term 입주협의 listings even if the sticker price is slightly higher.
 
 ## Guardrails
 
