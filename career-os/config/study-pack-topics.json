@@ -154,5 +154,17 @@
     "outputPath": "security/spring-security-oauth2-jwt.md",
     "commitTopic": "spring-security-oauth2-jwt-auth",
     "appendPrompt": "Spring Security OAuth2와 JWT를 이용한 상용 인증 시스템 설계 전략을 다루는 study-pack을 작성하라. OAuth2 Authorization Code/Client Credentials grant 흐름, JWT access token + refresh token 구조, Spring Security OAuth2 Resource Server 설정, 토큰 검증 필터 체인을 설명하고, 실전 보안 이슈(refresh token rotation, XSS/CSRF 방어, 토큰 탈취 시 대응, 로그아웃 처리)와 해결 방법을 제시하라. 커머스 멀티 클라이언트 환경(모바일 앱, 백오피스, 외부 API 연동)에서 각각 어떤 grant를 선택하는지 판단 기준을 포함하라. 문서 제목은 반드시 [초안]으로 시작하며, Spring Boot 3.x + Spring Security 6.x 기준으로 작성한다."
+  },
+  "redis-cluster-operations": {
+    "domain": "redis",
+    "outputPath": "database/redis/redis-cluster-operations.md",
+    "commitTopic": "redis-cluster",
+    "appendPrompt": "Redis Cluster의 샤딩 메커니즘(16384 슬롯), 노드 추가/제거 절차, 자동 페일오버와 수동 페일오버 시나리오, 그리고 운영 시 주의사항(네트워크 파티션, 슬롯 마이그레이션 중 트래픽 처리)을 다루는 study-pack을 작성하세요. 문서 제목은 반드시 [초안]으로 시작하며, CJ OliveYoung 같은 대규모 커머스 환경에서 Redis Cluster를 운영할 때 알아야 할 핵심 내용을 담아야 합니다."
+  },
+  "review-mysql-index-design": {
+    "domain": "mysql",
+    "outputPath": "database/mysql/review-index-design.md",
+    "commitTopic": "mysql-index-review",
+    "appendPrompt": "기존의 b-tree-index.md, composite-index 관련 문서, 그리고 커버링 인덱스 내용을 바탕으로, MySQL 인덱스 설계의 핵심 원칙(B+Tree 구조, 복합 인덱스 컬럼 순서, 커버링 인덱스 활용)만 압축한 1페이지 복습용 study-pack을 작성하세요. 문서 제목은 반드시 [초안]으로 시작하며, 인덱스 설계 체크리스트와 흔한 실수를 불릿으로 정리해야 합니다."
   }
 }

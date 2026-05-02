@@ -1,0 +1,135 @@
+{
+  "_meta": {
+    "purpose": "Geek/news/broad industry 추천 reservoir. 매일 morning 추천에서 1개 항목 선택용.",
+    "policy": "GeekNews/Hacker News 류의 산업 동향, OSS 신소식, 인프라/언어/도구 흐름 등 backend 시야 확장 목적. 단발성 뉴스가 아니라 한 단락으로 정리할 수 있는 평가형 주제로 기록한다.",
+    "updateGuidance": "live web fetch는 별도 enhancement 예정. 분기마다 사람이 stale 항목 정리 + 새 흐름 보강.",
+    "schema": {
+      "key": "kebab-case 고유 키",
+      "title": "한글 추천 제목",
+      "source": "출처 큐 (GeekNews / HackerNews / OSS release / 등)",
+      "url": "(optional) 검색/참고 힌트",
+      "tags": "분야 태그",
+      "estMinutes": "예상 reading 시간(분)",
+      "whyNow": "왜 지금 보면 좋은지"
+    }
+  },
+  "items": [
+    {
+      "key": "geeknews-weekly-top",
+      "title": "GeekNews 이번 주 인기 글 top 1편 정독",
+      "source": "GeekNews",
+      "url": "https://news.hada.io/",
+      "tags": ["industry", "weekly"],
+      "estMinutes": 15,
+      "whyNow": [
+        "한국 개발자 커뮤니티 흐름을 빠르게 따라가기 위한 최소 신호",
+        "면접 small talk / 기술 동향 답변에 즉시 활용 가능"
+      ]
+    },
+    {
+      "key": "hackernews-frontpage-deepdive",
+      "title": "Hacker News front page 1편 깊이 읽기",
+      "source": "Hacker News",
+      "url": "https://news.ycombinator.com/",
+      "tags": ["industry", "global"],
+      "estMinutes": 20,
+      "whyNow": [
+        "글로벌 엔지니어링 흐름을 주 1회 이상 흡수해두면 답변 폭이 달라진다",
+        "댓글까지 읽으면 다른 의견을 동시에 접할 수 있다"
+      ]
+    },
+    {
+      "key": "postgres-major-release-overview",
+      "title": "PostgreSQL 최신 메이저 릴리즈 변경점 훑기",
+      "source": "Postgres release notes",
+      "url": "https://www.postgresql.org/docs/release/",
+      "tags": ["database", "release"],
+      "estMinutes": 20,
+      "whyNow": [
+        "MySQL 외 DB 동향도 알고 있으면 DB 답변 폭이 넓어진다",
+        "Aurora/Citus/pgvector 활용 답변에서 차별화 포인트가 된다"
+      ]
+    },
+    {
+      "key": "duckdb-analytics-trend",
+      "title": "DuckDB / 단일 노드 분석 DB 트렌드",
+      "source": "DuckDB blog",
+      "url": "https://duckdb.org/news/",
+      "tags": ["database", "analytics"],
+      "estMinutes": 20,
+      "whyNow": [
+        "OLTP 외에 \"분석 쿼리는 어디로 보낼 것이냐\" 답변을 준비할 수 있다",
+        "데이터 엔지니어링 시야를 백엔드 답변에 더하는 데 가성비가 좋다"
+      ]
+    },
+    {
+      "key": "wasm-component-model",
+      "title": "WebAssembly Component Model 흐름 정리",
+      "source": "Bytecode Alliance",
+      "url": "https://bytecodealliance.org/",
+      "tags": ["wasm", "platform"],
+      "estMinutes": 20,
+      "whyNow": [
+        "플러그인/엣지 런타임 답변에 WASM 시그널을 잡아두면 차별화된다",
+        "5년 후 백엔드 런타임 흐름을 가늠하는 데 도움 된다"
+      ]
+    },
+    {
+      "key": "rust-tokio-async-ecosystem",
+      "title": "Rust / Tokio async 생태계 한 번 훑기",
+      "source": "Tokio blog",
+      "url": "https://tokio.rs/blog",
+      "tags": ["rust", "async"],
+      "estMinutes": 25,
+      "whyNow": [
+        "JVM 이외 언어 흐름을 알고 있으면 \"왜 Java 백엔드인가\" 답변이 더 정직해진다",
+        "비동기 모델 비교(Project Loom vs Tokio vs Node) 답변에 직접 활용된다"
+      ]
+    },
+    {
+      "key": "loom-virtual-thread-status",
+      "title": "Project Loom / Virtual Thread 운영 사례 업데이트",
+      "source": "OpenJDK Loom",
+      "url": "https://openjdk.org/projects/loom/",
+      "tags": ["java", "concurrency"],
+      "estMinutes": 25,
+      "whyNow": [
+        "Java 21 LTS 이후 virtual thread 운영 사례가 점점 쌓이는 중이라 면접 답변 갱신이 필요",
+        "blocking I/O 비용 이야기에 새로운 답이 추가된다"
+      ]
+    },
+    {
+      "key": "kafka-vs-redpanda-vs-pulsar",
+      "title": "Kafka 대안 — Redpanda / Pulsar 흐름 비교",
+      "source": "Industry comparisons",
+      "tags": ["messaging", "kafka"],
+      "estMinutes": 25,
+      "whyNow": [
+        "메시징 답변에서 Kafka 외 옵션을 알고 있는 것 자체가 차별 신호다",
+        "운영 단순성/비용 trade-off 답변 폭이 넓어진다"
+      ]
+    },
+    {
+      "key": "github-copilot-vs-cursor-claude-code",
+      "title": "AI 코딩 도구 — Copilot / Cursor / Claude Code 비교 단상",
+      "source": "Industry comparisons",
+      "tags": ["dev-tools", "ai"],
+      "estMinutes": 15,
+      "whyNow": [
+        "본인이 사용하는 도구의 위치를 한 줄 답변으로 정리해두면 자기소개에 바로 들어간다",
+        "AI 도구 도입 의사결정 답변에 활용 가능"
+      ]
+    },
+    {
+      "key": "linux-io-uring-overview",
+      "title": "Linux io_uring — async I/O 트렌드 한 번 정리",
+      "source": "kernel.org",
+      "tags": ["linux", "async-io"],
+      "estMinutes": 25,
+      "whyNow": [
+        "JVM/네트워크 라이브러리 성능 답변의 밑단을 이해하는 데 큰 도움",
+        "성능 답변의 깊이가 한 단계 올라간다"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,156 @@
+{
+  "_meta": {
+    "purpose": "AI 관련 추천 reservoir. 매일 morning 추천에서 3개 항목 선택용.",
+    "policy": "백엔드 엔지니어가 실제로 활용 가능한 AI 주제(LLM API, RAG, Agent, Vector DB, AI 코딩 워크플로) 중심. 단순 ML 이론은 제외.",
+    "updateGuidance": "Anthropic/OpenAI 신모델, 신기능 발표가 잦으므로 분기마다 사람이 검토.",
+    "schema": {
+      "key": "kebab-case 고유 키",
+      "title": "한글 추천 제목",
+      "category": "subdomain (api, rag, agent, vector-db, workflow, model)",
+      "url": "(optional) 참고 URL",
+      "tags": "분야 태그",
+      "estMinutes": "예상 학습 시간(분)",
+      "whyNow": "왜 지금 보면 좋은지"
+    }
+  },
+  "items": [
+    {
+      "key": "anthropic-prompt-caching-cost",
+      "title": "Anthropic Prompt Caching 실전 — cost / hit rate 튜닝",
+      "category": "api",
+      "url": "https://docs.anthropic.com/en/docs/build-with-claude/prompt-caching",
+      "tags": ["claude", "cost-optimization"],
+      "estMinutes": 25,
+      "whyNow": [
+        "career-os 자체가 매일 Claude를 호출하므로 cache 튜닝이 직접적인 비용 절감으로 이어진다",
+        "면접에서 \"AI를 실제 운영해 봤다\" 신호로 쓰기 좋다"
+      ]
+    },
+    {
+      "key": "claude-agent-sdk-tool-use",
+      "title": "Claude Agent SDK / Tool Use 패턴 정리",
+      "category": "agent",
+      "url": "https://docs.anthropic.com/en/docs/agents-and-tools/tool-use/overview",
+      "tags": ["claude", "agent", "tool-use"],
+      "estMinutes": 30,
+      "whyNow": [
+        "Claude Code/career-os 워크플로 자체가 agent 구조라 직접 활용 가능하다",
+        "에이전트 디자인 패턴은 신규 기술 답변 카드로 강력하다"
+      ]
+    },
+    {
+      "key": "rag-eval-ragas-langsmith",
+      "title": "RAG 평가 — Ragas / LangSmith로 retrieval 품질 측정",
+      "category": "rag",
+      "url": "https://docs.ragas.io/",
+      "tags": ["rag", "eval"],
+      "estMinutes": 30,
+      "whyNow": [
+        "RAG 도입은 흔하지만 \"평가까지 했다\"가 차별 포인트가 된다",
+        "백엔드 메트릭 수집 패턴과 동일해 익히기 쉽다"
+      ]
+    },
+    {
+      "key": "vector-db-pgvector-vs-qdrant",
+      "title": "Vector DB 선택 — pgvector vs Qdrant vs Weaviate 비교",
+      "category": "vector-db",
+      "tags": ["vector-db", "rag"],
+      "estMinutes": 25,
+      "whyNow": [
+        "기존 PostgreSQL 운영 경험을 RAG 도입 답변으로 자연스럽게 확장할 수 있다",
+        "OliveYoung 같은 커머스에서 상품 추천/검색 RAG 구상 시 직접적이다"
+      ]
+    },
+    {
+      "key": "openai-realtime-api-voice",
+      "title": "OpenAI Realtime API — voice agent / function call 워크플로",
+      "category": "api",
+      "url": "https://platform.openai.com/docs/guides/realtime",
+      "tags": ["openai", "realtime", "voice"],
+      "estMinutes": 30,
+      "whyNow": [
+        "음성/실시간 UX는 점점 표준이 되어가는 흐름이다",
+        "function call + 백엔드 연동 패턴은 백엔드 면접에서 차별점이 된다"
+      ]
+    },
+    {
+      "key": "llm-cost-routing-haiku-sonnet-opus",
+      "title": "LLM Cost Routing — Haiku/Sonnet/Opus 모델 분기 전략",
+      "category": "workflow",
+      "tags": ["claude", "cost-routing"],
+      "estMinutes": 20,
+      "whyNow": [
+        "OMC가 이미 모델 routing을 사용하므로 실제 패턴을 정리해두면 면접 사례화하기 쉽다",
+        "비용 통제는 AI 답변에서 가장 자주 묻는 후속 질문이다"
+      ]
+    },
+    {
+      "key": "structured-output-tool-schema-claude",
+      "title": "Claude Structured Output / Tool Schema 설계 베스트 프랙티스",
+      "category": "api",
+      "url": "https://docs.anthropic.com/en/docs/build-with-claude/structured-outputs",
+      "tags": ["claude", "structured-output"],
+      "estMinutes": 25,
+      "whyNow": [
+        "career-os question-bank가 strict schema 패턴을 쓰므로 그대로 사용 사례화 가능하다",
+        "백엔드 API 설계 감각과 직접 연결되는 주제다"
+      ]
+    },
+    {
+      "key": "mcp-server-design",
+      "title": "MCP (Model Context Protocol) 서버 직접 설계해 보기",
+      "category": "agent",
+      "url": "https://modelcontextprotocol.io/",
+      "tags": ["mcp", "tooling"],
+      "estMinutes": 35,
+      "whyNow": [
+        "OMC 환경이 MCP 기반이라 직접 설계 경험이 곧장 운영 시그널이 된다",
+        "Claude/Cursor/IDE 통합 답변에서 강력한 차별 카드"
+      ]
+    },
+    {
+      "key": "local-llm-vllm-ollama-serving",
+      "title": "Local LLM Serving — vLLM / Ollama 비교와 백엔드 연동",
+      "category": "model",
+      "tags": ["local-llm", "vllm", "ollama"],
+      "estMinutes": 30,
+      "whyNow": [
+        "보안/비용 이슈로 사내 LLM 운영 수요가 늘고 있다",
+        "GPU 자원/스루풋 관점은 백엔드 capacity planning과 같은 언어로 설명 가능하다"
+      ]
+    },
+    {
+      "key": "ai-coding-agent-workflow-omc",
+      "title": "AI Coding Agent 워크플로 — Claude Code / OMC 패턴 정리",
+      "category": "workflow",
+      "tags": ["claude-code", "agent", "workflow"],
+      "estMinutes": 25,
+      "whyNow": [
+        "본인이 매일 사용하는 워크플로를 \"왜 이렇게 운영하는가\"로 정리해두면 면접 자기소개에 바로 들어간다",
+        "AI 도입 사례 질문에 1분 답변으로 쓸 수 있다"
+      ]
+    },
+    {
+      "key": "embedding-model-comparison-openai-cohere",
+      "title": "Embedding 모델 비교 — OpenAI / Cohere / BGE / KURE",
+      "category": "model",
+      "tags": ["embedding", "rag", "ko-nlp"],
+      "estMinutes": 25,
+      "whyNow": [
+        "한국어 임베딩 모델 선택은 한국 커머스 RAG에서 핵심 결정이다",
+        "라이선스/비용/품질 trade-off는 면접에서 깊게 묻는 주제다"
+      ]
+    },
+    {
+      "key": "guardrails-llm-output-validation",
+      "title": "LLM Guardrails — 출력 검증 / hallucination 방어 패턴",
+      "category": "workflow",
+      "tags": ["guardrails", "validation"],
+      "estMinutes": 25,
+      "whyNow": [
+        "production LLM에서 검증 없는 출력은 곧 장애로 이어진다",
+        "백엔드 입력 검증 감각을 그대로 LLM 출력에 적용하는 답변이 된다"
+      ]
+    }
+  ]
+}

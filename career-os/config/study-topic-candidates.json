@@ -164,24 +164,6 @@
       }
     },
     {
-      "key": "redis-cluster-operations",
-      "title": "Redis Cluster 샤딩·슬롯 할당·페일오버 운영",
-      "domain": "redis",
-      "tag": "new",
-      "difficulty": "중상",
-      "estMinutes": 40,
-      "whyNow": [
-        "CJ OliveYoung 같은 대규모 커머스에서는 Redis 단일 노드 한계를 넘어 Cluster 구성이 필수적",
-        "슬롯 재분배·노드 추가·페일오버 시나리오는 실무 운영 면접에서 자주 물어보는 주제"
-      ],
-      "promotionTarget": {
-        "domain": "redis",
-        "outputPath": "database/redis/redis-cluster-operations.md",
-        "commitTopic": "redis-cluster",
-        "appendPrompt": "Redis Cluster의 샤딩 메커니즘(16384 슬롯), 노드 추가/제거 절차, 자동 페일오버와 수동 페일오버 시나리오, 그리고 운영 시 주의사항(네트워크 파티션, 슬롯 마이그레이션 중 트래픽 처리)을 다루는 study-pack을 작성하세요. 문서 제목은 반드시 [초안]으로 시작하며, CJ OliveYoung 같은 대규모 커머스 환경에서 Redis Cluster를 운영할 때 알아야 할 핵심 내용을 담아야 합니다."
-      }
-    },
-    {
       "key": "mysql-optimizer-hints",
       "title": "MySQL Query Optimizer Hint와 실행계획 유도",
       "domain": "mysql",
@@ -290,24 +272,6 @@
       }
     },
     {
-      "key": "review-mysql-index-design",
-      "title": "(Review) MySQL 인덱스 설계: B+Tree·복합·커버링 총정리",
-      "domain": "mysql",
-      "tag": "review",
-      "difficulty": "중",
-      "estMinutes": 30,
-      "whyNow": [
-        "B+Tree, 복합 인덱스, 커버링 인덱스 문서가 별도로 존재하지만 통합 복습 자료가 없음",
-        "면접 전 인덱스 설계 원칙을 빠르게 정리할 수 있는 체크리스트 형태가 효율적"
-      ],
-      "promotionTarget": {
-        "domain": "mysql",
-        "outputPath": "database/mysql/review-index-design.md",
-        "commitTopic": "mysql-index-review",
-        "appendPrompt": "기존의 b-tree-index.md, composite-index 관련 문서, 그리고 커버링 인덱스 내용을 바탕으로, MySQL 인덱스 설계의 핵심 원칙(B+Tree 구조, 복합 인덱스 컬럼 순서, 커버링 인덱스 활용)만 압축한 1페이지 복습용 study-pack을 작성하세요. 문서 제목은 반드시 [초안]으로 시작하며, 인덱스 설계 체크리스트와 흔한 실수를 불릿으로 정리해야 합니다."
-      }
-    },
-    {
       "key": "redis-memory-eviction-policies",
       "title": "Redis 메모리 관리와 Eviction 정책 선택",
       "domain": "redis",
@@ -323,6 +287,42 @@
         "outputPath": "database/redis/memory-eviction-policies.md",
         "commitTopic": "redis-memory-eviction",
         "appendPrompt": "Redis의 메모리 관리 구조(maxmemory, used_memory_rss, fragmentation)와 8가지 eviction 정책(noeviction, allkeys-lru, volatile-lru, allkeys-lfu, volatile-lfu, allkeys-random, volatile-random, volatile-ttl)을 비교 분석한다. 각 정책의 동작 원리, 적합한 사용 사례(세션 캐시 vs 조회 캐시 vs 메시지 큐), 그리고 실무에서 메모리 부족 장애를 예방하는 모니터링 전략(INFO memory, used_memory_peak, evicted_keys 지표)을 포함한다. 문서 제목은 반드시 [초안]으로 시작하며, CJ OliveYoung 커머스 환경에서 상품 조회 캐시와 장바구니 세션 캐시를 동시에 운영할 때의 정책 선택 근거를 예시로 든다."
+      }
+    },
+    {
+      "key": "spring-security-authentication-authorization",
+      "title": "Spring Security 인증·인가 아키텍처와 커스터마이징",
+      "domain": "security",
+      "tag": "new",
+      "difficulty": "중상",
+      "estMinutes": 40,
+      "whyNow": [
+        "커머스 플랫폼에서 회원·관리자·파트너사 등 다층 권한 체계를 안전하게 구현하려면 Spring Security 내부 구조 이해가 필수다",
+        "AuthenticationManager, SecurityContext, Filter Chain 동작 원리를 모르면 커스텀 인증 로직 추가 시 보안 구멍이 생기기 쉽다"
+      ],
+      "promotionTarget": {
+        "domain": "security",
+        "outputPath": "security/spring-security-authentication-authorization.md",
+        "commitTopic": "spring-security-authentication-authorization",
+        "appendPrompt": "문서 제목은 반드시 '[초안] Spring Security 인증·인가 아키텍처와 커스터마이징'으로 시작한다. AuthenticationManager, ProviderManager, AuthenticationProvider 체인, SecurityContext/SecurityContextHolder, Filter Chain (UsernamePasswordAuthenticationFilter, FilterSecurityInterceptor), 그리고 커스텀 인증 Provider와 Voter 구현 패턴을 다룬다. CJ OliveYoung Wellness Platform 면접을 대비하여 다층 권한 체계 설계 예시와 JWT 통합 시나리오, 세션 vs 토큰 기반 인증 선택 기준을 포함한다."
+      }
+    },
+    {
+      "key": "mysql-partitioning-strategy",
+      "title": "MySQL 파티셔닝 전략과 실무 적용",
+      "domain": "mysql",
+      "tag": "new",
+      "difficulty": "중상",
+      "estMinutes": 45,
+      "whyNow": [
+        "커머스 도메인의 주문·상품 이력 등 시간 기반 대용량 데이터 처리 필수 스킬",
+        "MySQL 인덱스·쿼리 최적화만으로 해결 안 되는 테이블 분할 전략 학습 필요"
+      ],
+      "promotionTarget": {
+        "domain": "mysql",
+        "outputPath": "database/mysql/mysql-partitioning-strategy.md",
+        "commitTopic": "mysql-partitioning",
+        "appendPrompt": "MySQL 파티셔닝 전략과 실무 적용 가이드 문서를 작성한다. RANGE, LIST, HASH 파티셔닝 비교, 파티션 프루닝 원리, 파티션 추가/삭제/병합 DDL, 커머스 주문 테이블 예시, 성능 트레이드오프를 포함한다. 문서 제목은 반드시 \"[초안]\"으로 시작한다."
       }
     }
   ]

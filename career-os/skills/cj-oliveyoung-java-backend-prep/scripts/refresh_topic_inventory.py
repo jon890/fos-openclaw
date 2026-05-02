@@ -1,4 +1,10 @@
 #!/usr/bin/env python3
+"""morning topic recommendation pipeline.
+
+ADR-009: reservoir-based, file-backed.
+ADR-010: score-based backend selection with mix targets.
+ADR-012: 10-item daily curation (backend 3 / tech-blog 3 / AI 3 / geek 1) + today pick 3.
+"""
 import json
 from collections import Counter
 from datetime import datetime, timezone
@@ -10,43 +16,75 @@ RUNTIME = TASK_ROOT / 'data' / 'runtime'
 RUNTIME.mkdir(parents=True, exist_ok=True)
 HISTORY_PATH = RUNTIME / 'topic-inventory-history.jsonl'
 
-# ADR-010: 추천 점수 기반 + mix target
-MIX_TARGET = {'new': 2, 'deepen': 1, 'review': 1, 'live-coding': 1}
+# ADR-010: backend 추천 점수 기반 + mix target (3-item version per ADR-012)
+BACKEND_TARGET_TOTAL = 3
+BACKEND_MIX_TARGET = {'new': 1, 'deepen': 1, 'live-coding': 1}
 WEAK_AREAS = {'mysql', 'redis'}
 WEAK_AREA_BONUS = 3
 RECENT_PENALTY_PER = 2
 CARRYOVER_PENALTY = 1
 TAG_PRIORITY = {'new': 0, 'deepen': -1, 'review': -2, 'live-coding': 0}
 
+# ADR-012: 보조 카테고리 슬롯
+TECH_BLOG_SLOTS = 3
+AI_SLOTS = 3
+GEEK_SLOTS = 1
+# 최근 N개 history entry 안에 있던 key는 가급적 회피 (cooldown)
+SECONDARY_COOLDOWN_ENTRIES = 3
+
 
 def read_json(path: Path):
     return json.loads(path.read_text(encoding='utf-8'))
 
 
-def load_yesterday_keys():
+def load_recent_history(max_entries: int):
+    """최근 max_entries개의 history line을 dict 형태로 반환."""
     if not HISTORY_PATH.exists():
-        return set()
-    last = None
+        return []
+    entries = []
     try:
         with HISTORY_PATH.open(encoding='utf-8') as f:
             for line in f:
                 line = line.strip()
-                if line:
-                    last = line
+                if not line:
+                    continue
+                try:
+                    entries.append(json.loads(line))
+                except json.JSONDecodeError:
+                    continue
     except OSError:
-        return set()
-    if not last:
-        return set()
-    try:
-        return set(json.loads(last).get('keys', []))
-    except json.JSONDecodeError:
-        return set()
+        return []
+    return entries[-max_entries:]
 
 
-def append_history(keys):
-    entry = {'generatedAt': datetime.now(timezone.utc).isoformat(), 'keys': list(keys)}
+def load_yesterday_keys():
+    recent = load_recent_history(1)
+    if not recent:
+        return set()
+    return set(recent[-1].get('keys', []))
+
+
+def collect_recent_keys(entries, field):
+    keys = set()
+    for entry in entries:
+        for key in entry.get(field, []) or []:
+            keys.add(key)
+    return keys
+
+
+def append_history(payload):
+    entry = {'generatedAt': datetime.now(timezone.utc).isoformat(), **payload}
     with HISTORY_PATH.open('a', encoding='utf-8') as f:
         f.write(json.dumps(entry, ensure_ascii=False) + '\n')
+
+
+def safe_load(path: Path, fallback):
+    if not path.exists():
+        return fallback
+    try:
+        return read_json(path)
+    except json.JSONDecodeError:
+        return fallback
 
 
 study_topics = read_json(CONFIG / 'study-pack-topics.json')
@@ -54,6 +92,10 @@ study_candidates = read_json(CONFIG / 'study-topic-candidates.json').get('topics
 live_seeds = read_json(CONFIG / 'live-coding-seed-pool.json').get('seeds', [])
 live_seed_candidates = read_json(CONFIG / 'live-coding-seed-candidates.json').get('seeds', [])
 artifacts = read_json(TASK_ROOT / 'data' / 'generated-artifacts.json').get('artifacts', [])
+
+tech_blog_items = safe_load(CONFIG / 'tech-blog-sources.json', {}).get('items', [])
+ai_topic_items = safe_load(CONFIG / 'ai-topic-sources.json', {}).get('items', [])
+geek_news_items = safe_load(CONFIG / 'geek-news-sources.json', {}).get('items', [])
 
 study_paths = {a.get('outputPath') for a in artifacts if a.get('kind') == 'study-pack'}
 live_paths = {a.get('outputPath') for a in artifacts if a.get('kind') == 'live-coding'}
@@ -115,19 +157,8 @@ for item in study_candidates:
     candidate_recommendations.append(item)
 
 
-def pick_recommendations():
-    """ADR-010: 점수 기반 + mix target 강제.
-
-    score = -RECENT_PENALTY_PER * recent10_domain_count
-          + WEAK_AREA_BONUS (mysql/redis)
-          + TAG_PRIORITY[tag]
-          - CARRYOVER_PENALTY (어제 추천에 있었으면)
-
-    1차: MIX_TARGET(new 2 / deepen 1 / review 1 / live-coding 1)을 점수 순으로 채움.
-    2차: 부족하면 mix 위반 허용하고 남은 점수 상위로 채움.
-    """
-    yesterday_keys = load_yesterday_keys()
-
+def pick_backend_recommendations(yesterday_keys):
+    """ADR-010 점수 기반 + ADR-012 3-item mix target."""
     pool = [dict(item) for item in candidate_recommendations]
 
     live_item_source = remaining_live[:3] or remaining_live_candidates[:3]
@@ -162,30 +193,72 @@ def pick_recommendations():
     used_tags = Counter()
     chosen_keys = set()
 
-    # 1차: mix target 충족 (점수 순)
     for item in pool:
         tag = item.get('tag', 'new')
-        if used_tags[tag] < MIX_TARGET.get(tag, 0):
+        if used_tags[tag] < BACKEND_MIX_TARGET.get(tag, 0):
             chosen.append(item)
             chosen_keys.add(item.get('key'))
             used_tags[tag] += 1
-            if len(chosen) >= 5:
+            if len(chosen) >= BACKEND_TARGET_TOTAL:
                 break
 
-    # 2차: mix 위반 허용, 점수 상위로 5개까지 채움
-    if len(chosen) < 5:
+    if len(chosen) < BACKEND_TARGET_TOTAL:
         for item in pool:
             if item.get('key') in chosen_keys:
                 continue
             chosen.append(item)
             chosen_keys.add(item.get('key'))
-            if len(chosen) >= 5:
+            if len(chosen) >= BACKEND_TARGET_TOTAL:
                 break
 
-    return chosen[:5]
+    return chosen[:BACKEND_TARGET_TOTAL]
 
 
-recommendations = pick_recommendations()
+def pick_secondary(items, recently_shown_keys, limit):
+    """비-backend 카테고리(tech-blog / AI / geek) 추천 선택.
+
+    1차: cooldown(최근 history N개) 안에 없는 항목을 reservoir 순서대로 선택.
+    2차: 부족하면 recently_shown 포함해서라도 채움.
+    reservoir 순서는 사람이 큐레이션한 우선도이므로 추가 정렬을 하지 않는다.
+    """
+    if not items:
+        return []
+    fresh = [item for item in items if item.get('key') not in recently_shown_keys]
+    chosen = list(fresh[:limit])
+    if len(chosen) >= limit:
+        return chosen
+    chosen_keys = {item.get('key') for item in chosen}
+    for item in items:
+        if item.get('key') in chosen_keys:
+            continue
+        chosen.append(item)
+        chosen_keys.add(item.get('key'))
+        if len(chosen) >= limit:
+            break
+    return chosen[:limit]
+
+
+recent_history = load_recent_history(SECONDARY_COOLDOWN_ENTRIES)
+yesterday_keys = load_yesterday_keys()
+recent_tech_blog_keys = collect_recent_keys(recent_history, 'techBlogKeys')
+recent_ai_keys = collect_recent_keys(recent_history, 'aiKeys')
+recent_geek_keys = collect_recent_keys(recent_history, 'geekKeys')
+
+backend_recommendations = pick_backend_recommendations(yesterday_keys)
+tech_blog_recommendations = pick_secondary(tech_blog_items, recent_tech_blog_keys, TECH_BLOG_SLOTS)
+ai_recommendations = pick_secondary(ai_topic_items, recent_ai_keys, AI_SLOTS)
+geek_recommendations = pick_secondary(geek_news_items, recent_geek_keys, GEEK_SLOTS)
+
+
+def first_or_none(items):
+    return items[0] if items else None
+
+
+today_pick = {
+    'backend': first_or_none(backend_recommendations),
+    'techBlog': first_or_none(tech_blog_recommendations),
+    'ai': first_or_none(ai_recommendations),
+}
 
 inventory = {
     'generatedAt': datetime.now(timezone.utc).isoformat(),
@@ -197,6 +270,9 @@ inventory = {
         'liveCodingRemainingPrimarySeeds': len(remaining_live),
         'liveCodingCandidateSeeds': len(live_seed_candidates),
         'liveCodingRemainingCandidateSeeds': len(remaining_live_candidates),
+        'techBlogReservoir': len(tech_blog_items),
+        'aiReservoir': len(ai_topic_items),
+        'geekReservoir': len(geek_news_items),
     },
     'recentDomainCounts': dict(recent_domain_counts),
     'pools': {
@@ -205,7 +281,11 @@ inventory = {
         'remainingLiveCodingSeeds': remaining_live,
         'remainingLiveCodingCandidateSeeds': remaining_live_candidates,
     },
-    'recommendations': recommendations,
+    'recommendations': backend_recommendations,
+    'techBlogRecommendations': tech_blog_recommendations,
+    'aiRecommendations': ai_recommendations,
+    'geekRecommendations': geek_recommendations,
+    'todayPick': today_pick,
 }
 
 (RUNTIME / 'topic-inventory.json').write_text(
@@ -213,30 +293,135 @@ inventory = {
     encoding='utf-8',
 )
 
-lines = ['오늘 추천 주제 5개', '']
-for idx, item in enumerate(recommendations, start=1):
-    tag_label = {'new': '신규', 'deepen': '심화', 'review': '복습'}.get(item.get('tag', 'new'), item.get('tag', 'new'))
-    lines.append(f"{idx}. **{tag_label} 추천 — {item['title']}**")
-    lines.append(f"   - 분야: {item.get('domain', 'unknown')}")
-    lines.append(f"   - 난이도: {item.get('difficulty', '중')}")
-    lines.append(f"   - 예상 학습 시간: {item.get('estMinutes', 45)}분")
-    lines.append('   - 왜 지금 추천하는지')
+
+def render_backend_item(idx, item):
+    tag_label = {
+        'new': '신규',
+        'deepen': '심화',
+        'review': '복습',
+        'live-coding': 'live-coding',
+    }.get(item.get('tag', 'new'), item.get('tag', 'new'))
+    out = [
+        f"{idx}. **{tag_label} 추천 — {item['title']}**",
+        f"   - 분야: {item.get('domain', 'unknown')}",
+        f"   - 난이도: {item.get('difficulty', '중')}",
+        f"   - 예상 학습 시간: {item.get('estMinutes', 45)}분",
+        '   - 왜 지금 추천하는지',
+    ]
     for reason in item.get('whyNow', []):
-        lines.append(f"     - {reason}")
+        out.append(f"     - {reason}")
+    return out
+
+
+def render_secondary_item(idx, item, source_field, source_label='출처'):
+    source = item.get(source_field) or item.get('source') or item.get('category', '')
+    out = [
+        f"{idx}. **{item['title']}**",
+    ]
+    if source:
+        out.append(f"   - {source_label}: {source}")
+    if item.get('url'):
+        out.append(f"   - 링크: {item['url']}")
+    if item.get('tags'):
+        out.append(f"   - 태그: {', '.join(item['tags'])}")
+    if item.get('estMinutes'):
+        out.append(f"   - 예상 시간: {item['estMinutes']}분")
+    if item.get('whyNow'):
+        out.append('   - 왜 지금 보면 좋은지')
+        for reason in item['whyNow']:
+            out.append(f"     - {reason}")
+    return out
+
+
+lines = ['# 오늘의 학습/리딩 추천 (10픽 + 오늘의 3선)', '']
+
+lines.append('## 백엔드 스터디 주제 (3)')
+lines.append('')
+if backend_recommendations:
+    for idx, item in enumerate(backend_recommendations, start=1):
+        lines.extend(render_backend_item(idx, item))
+        lines.append('')
+else:
+    lines.append('- (reservoir 비어 있음 — `run_now.sh replenish-topics` 필요)')
     lines.append('')
 
-lines.append('재고 메모')
+lines.append('## 회사·엔지니어링 기술 블로그 (3)')
+lines.append('')
+if tech_blog_recommendations:
+    for idx, item in enumerate(tech_blog_recommendations, start=1):
+        lines.extend(render_secondary_item(idx, item, 'source'))
+        lines.append('')
+else:
+    lines.append('- (`config/tech-blog-sources.json` 비어 있음)')
+    lines.append('')
+
+lines.append('## AI 관련 (3)')
+lines.append('')
+if ai_recommendations:
+    for idx, item in enumerate(ai_recommendations, start=1):
+        lines.extend(render_secondary_item(idx, item, 'category', source_label='분야'))
+        lines.append('')
+else:
+    lines.append('- (`config/ai-topic-sources.json` 비어 있음)')
+    lines.append('')
+
+lines.append('## Geek/뉴스/산업 흐름 (1)')
+lines.append('')
+if geek_recommendations:
+    for idx, item in enumerate(geek_recommendations, start=1):
+        lines.extend(render_secondary_item(idx, item, 'source'))
+        lines.append('')
+else:
+    lines.append('- (`config/geek-news-sources.json` 비어 있음)')
+    lines.append('')
+
+lines.append('## 오늘의 3선 (각 카테고리에서 1개씩)')
+lines.append('')
+pick_labels = [
+    ('백엔드', today_pick['backend']),
+    ('기술 블로그', today_pick['techBlog']),
+    ('AI', today_pick['ai']),
+]
+for label, pick in pick_labels:
+    if not pick:
+        lines.append(f"- {label}: (없음)")
+        continue
+    title = pick.get('title', pick.get('key', '제목 없음'))
+    lines.append(f"- **{label}**: {title}")
+
+lines.append('')
+lines.append('## 재고 메모')
 lines.append(f"- 신규 curated study topic 남음: {len(uncovered_curated)}개")
 lines.append(f"- live-coding primary seed 남음: {len(remaining_live)}개")
 lines.append(f"- live-coding candidate seed 남음: {len(remaining_live_candidates)}개")
+lines.append(f"- tech-blog reservoir: {len(tech_blog_items)}개 / AI reservoir: {len(ai_topic_items)}개 / geek reservoir: {len(geek_news_items)}개")
 lines.append('')
-lines.append('마음에 드는 주제를 고르면 study-pack으로 바로 만들어줄게.')
+lines.append('백엔드 항목은 `run_now.sh study-pack <key>`로 즉시 만들 수 있다.')
+lines.append('나머지 카테고리는 외부 reading 추천이라 별도 생성 단계 없이 그대로 학습한다.')
 
 (RUNTIME / 'morning-topic-recommendation.md').write_text('\n'.join(lines) + '\n', encoding='utf-8')
-append_history(r.get('key') for r in recommendations if r.get('key'))
+
+append_history({
+    'keys': [r.get('key') for r in backend_recommendations if r.get('key')],
+    'techBlogKeys': [r.get('key') for r in tech_blog_recommendations if r.get('key')],
+    'aiKeys': [r.get('key') for r in ai_recommendations if r.get('key')],
+    'geekKeys': [r.get('key') for r in geek_recommendations if r.get('key')],
+    'todayPickKeys': {
+        label: (pick.get('key') if pick else None)
+        for label, pick in (
+            ('backend', today_pick['backend']),
+            ('techBlog', today_pick['techBlog']),
+            ('ai', today_pick['ai']),
+        )
+    },
+})
+
 print(json.dumps({
     'inventory': str(RUNTIME / 'topic-inventory.json'),
     'recommendation': str(RUNTIME / 'morning-topic-recommendation.md'),
-    'recommendationCount': len(recommendations),
+    'backendCount': len(backend_recommendations),
+    'techBlogCount': len(tech_blog_recommendations),
+    'aiCount': len(ai_recommendations),
+    'geekCount': len(geek_recommendations),
     'history': str(HISTORY_PATH),
 }, ensure_ascii=False))

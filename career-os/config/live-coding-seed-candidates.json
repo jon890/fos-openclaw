@@ -24,66 +24,6 @@
         "사이클이 있으면 왜 실패하는지",
         "선후관계 문제로 변환하는 감각"
       ]
-    },
-    {
-      "slug": "linked-list",
-      "title": "Linked List",
-      "outputPath": "algorithm/live-coding/linked-list.md",
-      "difficulty": "중",
-      "focus": [
-        "dummy node 사용 이유",
-        "slow-fast pointer 패턴",
-        "reverse / merge 기본기",
-        "pointer null 처리 실수"
-      ]
-    },
-    {
-      "slug": "backtracking",
-      "title": "Backtracking",
-      "outputPath": "algorithm/live-coding/backtracking.md",
-      "difficulty": "중상",
-      "focus": [
-        "선택-재귀-복구 패턴",
-        "부분집합/순열/조합 변형",
-        "pruning 기준",
-        "상태 복원 누락 실수"
-      ]
-    },
-    {
-      "slug": "shortest-path",
-      "title": "Shortest Path",
-      "outputPath": "algorithm/live-coding/shortest-path.md",
-      "difficulty": "상",
-      "focus": [
-        "BFS shortest path vs Dijkstra 구분",
-        "priority queue 갱신 패턴",
-        "visited와 distance 배열 역할",
-        "가중치 조건에 따른 알고리즘 선택"
-      ]
-    },
-    {
-      "slug": "dynamic-programming-basic",
-      "title": "Dynamic Programming Basic",
-      "outputPath": "algorithm/live-coding/dynamic-programming-basic.md",
-      "difficulty": "상",
-      "focus": [
-        "점화식 세우는 순서",
-        "top-down vs bottom-up",
-        "상태 정의와 초기값",
-        "메모이제이션 누락 실수"
-      ]
-    },
-    {
-      "slug": "trie",
-      "title": "Trie",
-      "outputPath": "algorithm/live-coding/trie.md",
-      "difficulty": "상",
-      "focus": [
-        "prefix 검색 구조",
-        "노드 메모리 trade-off",
-        "insert/search 구현 패턴",
-        "문자 집합 가정과 최적화"
-      ]
     }
   ]
 }
