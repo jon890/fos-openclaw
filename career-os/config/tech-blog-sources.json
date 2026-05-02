@@ -2,12 +2,14 @@
   "_meta": {
     "purpose": "회사/엔지니어링 기술 블로그 추천 reservoir. 매일 morning 추천에서 3개 항목 선택용.",
     "policy": "백엔드/커머스/면접 도메인 적합도 우선. 동일 source 연속 추천을 피하기 위해 source 필드를 분산해 둔다.",
-    "updateGuidance": "live web fetch는 별도 enhancement 예정. 지금은 정기적으로 사람이 검토하여 stale 항목 정리.",
+    "updateGuidance": "feedUrl이 있는 source는 ADR-013 discovery 레이어가 매일 최신 글 1편을 자동 부착한다. feedUrl이 없거나 fetch 실패 시 reservoir 원본 카드로 fallback.",
     "schema": {
       "key": "kebab-case 고유 키",
-      "title": "한글 추천 제목",
+      "title": "한글 추천 제목 (discovery 실패 시 fallback에 사용)",
       "source": "블로그/조직 이름",
-      "url": "(optional) 참고 URL 또는 검색 힌트",
+      "url": "(optional) 블로그 홈/소스 URL",
+      "feedUrl": "(optional) RSS/Atom 피드 URL — 있으면 최신 글을 자동 선택",
+      "filterKeywords": "(optional) 글 제목에 포함되면 우선하는 키워드 배열 (case-insensitive)",
       "tags": "분야 태그 배열",
       "estMinutes": "예상 reading 시간(분)",
       "whyNow": "왜 지금 읽으면 좋은지 (1~3문장)"
@@ -19,6 +21,7 @@
       "title": "올리브영 테크블로그 최신 글 1편",
       "source": "올리브영 tech blog",
       "url": "https://oliveyoung.tech/",
+      "feedUrl": "https://oliveyoung.tech/rss.xml",
       "tags": ["commerce", "target-company"],
       "estMinutes": 20,
       "whyNow": [
@@ -43,6 +46,8 @@
       "title": "토스 기술 블로그 — 결제/트랜잭션/Spring 글 1편",
       "source": "토스 tech",
       "url": "https://toss.tech/tech",
+      "feedUrl": "https://toss.tech/rss.xml",
+      "filterKeywords": ["결제", "payment", "트랜잭션", "transaction", "spring", "kafka", "MSA", "백엔드"],
       "tags": ["spring", "payment", "transactions"],
       "estMinutes": 25,
       "whyNow": [
@@ -55,6 +60,8 @@
       "title": "카카오 기술블로그 — MySQL/Redis 운영 글 1편",
       "source": "카카오 tech",
       "url": "https://tech.kakao.com/blog/",
+      "feedUrl": "https://tech.kakao.com/feed/",
+      "filterKeywords": ["mysql", "redis", "db", "데이터베이스", "캐시", "인덱스", "트랜잭션"],
       "tags": ["mysql", "redis", "ops"],
       "estMinutes": 25,
       "whyNow": [
@@ -67,6 +74,8 @@
       "title": "네이버 D2 — 검색·아키텍처 글 1편",
       "source": "네이버 D2",
       "url": "https://d2.naver.com/home",
+      "feedUrl": "https://d2.naver.com/d2.atom",
+      "filterKeywords": ["검색", "search", "아키텍처", "architecture", "백엔드", "kafka", "redis", "mysql"],
       "tags": ["architecture", "search"],
       "estMinutes": 25,
       "whyNow": [
@@ -79,6 +88,8 @@
       "title": "LINE Engineering — 분산 시스템 글 1편",
       "source": "LINE engineering",
       "url": "https://engineering.linecorp.com/ko",
+      "feedUrl": "https://engineering.linecorp.com/ko/feed/",
+      "filterKeywords": ["kafka", "분산", "distributed", "스토리지", "storage", "messaging", "메시징", "백엔드"],
       "tags": ["architecture", "distributed"],
       "estMinutes": 25,
       "whyNow": [
@@ -91,6 +102,8 @@
       "title": "당근 tech blog — 백엔드/event-driven 글 1편",
       "source": "당근 tech",
       "url": "https://medium.com/daangn",
+      "feedUrl": "https://medium.com/feed/daangn",
+      "filterKeywords": ["백엔드", "backend", "event", "kafka", "msa", "도메인", "spring"],
       "tags": ["architecture", "event-driven"],
       "estMinutes": 20,
       "whyNow": [
@@ -103,6 +116,8 @@
       "title": "쿠팡 기술블로그 — 확장성/주문 처리 글 1편",
       "source": "쿠팡 engineering",
       "url": "https://medium.com/coupang-engineering",
+      "feedUrl": "https://medium.com/feed/coupang-engineering",
+      "filterKeywords": ["scaling", "확장", "order", "주문", "백엔드", "backend", "kafka", "java"],
       "tags": ["commerce", "scaling"],
       "estMinutes": 25,
       "whyNow": [
@@ -139,6 +154,8 @@
       "title": "Netflix Tech Blog — resilience / circuit breaker 글 1편",
       "source": "Netflix tech",
       "url": "https://netflixtechblog.com/",
+      "feedUrl": "https://medium.com/feed/netflix-techblog",
+      "filterKeywords": ["resilience", "circuit", "retry", "backpressure", "latency", "scaling", "kafka", "java"],
       "tags": ["architecture", "resilience"],
       "estMinutes": 25,
       "whyNow": [
@@ -151,6 +168,8 @@
       "title": "AWS Architecture Blog — Serverless/Aurora 글 1편",
       "source": "AWS architecture",
       "url": "https://aws.amazon.com/blogs/architecture/",
+      "feedUrl": "https://aws.amazon.com/blogs/architecture/feed/",
+      "filterKeywords": ["aurora", "serverless", "lambda", "sqs", "rds", "dynamodb", "msk", "scaling"],
       "tags": ["aws", "serverless", "aurora"],
       "estMinutes": 20,
       "whyNow": [

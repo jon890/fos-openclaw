@@ -4,17 +4,26 @@
 ADR-009: reservoir-based, file-backed.
 ADR-010: score-based backend selection with mix targets.
 ADR-012: 10-item daily curation (backend 3 / tech-blog 3 / AI 3 / geek 1) + today pick 3.
+ADR-013: secondary 카테고리에 RSS/Atom discovery로 실제 최신 글 1편을 부착.
 """
 import json
+import sys
 from collections import Counter
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from feed_discovery import discover_for_item  # noqa: E402
 
 TASK_ROOT = Path.home() / 'ai-nodes' / 'career-os'
 CONFIG = TASK_ROOT / 'config'
 RUNTIME = TASK_ROOT / 'data' / 'runtime'
 RUNTIME.mkdir(parents=True, exist_ok=True)
 HISTORY_PATH = RUNTIME / 'topic-inventory-history.jsonl'
+FEED_CACHE_DIR = RUNTIME / 'feed-cache'
+FEED_CACHE_TTL = timedelta(hours=6)
+FEED_TIMEOUT_SECONDS = 8
+RECENT_ARTICLE_URL_LOOKBACK = 7  # 최근 N개 history entry의 article URL은 회피
 
 # ADR-010: backend 추천 점수 기반 + mix target (3-item version per ADR-012)
 BACKEND_TARGET_TOTAL = 3
@@ -244,10 +253,63 @@ recent_tech_blog_keys = collect_recent_keys(recent_history, 'techBlogKeys')
 recent_ai_keys = collect_recent_keys(recent_history, 'aiKeys')
 recent_geek_keys = collect_recent_keys(recent_history, 'geekKeys')
 
+# 최근 추천된 article URL을 모아 두면 동일 글이 며칠 연속 노출되는 것을 막을 수 있다.
+# discoverHistory[*].articleUrls 필드를 누적해서 사용.
+article_url_history = load_recent_history(RECENT_ARTICLE_URL_LOOKBACK)
+recent_article_urls = set()
+for entry in article_url_history:
+    for url in entry.get('articleUrls', []) or []:
+        if url:
+            recent_article_urls.add(url)
+
 backend_recommendations = pick_backend_recommendations(yesterday_keys)
 tech_blog_recommendations = pick_secondary(tech_blog_items, recent_tech_blog_keys, TECH_BLOG_SLOTS)
 ai_recommendations = pick_secondary(ai_topic_items, recent_ai_keys, AI_SLOTS)
 geek_recommendations = pick_secondary(geek_news_items, recent_geek_keys, GEEK_SLOTS)
+
+
+def attach_discovered_articles(items, exclude_urls):
+    """ADR-013: feedUrl이 있는 reservoir 항목에 최신 글을 부착.
+
+    실패 항목은 조용히 reservoir 원본 그대로 둔다. 새로 선택된 URL은
+    exclude_urls 셋에 누적해 같은 morning 안에서 중복 추천을 방지한다.
+    """
+    discovery_log = []
+    for item in items:
+        feed_url = item.get('feedUrl')
+        if not feed_url:
+            discovery_log.append({'key': item.get('key'), 'status': 'no-feed'})
+            continue
+        article = discover_for_item(
+            item,
+            cache_dir=FEED_CACHE_DIR,
+            exclude_urls=exclude_urls,
+            ttl=FEED_CACHE_TTL,
+            timeout=FEED_TIMEOUT_SECONDS,
+        )
+        if not article:
+            discovery_log.append({'key': item.get('key'), 'status': 'no-match', 'feedUrl': feed_url})
+            continue
+        item['discoveredArticle'] = {
+            'title': article.get('title') or item.get('title', ''),
+            'url': article.get('link') or '',
+            'published': article.get('published') or '',
+        }
+        if item['discoveredArticle']['url']:
+            exclude_urls.add(item['discoveredArticle']['url'])
+        discovery_log.append({
+            'key': item.get('key'),
+            'status': 'ok',
+            'feedUrl': feed_url,
+            'articleUrl': item['discoveredArticle']['url'],
+        })
+    return discovery_log
+
+
+discovery_exclude = set(recent_article_urls)
+discovery_log = []
+for group in (tech_blog_recommendations, ai_recommendations, geek_recommendations):
+    discovery_log.extend(attach_discovered_articles(group, discovery_exclude))
 
 
 def first_or_none(items):
@@ -286,6 +348,11 @@ inventory = {
     'aiRecommendations': ai_recommendations,
     'geekRecommendations': geek_recommendations,
     'todayPick': today_pick,
+    'discovery': {
+        'cacheDir': str(FEED_CACHE_DIR),
+        'cacheTtlHours': FEED_CACHE_TTL.total_seconds() / 3600,
+        'log': discovery_log,
+    },
 }
 
 (RUNTIME / 'topic-inventory.json').write_text(
@@ -315,13 +382,33 @@ def render_backend_item(idx, item):
 
 def render_secondary_item(idx, item, source_field, source_label='출처'):
     source = item.get(source_field) or item.get('source') or item.get('category', '')
-    out = [
-        f"{idx}. **{item['title']}**",
-    ]
+    article = item.get('discoveredArticle')
+    if article and article.get('url'):
+        # ADR-013: 실 글 제목/URL을 1순위로 노출하고, 원본 reservoir 카드는 fallback 컨텍스트로만 둔다.
+        title = article.get('title') or item.get('title') or item.get('key', '제목 없음')
+        out = [f"{idx}. **{title}**"]
+        if source:
+            out.append(f"   - {source_label}: {source}")
+        out.append(f"   - 링크: {article['url']}")
+        if article.get('published'):
+            out.append(f"   - 게시: {article['published']}")
+        if item.get('tags'):
+            out.append(f"   - 태그: {', '.join(item['tags'])}")
+        if item.get('estMinutes'):
+            out.append(f"   - 예상 시간: {item['estMinutes']}분")
+        if item.get('whyNow'):
+            out.append('   - 왜 지금 보면 좋은지')
+            for reason in item['whyNow']:
+                out.append(f"     - {reason}")
+        return out
+
+    out = [f"{idx}. **{item['title']}**"]
     if source:
         out.append(f"   - {source_label}: {source}")
     if item.get('url'):
         out.append(f"   - 링크: {item['url']}")
+    if item.get('feedUrl'):
+        out.append(f"   - (피드 fetch 실패 또는 매칭 글 없음 — reservoir 카드로 표시)")
     if item.get('tags'):
         out.append(f"   - 태그: {', '.join(item['tags'])}")
     if item.get('estMinutes'):
@@ -386,8 +473,14 @@ for label, pick in pick_labels:
     if not pick:
         lines.append(f"- {label}: (없음)")
         continue
-    title = pick.get('title', pick.get('key', '제목 없음'))
-    lines.append(f"- **{label}**: {title}")
+    article = pick.get('discoveredArticle') if isinstance(pick, dict) else None
+    if article and article.get('url'):
+        title = article.get('title') or pick.get('title', pick.get('key', '제목 없음'))
+        lines.append(f"- **{label}**: {title}")
+        lines.append(f"  - {article['url']}")
+    else:
+        title = pick.get('title', pick.get('key', '제목 없음'))
+        lines.append(f"- **{label}**: {title}")
 
 lines.append('')
 lines.append('## 재고 메모')
@@ -401,11 +494,19 @@ lines.append('나머지 카테고리는 외부 reading 추천이라 별도 생�
 
 (RUNTIME / 'morning-topic-recommendation.md').write_text('\n'.join(lines) + '\n', encoding='utf-8')
 
+discovered_article_urls = []
+for group in (tech_blog_recommendations, ai_recommendations, geek_recommendations):
+    for item in group:
+        article = item.get('discoveredArticle')
+        if article and article.get('url'):
+            discovered_article_urls.append(article['url'])
+
 append_history({
     'keys': [r.get('key') for r in backend_recommendations if r.get('key')],
     'techBlogKeys': [r.get('key') for r in tech_blog_recommendations if r.get('key')],
     'aiKeys': [r.get('key') for r in ai_recommendations if r.get('key')],
     'geekKeys': [r.get('key') for r in geek_recommendations if r.get('key')],
+    'articleUrls': discovered_article_urls,
     'todayPickKeys': {
         label: (pick.get('key') if pick else None)
         for label, pick in (
@@ -416,6 +517,9 @@ append_history({
     },
 })
 
+discovery_ok = sum(1 for entry in discovery_log if entry.get('status') == 'ok')
+discovery_attempted = sum(1 for entry in discovery_log if entry.get('status') in ('ok', 'no-match'))
+
 print(json.dumps({
     'inventory': str(RUNTIME / 'topic-inventory.json'),
     'recommendation': str(RUNTIME / 'morning-topic-recommendation.md'),
@@ -423,5 +527,10 @@ print(json.dumps({
     'techBlogCount': len(tech_blog_recommendations),
     'aiCount': len(ai_recommendations),
     'geekCount': len(geek_recommendations),
+    'discovery': {
+        'attempted': discovery_attempted,
+        'ok': discovery_ok,
+        'cacheDir': str(FEED_CACHE_DIR),
+    },
     'history': str(HISTORY_PATH),
 }, ensure_ascii=False))

@@ -2,12 +2,14 @@
   "_meta": {
     "purpose": "Geek/news/broad industry 추천 reservoir. 매일 morning 추천에서 1개 항목 선택용.",
     "policy": "GeekNews/Hacker News 류의 산업 동향, OSS 신소식, 인프라/언어/도구 흐름 등 backend 시야 확장 목적. 단발성 뉴스가 아니라 한 단락으로 정리할 수 있는 평가형 주제로 기록한다.",
-    "updateGuidance": "live web fetch는 별도 enhancement 예정. 분기마다 사람이 stale 항목 정리 + 새 흐름 보강.",
+    "updateGuidance": "feedUrl이 있는 source는 ADR-013 discovery 레이어가 매일 최신 글 1편을 자동 부착한다. fetch 실패 시 reservoir 원본 카드로 fallback.",
     "schema": {
       "key": "kebab-case 고유 키",
-      "title": "한글 추천 제목",
+      "title": "한글 추천 제목 (discovery 실패 시 fallback)",
       "source": "출처 큐 (GeekNews / HackerNews / OSS release / 등)",
       "url": "(optional) 검색/참고 힌트",
+      "feedUrl": "(optional) RSS/Atom 피드 URL — 있으면 최신 글 자동 선택",
+      "filterKeywords": "(optional) 글 제목에 포함되면 우선하는 키워드 배열",
       "tags": "분야 태그",
       "estMinutes": "예상 reading 시간(분)",
       "whyNow": "왜 지금 보면 좋은지"
@@ -19,6 +21,7 @@
       "title": "GeekNews 이번 주 인기 글 top 1편 정독",
       "source": "GeekNews",
       "url": "https://news.hada.io/",
+      "feedUrl": "https://news.hada.io/rss/news",
       "tags": ["industry", "weekly"],
       "estMinutes": 15,
       "whyNow": [
@@ -28,14 +31,16 @@
     },
     {
       "key": "hackernews-frontpage-deepdive",
-      "title": "Hacker News front page 1편 깊이 읽기",
+      "title": "Hacker News 백엔드/인프라 관련 글 1편 깊이 읽기",
       "source": "Hacker News",
       "url": "https://news.ycombinator.com/",
+      "feedUrl": "https://news.ycombinator.com/rss",
+      "filterKeywords": ["database", "postgres", "mysql", "redis", "java", "jvm", "kafka", "distributed", "backend", "server", "linux", "cloud", "aws", "kubernetes", "observability", "security", "llm", "agent", "ai"],
       "tags": ["industry", "global"],
       "estMinutes": 20,
       "whyNow": [
-        "글로벌 엔지니어링 흐름을 주 1회 이상 흡수해두면 답변 폭이 달라진다",
-        "댓글까지 읽으면 다른 의견을 동시에 접할 수 있다"
+        "글로벌 엔지니어링 흐름 중 백엔드/인프라와 연결되는 글만 골라 답변 폭을 넓힌다",
+        "댓글까지 읽으면 같은 기술 선택에 대한 찬반 논리를 동시에 접할 수 있다"
       ]
     },
     {
@@ -43,6 +48,8 @@
       "title": "PostgreSQL 최신 메이저 릴리즈 변경점 훑기",
       "source": "Postgres release notes",
       "url": "https://www.postgresql.org/docs/release/",
+      "feedUrl": "https://www.postgresql.org/news.rss",
+      "filterKeywords": ["release", "릴리즈", "version", "버전", "Postgres"],
       "tags": ["database", "release"],
       "estMinutes": 20,
       "whyNow": [

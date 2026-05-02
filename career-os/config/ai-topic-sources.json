@@ -2,12 +2,14 @@
   "_meta": {
     "purpose": "AI 관련 추천 reservoir. 매일 morning 추천에서 3개 항목 선택용.",
     "policy": "백엔드 엔지니어가 실제로 활용 가능한 AI 주제(LLM API, RAG, Agent, Vector DB, AI 코딩 워크플로) 중심. 단순 ML 이론은 제외.",
-    "updateGuidance": "Anthropic/OpenAI 신모델, 신기능 발표가 잦으므로 분기마다 사람이 검토.",
+    "updateGuidance": "Anthropic/OpenAI 신모델, 신기능 발표가 잦으므로 분기마다 사람이 검토. feedUrl이 있는 항목은 ADR-013 discovery 레이어가 최신 글을 자동 부착.",
     "schema": {
       "key": "kebab-case 고유 키",
-      "title": "한글 추천 제목",
+      "title": "한글 추천 제목 (discovery 실패 시 fallback)",
       "category": "subdomain (api, rag, agent, vector-db, workflow, model)",
       "url": "(optional) 참고 URL",
+      "feedUrl": "(optional) RSS/Atom 피드 URL",
+      "filterKeywords": "(optional) 글 제목 우선 키워드",
       "tags": "분야 태그",
       "estMinutes": "예상 학습 시간(분)",
       "whyNow": "왜 지금 보면 좋은지"
@@ -62,15 +64,17 @@
       ]
     },
     {
-      "key": "openai-realtime-api-voice",
-      "title": "OpenAI Realtime API — voice agent / function call 워크플로",
+      "key": "openai-api-agent-product-updates",
+      "title": "OpenAI API / Agent 제품 업데이트 1편",
       "category": "api",
-      "url": "https://platform.openai.com/docs/guides/realtime",
-      "tags": ["openai", "realtime", "voice"],
+      "url": "https://openai.com/news/",
+      "feedUrl": "https://openai.com/news/rss.xml",
+      "filterKeywords": ["api", "agent", "tool", "function", "codex", "model", "realtime"],
+      "tags": ["openai", "api", "agent"],
       "estMinutes": 30,
       "whyNow": [
-        "음성/실시간 UX는 점점 표준이 되어가는 흐름이다",
-        "function call + 백엔드 연동 패턴은 백엔드 면접에서 차별점이 된다"
+        "OpenAI API와 agent 제품 변화는 백엔드 서비스 설계 선택지에 직접 영향을 준다",
+        "function/tool call, managed agent, 모델 라우팅 같은 주제는 AI 기능 운영 답변에서 차별점이 된다"
       ]
     },
     {
