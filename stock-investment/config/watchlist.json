@@ -1,0 +1,67 @@
+{
+  "profiles": {
+    "circle-bitcoin": {
+      "title": "CRCL/BTC 모닝 체크",
+      "primaryEquities": [
+        {
+          "symbol": "CRCL",
+          "name": "Circle Internet Group",
+          "focus": [
+            "USDC 유통량/점유율 변화",
+            "Circle Payments Network/파트너십/결제량 뉴스",
+            "스테이블코인 규제/CLARITY Act/SEC/법안 뉴스",
+            "CRCL 가격 추이와 실적 전후 리스크"
+          ]
+        },
+        {
+          "symbol": "GOOGL",
+          "name": "Alphabet Class A",
+          "focus": [
+            "Google I/O 및 Gemini/AI 제품 발표 기대감",
+            "검색/광고 성장과 AI 검색 전환 리스크",
+            "Google Cloud/TPU/AI 인프라 모멘텀",
+            "반독점/규제 소송 및 CapEx 부담"
+          ]
+        },
+        {
+          "symbol": "GOOG",
+          "name": "Alphabet Class C",
+          "focus": [
+            "GOOGL과 가격 괴리/유동성 참고용"
+          ]
+        }
+      ],
+      "crypto": [
+        {
+          "symbol": "BTC-USD",
+          "name": "Bitcoin",
+          "focus": [
+            "BTC 가격 추세",
+            "ETF inflow/outflow 분위기",
+            "기관 채택/규제 뉴스",
+            "crypto market risk-on/risk-off"
+          ]
+        }
+      ],
+      "macroIndices": [
+        {
+          "symbol": "QQQ",
+          "name": "Invesco QQQ / Nasdaq proxy",
+          "focus": [
+            "Nasdaq/빅테크 위험선호 흐름",
+            "AI·반도체·대형 기술주 주도력",
+            "금리/달러/매크로 이벤트에 따른 밸류에이션 압력"
+          ]
+        },
+        {
+          "symbol": "^NDX",
+          "name": "Nasdaq 100 Index",
+          "focus": [
+            "QQQ 확인용 지수 레벨"
+          ]
+        }
+      ]
+    }
+  },
+  "defaultProfile": "circle-bitcoin"
+}
