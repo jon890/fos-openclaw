@@ -1,6 +1,6 @@
 ---
 name: stock-investing-morning-brief
-description: Generate a Korean morning stock/crypto investment brief from the 주식투자 ai-nodes workspace for Circle Internet Group (CRCL), Bitcoin, Google/Alphabet (GOOGL/GOOG), and Nasdaq/QQQ as first-class analysis targets. Use for daily 08:00 Asia/Seoul reports, smoke tests, and cron-backed Discord delivery.
+description: Generate a Korean morning stock/crypto investment brief from the 주식투자 ai-nodes workspace for Circle Internet Group (CRCL), Bitcoin, Google/Alphabet (GOOGL/GOOG), Nasdaq/QQQ, and AI semiconductor/infrastructure targets as first-class analysis targets. Use for daily 08:00 Asia/Seoul reports, smoke tests, and cron-backed Discord delivery.
 ---
 
 # Stock Investing Morning Brief
@@ -19,6 +19,7 @@ Focus:
 - BTC price trend, ETF-flow narrative, and broader crypto risk tone
 - GOOGL/GOOG as Alphabet/Google, with Google I/O, Gemini/AI, Search, Cloud, CapEx, and regulation as key watch points
 - QQQ/^NDX as Nasdaq/growth-tech risk tone, with AI/semiconductor leadership and rates/macro pressure
+- AI semiconductor/infrastructure basket: SMH, NVDA, TSM, AVGO, AMD, ASML, VRT
 
 ## Workflow
 

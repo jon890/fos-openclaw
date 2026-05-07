@@ -182,6 +182,9 @@ def extract_news_items(source: dict, max_items: int = 8) -> dict:
         "Circle", "USDC", "stablecoin", "Bitcoin", "BTC", "ETF", "CLARITY", "SEC", "payment", "Payments", "Thunes", "Mesh",
         "Alphabet", "Google", "GOOGL", "GOOG", "Gemini", "AI", "I/O", "Google I/O", "Cloud", "TPU", "Search",
         "Nasdaq", "QQQ", "NDX", "technology", "growth stocks", "Magnificent", "semiconductor", "rates", "yields",
+        "NVIDIA", "NVDA", "Blackwell", "Rubin", "GPU", "accelerator", "TSMC", "TSM", "CoWoS", "foundry",
+        "Broadcom", "AVGO", "ASIC", "networking", "AMD", "MI300", "MI350", "ASML", "EUV", "High-NA",
+        "Vertiv", "VRT", "data center", "datacenter", "power", "cooling", "infrastructure", "AI infrastructure",
     ]
     sentences = re.split(r"(?<=[.!?])\s+", text)
     hits = []

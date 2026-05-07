@@ -55,6 +55,41 @@
       "id": "nasdaq-news",
       "url": "https://www.nasdaq.com/news-and-insights/topic/markets",
       "topic": "Nasdaq / growth stocks / market risk tone"
+    },
+    {
+      "id": "nvidia-newsroom",
+      "url": "https://nvidianews.nvidia.com/news",
+      "topic": "NVIDIA AI chips / data center / product announcements"
+    },
+    {
+      "id": "tsmc-news",
+      "url": "https://pr.tsmc.com/english/news",
+      "topic": "TSMC official news / HPC, capacity, monthly revenue context"
+    },
+    {
+      "id": "asml-news",
+      "url": "https://www.asml.com/en/news",
+      "topic": "ASML lithography / EUV / semiconductor capex"
+    },
+    {
+      "id": "broadcom-news",
+      "url": "https://www.broadcom.com/company/news",
+      "topic": "Broadcom AI networking, ASIC and infrastructure software"
+    },
+    {
+      "id": "amd-newsroom",
+      "url": "https://www.amd.com/en/newsroom.html",
+      "topic": "AMD AI accelerators / data center / CPUs"
+    },
+    {
+      "id": "semi-industry-news",
+      "url": "https://www.semiconductors.org/news-events/latest-news/",
+      "topic": "Semiconductor industry policy / sales cycle / supply chain"
+    },
+    {
+      "id": "vertiv-news",
+      "url": "https://www.vertiv.com/en-us/about/news-and-insights/news-releases/",
+      "topic": "AI data center power and cooling infrastructure"
     }
   ],
   "priceRanges": {
@@ -63,6 +98,13 @@
     "QQQ": "1mo",
     "^NDX": "1mo",
     "GOOGL": "1mo",
-    "GOOG": "1mo"
+    "GOOG": "1mo",
+    "SMH": "1mo",
+    "NVDA": "1mo",
+    "TSM": "1mo",
+    "AVGO": "1mo",
+    "AMD": "1mo",
+    "ASML": "1mo",
+    "VRT": "1mo"
   }
 }
