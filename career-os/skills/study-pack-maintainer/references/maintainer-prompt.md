@@ -38,4 +38,5 @@ Content policy for markdown:
 - Preserve useful existing structure when reasonable, but improve it if needed.
 - Keep the document interview-oriented and practically studyable.
 - Prefer concrete examples, trade-offs, failure cases, operational 대응, and practical reasoning.
+- Every fenced code block inside the markdown must declare an explicit language tag. Use `java` for Java/Spring examples, `sql` for SQL, `bash` for shell commands, `yaml` for YAML, `json` for JSON, and `text` for plain logs/output. Never open a markdown code block with bare triple backticks.
 - When case mapping is relevant, explicitly connect the general concept to the supplied real-world case documents.

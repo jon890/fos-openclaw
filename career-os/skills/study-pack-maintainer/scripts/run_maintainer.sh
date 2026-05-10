@@ -58,10 +58,19 @@ PY
 
 run_once() {
   rm -f "$RAW_RESULT_JSON"
+  local code=0
   timeout 900s claude --permission-mode bypassPermissions --print \
     --output-format json \
     --no-session-persistence \
-    "$(cat "$INPUT_NOTE")" > "$RAW_RESULT_JSON"
+    "$(cat "$INPUT_NOTE")" > "$RAW_RESULT_JSON" || code=$?
+  if (( code != 0 )); then
+    echo "maintainer claude CLI failed or timed out (exit ${code}) for ${TOPIC}" >&2
+    return "$code"
+  fi
+  if [[ ! -s "$RAW_RESULT_JSON" ]]; then
+    echo "maintainer claude CLI produced empty JSON envelope for ${TOPIC}" >&2
+    return 1
+  fi
 }
 
 parse_result() {
@@ -77,6 +86,17 @@ envelope = json.loads(raw)
 result = envelope.get('result', '').strip()
 if not result:
     raise SystemExit('maintainer validation failed: empty result field')
+
+# Claude sometimes wraps the requested JSON object in a fenced ```json block even
+# when the prompt says "valid JSON only". Treat that as recoverable, not fatal.
+if result.startswith('```'):
+    lines = result.splitlines()
+    if lines and lines[0].lstrip().startswith('```'):
+        lines = lines[1:]
+    if lines and lines[-1].strip() == '```':
+        lines = lines[:-1]
+    result = '\n'.join(lines).strip()
+
 data = json.loads(result)
 required = ['action', 'outputPath', 'rationale', 'markdown']
 for key in required:
@@ -87,14 +107,74 @@ if data['action'] not in ['update-existing', 'create-new', 'augment-existing', '
 markdown = data['markdown'].strip()
 if not markdown.startswith('#'):
     raise SystemExit('maintainer validation failed: markdown does not start with heading')
+
+def validate_code_fence_languages(content: str) -> None:
+    in_fence = False
+    for line_no, line in enumerate(content.splitlines(), 1):
+        stripped = line.lstrip()
+        if not stripped.startswith('```'):
+            continue
+        if not in_fence:
+            language = stripped[3:].strip()
+            if not language:
+                raise SystemExit(
+                    'maintainer validation failed: code fence opened without language tag '
+                    f'at line {line_no}'
+                )
+            in_fence = True
+        else:
+            in_fence = False
+
+validate_code_fence_languages(markdown)
+
+def escape_tilde_ranges(content: str) -> str:
+    out = []
+    in_fence = False
+    inline_code = False
+    for line in content.splitlines():
+        if line.lstrip().startswith('```'):
+            in_fence = not in_fence
+            out.append(line)
+            continue
+        if in_fence:
+            out.append(line)
+            continue
+        chars = []
+        for i, ch in enumerate(line):
+            if ch == '`':
+                inline_code = not inline_code
+                chars.append(ch)
+            elif ch == '~' and not inline_code:
+                if i > 0 and line[i - 1] == '\\':
+                    chars.append(ch)
+                else:
+                    chars.append('\\~')
+            else:
+                chars.append(ch)
+        out.append(''.join(chars))
+    return '\n'.join(out)
+
+data['markdown'] = escape_tilde_ranges(markdown)
 if 'relatedFiles' not in data:
     data['relatedFiles'] = []
 Path(sys.argv[2]).write_text(json.dumps(data, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
 PY
 }
 
-run_once
-parse_result
+if ! run_once || ! parse_result; then
+  echo "First maintainer run failed for $TOPIC, retrying once with stricter JSON instructions..." >&2
+  cat >> "$INPUT_NOTE" <<'EOF'
+
+재시도 지시사항:
+- 이전 응답은 파싱/검증에 실패했다.
+- 응답 전체는 반드시 JSON object 하나여야 한다.
+- ```json 코드펜스, 설명문, 요약문을 절대 쓰지 않는다.
+- JSON 문자열 내부의 markdown만 `markdown` 필드에 넣는다.
+- markdown 내부 코드블록은 반드시 언어 태그가 있는 fence로 연다. bare ```는 검증 실패다.
+EOF
+  run_once
+  parse_result
+fi
 
 OUTPUT_REL_PATH="$(python3 - <<'PY' "$PARSED_JSON"
 import json, sys

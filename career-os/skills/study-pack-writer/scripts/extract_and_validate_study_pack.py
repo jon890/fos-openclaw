@@ -39,6 +39,66 @@ def strip_to_markdown_body(raw_text: str) -> str:
     return content
 
 
+def escape_tilde_ranges(content: str) -> str:
+    """Escape bare tildes in prose to avoid accidental GFM strikethrough.
+
+    GitHub Flavored Markdown treats multiple bare `~` characters in one paragraph
+    as strikethrough delimiters. Study packs often contain ranges like `1~2분` or
+    `60~100건`; when two ranges appear in one paragraph, rendering can be broken.
+
+    Keep code fences and inline code unchanged, and skip already escaped tildes.
+    """
+    out: list[str] = []
+    in_fence = False
+    inline_code = False
+    for line in content.splitlines():
+        if line.lstrip().startswith("```"):
+            in_fence = not in_fence
+            out.append(line)
+            continue
+        if in_fence:
+            out.append(line)
+            continue
+
+        chars: list[str] = []
+        i = 0
+        while i < len(line):
+            ch = line[i]
+            if ch == "`":
+                inline_code = not inline_code
+                chars.append(ch)
+            elif ch == "~" and not inline_code:
+                prev_ch = line[i - 1] if i > 0 else ""
+                if prev_ch == "\\":
+                    chars.append(ch)
+                else:
+                    chars.append("\\~")
+            else:
+                chars.append(ch)
+            i += 1
+        out.append("".join(chars))
+    return "\n".join(out)
+
+
+def validate_code_fence_languages(content: str) -> None:
+    """Require a language tag on every opening fenced code block."""
+    in_fence = False
+    for line_no, line in enumerate(content.splitlines(), 1):
+        stripped = line.lstrip()
+        if not stripped.startswith("```"):
+            continue
+        if not in_fence:
+            language = stripped[3:].strip()
+            if not language:
+                raise SystemExit(
+                    "study-pack validation failed: code fence opened without language tag "
+                    f"at line {line_no}"
+                )
+            in_fence = True
+        else:
+            in_fence = False
+
+
 def validate(content: str) -> None:
     if not content:
         raise SystemExit("study-pack validation failed: generated file is empty")
@@ -54,6 +114,7 @@ def validate(content: str) -> None:
         raise SystemExit(
             "study-pack validation failed: generated file is too short, likely not a full study pack"
         )
+    validate_code_fence_languages(content)
 
 
 def main(argv: list[str]) -> int:
@@ -75,6 +136,7 @@ def main(argv: list[str]) -> int:
     text = payload.get("result", "")
     content = strip_to_markdown_body(text)
     validate(content)
+    content = escape_tilde_ranges(content)
 
     out.write_text(content.rstrip() + "\n", encoding="utf-8")
     print(f"Wrote study pack: {out}")

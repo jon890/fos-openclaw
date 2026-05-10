@@ -38,3 +38,12 @@
 - '왜 그렇게 판단했는지'와 trade-off를 분명히 적는다
 - 본문은 학습 가능성과 면접 활용성을 동시에 만족해야 한다
 - 관련 문서가 있으면 상대 경로 링크를 적극 사용한다
+- 모든 fenced code block은 여는 fence에 언어를 명시한다. Java/Spring 예시는 ```java, SQL은 ```sql, shell 명령은 ```bash, YAML은 ```yaml, JSON은 ```json, 로그/출력은 ```text를 사용한다.
+- bare triple backticks(``` 단독)로 코드블록을 열지 않는다.
+
+## 7. Markdown 렌더링 안전장치
+- GitHub Flavored Markdown에서 한 paragraph 안에 `~`가 여러 번 나오면 취소선으로 렌더링될 수 있다.
+- 범위 표기는 `60\~100건`, `1\~2분`처럼 이스케이프한다.
+- 기간 표기는 가능하면 `2026.04–2026.05`처럼 en dash를 쓴다.
+- 코드 인라인/코드 블록 안의 `~`는 그대로 둔다.
+- 문서 수정 후 `grep -n "~" <file>`로 잔여 물결표를 확인한다.

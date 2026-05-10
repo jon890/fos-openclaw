@@ -49,6 +49,8 @@ cat >> "$INPUT_NOTE" <<'EOF'
 - "파일을 생성했습니다" 같은 상태 메시지를 쓰지 않는다.
 - 완료 노트, 요약, 리뷰 코멘트, 문서 개요 표를 포함하지 않는다.
 - 응답 전체를 코드 펜스로 감싸지 않는다.
+- 문서 내부의 모든 코드블록은 여는 fence에 언어를 명시한다. 예: ```java, ```bash, ```sql, ```yaml, ```json, ```text.
+- bare triple backticks(``` 단독)로 코드블록을 열지 않는다.
 - 작성한 내용을 설명하지 않는다. 실제 문서만 쓴다.
 EOF
 
@@ -88,6 +90,7 @@ if ! attempt; then
 - 응답의 첫 글자는 반드시 '#' 이어야 한다.
 - 제목 앞에 서문·설명·상태 노트·요약 문장·섹션 표를 넣지 않는다.
 - 응답을 비워 두지 않는다.
+- 문서 내부 코드블록은 반드시 언어 태그가 있는 fence로 연다. bare ```는 검증 실패다.
 EOF
   if ! attempt; then
     echo "Study-pack generation failed after retry for $TOPIC" >&2
