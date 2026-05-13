@@ -75,7 +75,7 @@ attempt() {
   validate_and_render || return 1
 }
 
-RENDERER="$TASK_ROOT/skills/experience-question-bank-writer/scripts/render_question_bank.py"
+RENDERER="$TASK_ROOT/scripts/experience-question-bank-writer/render_question_bank.py"
 
 validate_and_render() {
   python3 "$RENDERER" "$RAW_JSON" "$OUTPUT_MD"

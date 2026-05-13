@@ -15,7 +15,7 @@ SOURCES_JSON="$TASK_ROOT/config/sources.json"
 RAW_RESULT_JSON="$OUTDIR/claude.result.json"
 INPUT_NOTE="$OUTDIR/input.md"
 REPORT_MD="$OUTDIR/report.md"
-EXTRACTOR="$TASK_ROOT/skills/position-recommender/scripts/extract_position_report.py"
+EXTRACTOR="$TASK_ROOT/scripts/position-recommender/extract_position_report.py"
 
 mkdir -p "$OUTDIR" "$TASK_ROOT/data/runtime"
 

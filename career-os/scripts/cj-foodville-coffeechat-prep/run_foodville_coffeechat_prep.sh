@@ -16,7 +16,7 @@ REPORT_MD="$OUTDIR/report.md"
 mkdir -p "$OUTDIR" "$TASK_ROOT/data/runtime" "$SOURCE_DIR"
 
 set +e
-python3 "$SKILL_DIR/scripts/collect_foodville_sites.py" "$SOURCE_DIR" > "$OUTDIR/site-collection.json"
+python3 "$TASK_ROOT/scripts/cj-foodville-coffeechat-prep/collect_foodville_sites.py" "$SOURCE_DIR" > "$OUTDIR/site-collection.json"
 collect_code=$?
 set -e
 if (( collect_code != 0 )); then

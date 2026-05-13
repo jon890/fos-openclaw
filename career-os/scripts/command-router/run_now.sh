@@ -95,19 +95,19 @@ ns = cfg.get('study-pack-maintainer', {})
 sys.exit(0 if sys.argv[2] in ns else 1)
 PY
     then
-      RESOLVER="$TASK_ROOT/skills/study-pack-maintainer/scripts/resolve_maintainer_topic.py"
+      RESOLVER="$TASK_ROOT/scripts/study-pack-maintainer/resolve_maintainer_topic.py"
       eval "$(python3 "$RESOLVER" "$MAINTAINER_CONFIG" "$TOPIC")"
 
       run_tracked "career-os:study-pack:$TOPIC" "${TOPIC} 스터디팩 (maintainer)" \
-        "$TASK_ROOT/skills/study-pack-maintainer/scripts/run_maintainer.sh"
+        "$TASK_ROOT/scripts/study-pack-maintainer/run_maintainer.sh"
     fi
 
-    RESOLVER="$TASK_ROOT/skills/study-pack-writer/scripts/resolve_study_pack_topic.py"
+    RESOLVER="$TASK_ROOT/scripts/study-pack-writer/resolve_study_pack_topic.py"
     TOPIC_CONFIG="${TOPIC_CONFIG_OVERRIDE:-$TASK_ROOT/config/topics.json}"
     eval "$(python3 "$RESOLVER" "$TOPIC_CONFIG" "$TOPIC")"
 
     run_tracked "career-os:study-pack:$TOPIC" "${TOPIC} 스터디팩" \
-      "$TASK_ROOT/skills/study-pack-writer/scripts/run_study_pack.sh"
+      "$TASK_ROOT/scripts/study-pack-writer/run_study_pack.sh"
     ;;
   question-bank)
     TOPIC="${2:-}"
@@ -117,12 +117,12 @@ PY
       exit 1
     fi
 
-    RESOLVER="$TASK_ROOT/skills/experience-question-bank-writer/scripts/resolve_question_bank_topic.py"
+    RESOLVER="$TASK_ROOT/scripts/experience-question-bank-writer/resolve_question_bank_topic.py"
     TOPIC_CONFIG="$TASK_ROOT/config/topics.json"
     eval "$(python3 "$RESOLVER" "$TOPIC_CONFIG" "$TOPIC")"
 
     run_tracked "career-os:question-bank:$TOPIC" "${TOPIC} question-bank" \
-      "$TASK_ROOT/skills/experience-question-bank-writer/scripts/run_question_bank.sh"
+      "$TASK_ROOT/scripts/experience-question-bank-writer/run_question_bank.sh"
     ;;
   recommend-topics)
     run_tracked "career-os:recommend-topics" "morning topic 추천" \
@@ -134,11 +134,11 @@ PY
     ;;
   recommend-positions)
     run_tracked "career-os:position-recommendation" "position 추천" \
-      "$TASK_ROOT/skills/position-recommender/scripts/run_position_recommendation.sh"
+      "$TASK_ROOT/scripts/position-recommender/run_position_recommendation.sh"
     ;;
   foodville-coffeechat)
     run_tracked "career-os:foodville-coffeechat" "Foodville coffeechat 준비" \
-      "$TASK_ROOT/skills/cj-foodville-coffeechat-prep/scripts/run_foodville_coffeechat_prep.sh"
+      "$TASK_ROOT/scripts/cj-foodville-coffeechat-prep/run_foodville_coffeechat_prep.sh"
     ;;
   bootcamp-batch)
     run_tracked "career-os:bootcamp-batch" "부트캠프 일괄 study-pack" \
@@ -146,7 +146,7 @@ PY
     ;;
   auto-question-bank)
     run_tracked "career-os:auto-question-bank" "auto question-bank refresh" \
-      "$TASK_ROOT/skills/experience-question-bank-writer/scripts/run_question_bank_auto.sh"
+      "$TASK_ROOT/scripts/experience-question-bank-writer/run_question_bank_auto.sh"
     ;;
   replenish-topics)
     run_tracked "career-os:replenish-topics" "topic reservoir 보충" \
@@ -160,22 +160,22 @@ PY
       exit 1
     fi
 
-    RESOLVER="$TASK_ROOT/skills/study-pack-maintainer/scripts/resolve_maintainer_topic.py"
+    RESOLVER="$TASK_ROOT/scripts/study-pack-maintainer/resolve_maintainer_topic.py"
     TOPIC_CONFIG="$TASK_ROOT/config/topics.json"
     eval "$(python3 "$RESOLVER" "$TOPIC_CONFIG" "$TOPIC")"
 
     run_tracked "career-os:maintain-study-pack:$TOPIC" "${TOPIC} 스터디팩 유지보수" \
-      "$TASK_ROOT/skills/study-pack-maintainer/scripts/run_maintainer.sh"
+      "$TASK_ROOT/scripts/study-pack-maintainer/run_maintainer.sh"
     ;;
   master)
     TOPIC="${2:-senior-backend-master-playbook}"
 
-    RESOLVER="$TASK_ROOT/skills/interview-master-writer/scripts/resolve_master_topic.py"
+    RESOLVER="$TASK_ROOT/scripts/interview-master-writer/resolve_master_topic.py"
     TOPIC_CONFIG="$TASK_ROOT/config/topics.json"
     eval "$(python3 "$RESOLVER" "$TOPIC_CONFIG" "$TOPIC")"
 
     run_tracked "career-os:master:$TOPIC" "${TOPIC} master playbook" \
-      "$TASK_ROOT/skills/interview-master-writer/scripts/run_master.sh"
+      "$TASK_ROOT/scripts/interview-master-writer/run_master.sh"
     ;;
   smoke)
     run_tracked "career-os:smoke" "smoke test" \

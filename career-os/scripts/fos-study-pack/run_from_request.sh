@@ -8,7 +8,7 @@ if [[ -z "$REQUEST_TEXT" ]]; then
   exit 1
 fi
 
-RESOLVER="$TASK_ROOT/skills/fos-study-pack/scripts/resolve_freeform_study_pack.py"
+RESOLVER="$TASK_ROOT/scripts/fos-study-pack/resolve_freeform_study_pack.py"
 TOPICS_CFG="$TASK_ROOT/config/topics.json"
 RUNNER="$TASK_ROOT/scripts/command-router/run_now.sh"
 

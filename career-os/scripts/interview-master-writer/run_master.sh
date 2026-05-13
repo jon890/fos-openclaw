@@ -14,7 +14,7 @@ PROMPT_FILE="$TASK_ROOT/skills/interview-master-writer/references/master-prompt.
 OUTPUT_MD="$SOURCE_DIR/$OUTPUT_REL_PATH"
 INPUT_NOTE="$OUTDIR/analysis-input.md"
 RAW_RESULT_JSON="$OUTDIR/claude.result.json"
-EXTRACTOR="$TASK_ROOT/skills/study-pack-writer/scripts/extract_and_validate_study_pack.py"
+EXTRACTOR="$TASK_ROOT/scripts/study-pack-writer/extract_and_validate_study_pack.py"
 
 mkdir -p "$OUTDIR"
 mkdir -p "$(dirname "$OUTPUT_MD")"
