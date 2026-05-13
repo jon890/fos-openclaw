@@ -371,3 +371,51 @@ retry 경로의 ordering bug 회피 위해 persist 호출은 `run_once` 직후(e
 - recommend-positions 실행 후 `model=claude-opus-4-7[1m]`, `cost_usd=$0.5157`, `duration=93s` 정상 기록 (2026-05-13 검증).
 - `run_now.sh`의 11개 case 모두 [완료]/[실패] Discord 알림 + cost summary 통일.
 - CLAUDE.md의 "Token / Cost Discipline" 조항이 다시 측정 가능한 정책.
+
+---
+
+## ADR-015 — docs/ 피드백 루프 + data/ 위치 정책
+
+- Status: Accepted
+- Date: 2026-05-13
+
+### 맥락
+5문서(`prd / data-schema / flow / code-architecture / adr`) 컨벤션을 도입했지만 docs 자체의 *역할*을 명문화하지 않으면 시간이 지나며 다시 흩어진다. 또한 데이터 파일(`*.json`, `*.jsonl`)이 docs/ 아래에 끼어들면 5문서의 "사람이 읽는 단일 출처" 성격이 무너진다.
+
+fos-blog의 plan-and-build 스킬을 ai-nodes에 포팅하면서 사용자가 추가 directive를 제시: docs/는 의사결정·기술 학습을 누적하는 *피드백 루프* 구조여야 하고, 데이터 파일은 반드시 `data/`에 둬야 한다.
+
+### 결정
+
+**docs/ = 피드백 루프**
+
+매 작업 사이클은 docs로 들어와서 docs로 돌아온다.
+
+- 새 의사결정 → `docs/adr.md` 맨 아래 누적 (개별 파일 신설 금지).
+- 명세 변경 → `prd.md` / `data-schema.md` / `flow.md` / `code-architecture.md` 중 영향 받는 문서 즉시 갱신.
+- 학습·회고 → `docs/learn/YYYY-MM-DD-<topic>.md` (자유 형식, prose).
+- 인수인계 / 외부 위임 메모 → `docs/hand-off/`.
+- 회사·이벤트별 일회성 준비 → `docs/prep/`.
+- legacy `docs/decisions/NNN-*.md` 14개 파일은 history 보존 용도로만 유지. 새 ADR은 그쪽에 추가 금지.
+
+**data/ = 모든 영속 데이터의 단일 위치**
+
+데이터 파일(`*.json`, `*.jsonl`, `*.csv`, 큰 binary 캐시 등)은 반드시 워크스페이스의 `data/` 디렉터리 안에. 자세한 분류는 `docs/data-schema.md`:
+
+- `data/study-progress.json`, `data/generated-artifacts.json` — 진도·산출물 인덱스.
+- `data/reports/{baseline,daily}/YYYY-MM-DD/` — 실행 산출물.
+- `data/runtime/` — 가변 상태 (토픽 풀, 잠금, 피드 캐시).
+- `data/normalized/`, `data/source/` — 정규화·수집 캐시.
+- `config/`는 *사람이 큐레이션하는 입력*만 (예: topic list, profile). 자동 생성 데이터를 config/에 두지 않는다.
+
+docs/ 또는 다른 디렉터리에 데이터 파일을 두는 것은 본 ADR 위반.
+
+### 결과
+- 새 에이전트가 docs/를 읽으면 *결정·학습 누적의 단일 출처*임을 즉시 알 수 있다.
+- 데이터와 의사결정이 디렉터리 레벨에서 분리되어 grep·audit 비용 감소.
+- plan-and-build 스킬의 phase 작성 self-check (`common-pitfalls.md` § 3)에서 위반을 즉시 잡아낸다.
+- `workspace-audit`은 향후 `docs/` 안의 데이터 파일 또는 `data/`에 누락된 문서를 별도 룰로 검출하도록 강화 가능.
+
+### 적용
+- `skills/plan-and-build/references/common-pitfalls.md` § 3에 검증 항목.
+- `career-os/AGENTS.md` 5문서 라우팅 + 운영 원칙 섹션에 명시.
+- 본 ADR 채택 후 docs/ 안에 데이터 파일이 들어오면 즉시 `data/`로 이동.

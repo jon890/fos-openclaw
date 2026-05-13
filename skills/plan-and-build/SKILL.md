@@ -1,0 +1,208 @@
+---
+name: plan-and-build
+description: ai-nodes 워크스페이스 단위의 대규모 구현 자동화. 논의 → docs 반영·커밋 → task 파일 생성·커밋 → run-phases.py 백그라운드 실행 → 검증. 새 기능 추가, 리팩토링, 폴더 분해 등 multi-phase 작업에 사용. 본 세션 = 계획 수립, 별도 세션 = 자동 실행.
+---
+
+# plan-and-build
+
+ai-nodes 워크스페이스의 새 기능이나 대규모 변경을 phase 단위로 분리하고, `run-phases.py` 하네스를 통해 Claude Code가 자동으로 순차 실행하는 시스템.
+
+fos-blog repo의 동명 스킬을 ai-nodes 멀티 워크스페이스 맥락으로 포팅한 것. 핵심 흐름과 docs-first 커밋 원칙은 그대로 유지하면서, **워크스페이스 인자**와 ai-nodes의 `notify_discord.sh` 알림 패턴을 차용한다.
+
+## 핵심 원칙 — 사용자에게 묻지 말고 자동으로 따를 것
+
+**모든 작업은 반드시 이 순서를 자동으로 따른다. 사용자가 매번 지시하지 않아도 된다:**
+
+1. 논의가 필요하면 먼저 논의
+2. **docs 반영 + 커밋** (task 생성 전 필수, 건너뛰기 금지)
+3. **task 파일 생성 + 커밋** (실행 전 필수)
+4. task 실행 (백그라운드)
+5. 완료 후 검증
+
+이 순서를 어기면 안 된다.
+
+### docs 피드백 루프 원칙 (ai-nodes 추가)
+
+ai-nodes의 docs는 단순 참조 문서가 아니라 **의사결정·기술 학습이 누적되는 피드백 루프**다. 매 사이클마다:
+
+- 새 결정은 `<workspace>/docs/adr.md` 맨 아래에 누적 (개별 ADR 파일 신설 금지).
+- 명세 변경은 `prd.md` / `data-schema.md` / `flow.md` / `code-architecture.md` 중 영향 받는 문서에 즉시 반영.
+- 학습·회고는 `<workspace>/docs/learn/YYYY-MM-DD-<topic>.md`로.
+- 인수인계 메모는 `<workspace>/docs/hand-off/`.
+
+### 데이터 위치 원칙 (ai-nodes 추가)
+
+데이터 파일은 **반드시** 워크스페이스의 `data/` 디렉터리 안에. 자세히는 `<workspace>/docs/data-schema.md` 참조. docs/ 안에 데이터를 두지 않는다.
+
+## 실행 절차
+
+### 1. 문서 파악
+
+`<workspace>/docs/` 하위 5문서를 읽어 워크스페이스 기획·아키텍처·결정 의도를 파악한다. 필요 시 여러 Explore 에이전트를 병렬로 사용한다.
+
+참조 문서:
+
+- `<workspace>/docs/prd.md` — 제품 범위, MVP 기능 명세
+- `<workspace>/docs/data-schema.md` — 데이터 스키마 (config / logs / runtime / data)
+- `<workspace>/docs/flow.md` — 사용자·데이터 플로우
+- `<workspace>/docs/code-architecture.md` — 디렉터리 구조, 계층, 외부 의존성
+- `<workspace>/docs/adr.md` — 모든 아키텍처 결정 누적 기록
+- `<workspace>/AGENTS.md` — 워크스페이스 진입점·정책 요약
+- 전역 `CLAUDE.md` — ai-nodes 차원 규칙
+
+### 2. 논의
+
+구체화가 필요한 점, 기술적으로 논의할 점을 사용자에게 제시한다. 사용자가 충분히 논의됐다고 판단하면 2.5단계로 넘어간다.
+
+### 2.5. docs 최신화 + 커밋 (task 생성 전 필수)
+
+논의 결과를 반드시 **task 생성 전에** docs에 반영한다. task 내부(phase)에서는 docs를 수정하지 않는다.
+
+- `<workspace>/docs/adr.md` — 새 의사결정 한 항목 누적 (개별 파일 신설 X)
+- `<workspace>/docs/data-schema.md` — 스키마 변경 반영
+- `<workspace>/docs/flow.md` — 플로우 변경 반영
+- `<workspace>/docs/code-architecture.md` — 디렉터리·계층 변경 반영
+- `<workspace>/docs/prd.md` — 기능 표 갱신 (새 명령 추가 등)
+
+**docs-first 커밋 원칙**: docs 변경사항을 먼저 단독 커밋 (`docs(<workspace>): ...`). 그 후 task 파일 생성 및 실행. task 실패해도 docs는 main에 남아 있고, task 커밋과 분리되어 history가 명확하다.
+
+### 3. 구현 계획 초안
+
+`skills/planning/task-create.md`(아직 포팅 전이면 fos-blog 원본 참고)를 정확히 숙지한 후, 다음을 포함한 초안을 작성한다:
+
+- phase별 분리 이유와 작업 목록
+- 성공 기준 (실행 가능한 명령어)
+- 논의 필요한 사항
+
+사용자 피드백을 받아 계획을 확정한다.
+
+### 4. Task 생성
+
+`<workspace>/tasks/<task-name>/` 디렉터리 아래:
+
+```
+<workspace>/tasks/<task-name>/
+  index.json
+  phase-01.md
+  phase-02.md
+  ...
+```
+
+각 phase 프롬프트는 **자기완결적**이어야 한다 — 이전 대화 없이 독립 실행 가능. `references/common-pitfalls.md`의 self-check 항목을 모두 거친 뒤 사용자에게 제출.
+
+### 5. 실행
+
+**실행 전 필수 확인**: `git status --porcelain`으로 working directory 상태 확인.
+
+- **이상적**: clean 상태 (docs 커밋 완료 후)
+- **허용 가능**: task와 무관한 format-on-save만 존재
+- **금지**: 같은 working directory에서 다른 task와 병렬 실행. git add/commit/push 충돌 발생.
+
+**병렬 실행 규칙**: 두 task를 동시에 실행하려면 반드시 **git worktree 분리** 또는 **claude teams**(subagent)를 사용. 같은 working directory에서 `run-phases.py`를 2개 동시 실행 금지.
+
+**반드시 `run-phases.py`를 Bash `run_in_background: true`로 실행한다.**
+
+```bash
+# 전체 실행 (백그라운드)
+python3 skills/plan-and-build/scripts/run-phases.py career-os/tasks/<task-name>
+
+# 특정 phase부터 재개
+python3 skills/plan-and-build/scripts/run-phases.py career-os/tasks/<task-name> --from-phase 3
+```
+
+run-phases.py가 자동으로 워크스페이스(`<task-dir>/../..`)를 감지하고:
+- `<workspace>/config/.env`를 env로 로드 (Discord webhook URL 등)
+- `<workspace>/skills/*/scripts/notify_discord.sh`를 찾아 진행/완료/실패 알림 발송
+- phase별 commit SHA를 `index.json`에 기록
+
+### 6. 검증
+
+- `index.json`의 `status` = `completed` 확인
+- 각 phase의 성공 기준 명령어 실행
+- 산출물 (`<workspace>/data/...` 또는 `<workspace>/docs/...` 변경)을 5문서와 대조
+
+## task 파일 스키마 (`index.json`)
+
+```json
+{
+  "name": "string (kebab-case)",
+  "description": "string (한 줄)",
+  "created_at": "ISO-8601 UTC",
+  "updated_at": "ISO-8601 UTC",
+  "status": "planned | running | blocked | failed | completed",
+  "current_phase": "int (1-based)",
+  "total_phases": "int",
+  "error_message": "string | null",
+  "blocked_reason": "string | null",
+  "phases": [
+    {
+      "number": "int (1-based)",
+      "title": "string",
+      "file": "phase-NN.md",
+      "status": "pending | running | blocked | failed | completed",
+      "allowedTools": ["Read", "Write", "Edit", "Bash", "Glob", "Grep"],
+      "model": "haiku | sonnet | opus | (생략 가능)",
+      "timeout": "int (초, 기본 600)",
+      "commitSha": "string (실행 후 자동 기록)"
+    }
+  ]
+}
+```
+
+## phase 프롬프트 작성 규칙
+
+각 `phase-NN.md`는 **자기완결적인 프롬프트**다. Claude Code가 직접 읽고 실행한다.
+
+필수 요소:
+
+1. **목표 한 줄** — 무엇을 만들지/바꿀지.
+2. **관련 docs** — 어떤 docs/ 파일을 먼저 읽어야 하는지 명시.
+3. **변경할 파일 목록** — 정확한 경로.
+4. **성공 기준** — 실행 가능한 명령어 (예: `bash -n script.sh && echo OK`).
+5. **금지 사항** — 이 phase에서 *하지 말아야 할 일* (예: docs 수정 금지, 다른 phase 영역 침범 금지).
+6. **PHASE_BLOCKED / PHASE_FAILED 신호** — 사람 개입이 필요하면 해당 marker를 stdout에 출력하고 종료한다.
+
+phase 끝에 git commit + (선택) push를 포함시킨다. 마지막 phase에서 push.
+
+## 알림 신호
+
+run-phases.py가 자동 발송:
+
+- `[진행] <ws> task <name> phase N/M: <title>`
+- `[완료] <ws> task <name> phase N/M: <title> [elapsed]`
+- `[실패] <ws> task <name> phase N: <error>`
+- `[보류] <ws> task <name> phase N: <blocked-reason>`
+- `[완료] <ws> task <name> 전체 완료 (M phases)`
+
+webhook URL은 `<workspace>/config/.env`의 `DISCORD_WEBHOOK_URL` 또는 notify_discord.sh가 내부적으로 처리하는 변수에 의존.
+
+## 파일
+
+- `scripts/run-phases.py` — phase 순차 실행 하네스
+- `references/common-pitfalls.md` — task 작성 시 self-check 누적 (시간이 갈수록 두꺼워짐)
+
+## 사용 예시
+
+```bash
+# 1) 본 세션: docs 반영 + task 생성 + 별도 커밋
+git add career-os/docs/adr.md career-os/docs/code-architecture.md
+git commit -m "docs(career-os): cj-oliveyoung 폴더 분해 ADR 추가"
+git push
+
+mkdir -p career-os/tasks/cj-oliveyoung-decomposition
+# index.json + phase-01.md ... phase-05.md 작성
+git add career-os/tasks/cj-oliveyoung-decomposition/
+git commit -m "task(career-os): cj-oliveyoung 폴더 분해 task 생성"
+git push
+
+# 2) 다음 세션 (별도 Claude 인스턴스): 자동 실행
+python3 skills/plan-and-build/scripts/run-phases.py career-os/tasks/cj-oliveyoung-decomposition
+```
+
+## 의도적으로 안 하는 것
+
+- **본 세션에서 task 자동 실행**: 본 세션 = 논의 + 계획. 실행은 별도 세션이 책임. 결과물 분리 + 컨텍스트 격리.
+- **워크스페이스 간 task 공유**: 각 워크스페이스의 `tasks/`는 그 워크스페이스 작업만 다룬다.
+- **phase 안에서 docs 수정**: docs는 task 생성 *전*에 별도 커밋. phase에서 docs를 또 만지면 history가 섞인다.
+- **task 중간에 사람 개입을 silent 처리**: 사람이 결정해야 하는 분기는 반드시 `PHASE_BLOCKED:` marker로 명시. blocked 상태는 exit 2.
+- **자동 git push (모든 phase)**: phase마다 commit은 OK, push는 마지막 phase 또는 명시적 phase에서만.
