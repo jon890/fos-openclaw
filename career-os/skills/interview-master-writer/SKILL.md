@@ -59,7 +59,7 @@ Avoid feeding the entire task tree in one run. Avoid overlapping with existing q
 ## Invocation
 
 ```bash
-skills/cj-oliveyoung-java-backend-prep/scripts/run_now.sh master <topic>
+skills/command-router/scripts/run_now.sh master <topic>
 ```
 
 Where `<topic>` is a key in `config/topics.json (master namespace)`

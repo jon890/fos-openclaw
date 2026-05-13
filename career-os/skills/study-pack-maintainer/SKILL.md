@@ -50,7 +50,7 @@ The runner is responsible for extracting these fields and publishing the markdow
 ## Invocation
 
 ```bash
-skills/cj-oliveyoung-java-backend-prep/scripts/run_now.sh maintain-study-pack <topic>
+skills/command-router/scripts/run_now.sh maintain-study-pack <topic>
 ```
 
 Use this instead of plain `study-pack` when overlap / update strategy matters.

@@ -77,7 +77,7 @@ Domain-specific extensions:
 This skill is normally invoked via the `cj-oliveyoung-java-backend-prep` skill runner:
 
 ```bash
-skills/cj-oliveyoung-java-backend-prep/scripts/run_now.sh study-pack <topic>
+skills/command-router/scripts/run_now.sh study-pack <topic>
 ```
 
 Where `<topic>` is a key in `config/topics.json (study-pack namespace)` (e.g. `explain-plan`, `composite-index`).

@@ -12,7 +12,7 @@ PY
 )"
 $NOTIFY_SCRIPT "[시작] ${TOPIC} 면접 질문팩 업데이트 시작"
 set +e
-bash "$TASK_ROOT/skills/cj-oliveyoung-java-backend-prep/scripts/run_now.sh" question-bank "$TOPIC"
+bash "$TASK_ROOT/skills/command-router/scripts/run_now.sh" question-bank "$TOPIC"
 code=$?
 set -e
 if (( code == 0 )); then

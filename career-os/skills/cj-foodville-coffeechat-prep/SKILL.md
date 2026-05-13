@@ -12,7 +12,7 @@ Use this skill to prepare a private CJ Foodville coffee-chat strategy report.
 Run:
 
 ```bash
-/home/bifos/ai-nodes/career-os/skills/cj-oliveyoung-java-backend-prep/scripts/run_now.sh foodville-coffeechat
+/home/bifos/ai-nodes/career-os/skills/command-router/scripts/run_now.sh foodville-coffeechat
 ```
 
 Direct runner:

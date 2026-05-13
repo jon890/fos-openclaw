@@ -30,7 +30,7 @@ When triggered:
 Primary runtime entrypoint:
 
 ```bash
-/home/bifos/ai-nodes/career-os/skills/cj-oliveyoung-java-backend-prep/scripts/run_now.sh study-pack <topic>
+/home/bifos/ai-nodes/career-os/skills/command-router/scripts/run_now.sh study-pack <topic>
 ```
 
 This entrypoint already supports maintainer-backed routing internally for registered maintainer topics.

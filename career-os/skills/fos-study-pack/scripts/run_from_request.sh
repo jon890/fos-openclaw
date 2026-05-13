@@ -10,7 +10,7 @@ fi
 
 RESOLVER="$TASK_ROOT/skills/fos-study-pack/scripts/resolve_freeform_study_pack.py"
 TOPICS_CFG="$TASK_ROOT/config/topics.json"
-RUNNER="$TASK_ROOT/skills/cj-oliveyoung-java-backend-prep/scripts/run_now.sh"
+RUNNER="$TASK_ROOT/skills/command-router/scripts/run_now.sh"
 
 RESOLUTION_JSON="$(python3 "$RESOLVER" "$TOPICS_CFG" "$REQUEST_TEXT")"
 MODE="$(python3 - <<'PY' "$RESOLUTION_JSON"
