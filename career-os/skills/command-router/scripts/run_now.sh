@@ -44,7 +44,7 @@ run_tracked() {
 case "$MODE" in
   baseline)
     run_tracked "career-os:baseline" "baseline gap analysis" \
-      "$TASK_ROOT/skills/cj-oliveyoung-java-backend-prep/scripts/run_baseline.sh"
+      "$TASK_ROOT/skills/knowledge-gap-analyzer/scripts/run_baseline.sh"
     ;;
   daily)
     # Optional second arg: topic key from config/topic-file-map.json
@@ -52,7 +52,7 @@ case "$MODE" in
     # Omit to auto-select the most overdue weak spot from data/study-progress.json
     export DAILY_TOPIC="${2:-}"
     run_tracked "career-os:daily" "daily focus report" \
-      "$TASK_ROOT/skills/cj-oliveyoung-java-backend-prep/scripts/run_daily.sh"
+      "$TASK_ROOT/skills/knowledge-gap-analyzer/scripts/run_daily.sh"
     ;;
   study-pack)
     TOPIC="${2:-}"
@@ -167,7 +167,7 @@ PY
     ;;
   smoke)
     run_tracked "career-os:smoke" "smoke test" \
-      "$TASK_ROOT/skills/cj-oliveyoung-java-backend-prep/scripts/run_smoke_test.sh"
+      "$TASK_ROOT/skills/knowledge-gap-analyzer/scripts/run_smoke_test.sh"
     ;;
   *)
     echo "usage: run_now.sh [baseline | daily [topic] | study-pack <topic> | question-bank <topic> | recommend-topics | recommend-positions | foodville-coffeechat | replenish-topics | maintain-study-pack <topic> | master [topic] | smoke]" >&2

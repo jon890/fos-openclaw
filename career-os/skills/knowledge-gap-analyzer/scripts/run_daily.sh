@@ -6,7 +6,7 @@ DATE="${REPORT_DATE:-$(date +%F)}"
 TOPIC="${DAILY_TOPIC:-}"
 OUTDIR="$TASK_ROOT/data/reports/daily/$DATE"
 PROFILE="$TASK_ROOT/config/candidate-profile.md"
-PROMPT_FILE="$TASK_ROOT/skills/cj-oliveyoung-java-backend-prep/references/daily-prompt.md"
+PROMPT_FILE="$TASK_ROOT/skills/knowledge-gap-analyzer/references/daily-prompt.md"
 SOURCE_DIR="$TASK_ROOT/sources/fos-study"
 TOPIC_MAP="$TASK_ROOT/config/topic-file-map.json"
 PROGRESS_FILE="$TASK_ROOT/data/study-progress.json"
@@ -15,8 +15,8 @@ INPUT_NOTE="$OUTDIR/analysis-input.md"
 REPORT_MD="$OUTDIR/report.md"
 CLAUDE_JSON="$OUTDIR/claude.result.json"
 FALLBACK_MD="$OUTDIR/report.fallback.md"
-TARGET_BUILDER="$TASK_ROOT/skills/cj-oliveyoung-java-backend-prep/scripts/build_target_file_list.py"
-TOPIC_SELECTOR="$TASK_ROOT/skills/cj-oliveyoung-java-backend-prep/scripts/select_topic.py"
+TARGET_BUILDER="$TASK_ROOT/skills/knowledge-gap-analyzer/scripts/build_target_file_list.py"
+TOPIC_SELECTOR="$TASK_ROOT/skills/knowledge-gap-analyzer/scripts/select_topic.py"
 mkdir -p "$OUTDIR"
 
 # --- Git sync ---
@@ -69,7 +69,7 @@ if timeout 420s claude --permission-mode bypassPermissions --print --output-form
     "$CLAUDE_JSON" "$REPORT_MD" "${TRACK_TASK_CLAUDE_USAGE_FILE:-}"
 
   # --- Update study-progress.json ---
-  python3 "$TASK_ROOT/skills/cj-oliveyoung-java-backend-prep/scripts/update_study_progress.py" \
+  python3 "$TASK_ROOT/skills/knowledge-gap-analyzer/scripts/update_study_progress.py" \
     "$PROGRESS_FILE" "$TOPIC" "$TARGET_LIST"
 
 else

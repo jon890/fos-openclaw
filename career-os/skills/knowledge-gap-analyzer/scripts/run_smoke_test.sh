@@ -1,37 +1,30 @@
 #!/usr/bin/env bash
-# run_baseline.sh — single-call baseline gap analysis using curated core file set.
-# ADR-003: chunking removed (10 files fit in one context window).
 set -euo pipefail
 
 TASK_ROOT="${TASK_ROOT:-$HOME/ai-nodes/career-os}"
 DATE="${REPORT_DATE:-$(date +%F)}"
-OUTDIR="$TASK_ROOT/data/reports/baseline/$DATE"
+OUTDIR="$TASK_ROOT/data/reports/baseline/$DATE/smoke-test"
 PROFILE="$TASK_ROOT/config/candidate-profile.md"
-PROMPT_FILE="$TASK_ROOT/skills/cj-oliveyoung-java-backend-prep/references/baseline-prompt.md"
+PROMPT_FILE="$TASK_ROOT/skills/knowledge-gap-analyzer/references/baseline-prompt.md"
 SOURCE_DIR="$TASK_ROOT/sources/fos-study"
 TARGET_LIST="$OUTDIR/target-files.txt"
 INPUT_NOTE="$OUTDIR/analysis-input.md"
 REPORT_MD="$OUTDIR/report.md"
 STDERR_LOG="$OUTDIR/claude.stderr.log"
+STDOUT_LOG="$OUTDIR/claude.stdout.log"
 CLAUDE_JSON="$OUTDIR/claude.result.json"
 FALLBACK_MD="$OUTDIR/report.fallback.md"
-CORE_LIST="$TASK_ROOT/config/baseline-core-files.json"
 mkdir -p "$OUTDIR"
 
-# --- Git sync ---
-if [[ ! -d "$SOURCE_DIR/.git" ]]; then
-  git clone --depth=1 https://github.com/jon890/fos-study.git "$SOURCE_DIR"
-else
-  git -C "$SOURCE_DIR" pull --ff-only
-fi
+cat > "$TARGET_LIST" <<EOF
+interview/kakao-healthcare-carechat-ai-agent.md
+database/index.md
+database/mysql/transaction-lock.md
+database/mysql/mysql-architecture.md
+java/spring/jpa-transaction.md
+architecture/distributed-transaction.md
+EOF
 
-python3 -c "
-import json, sys
-data = json.load(open('$CORE_LIST'))
-print('\n'.join(f['path'] for f in data['files']))
-" > "$TARGET_LIST"
-
-# --- Build analysis input note ---
 cat > "$INPUT_NOTE" <<EOF
 $(cat "$PROMPT_FILE")
 
@@ -48,31 +41,28 @@ $(cat "$PROMPT_FILE")
 - DB를 약점 가능성이 높은 영역으로 다루고, 스터디 노트가 이를 뒷받침하는지 검증한다.
 - interview/kakao-healthcare-carechat-ai-agent.md 의 근거를 우선한다.
 - 최종 리포트는 한국어로 작성한다.
-- 신뢰도를 최대화하기 위해 baseline은 큐레이션된 core 파일 세트 내에서만 분석한다.
 EOF
 
-# --- Claude synthesis (single call, ADR-003) ---
-if timeout 420s claude --permission-mode bypassPermissions --print --output-format json \
-  "Read $INPUT_NOTE and complete the requested analysis. Write only the final markdown report." \
-  > "$CLAUDE_JSON" 2>> "$STDERR_LOG"; then
-
+if timeout 300s claude --permission-mode bypassPermissions --print --output-format json "Read $INPUT_NOTE and complete the requested analysis. Write only the final markdown report." > "$CLAUDE_JSON" 2> "$STDERR_LOG"; then
+  cp "$CLAUDE_JSON" "$STDOUT_LOG"
   bun run "$HOME/ai-nodes/_shared/lib/invoke_claude_skills.ts" extract \
     "$CLAUDE_JSON" "$REPORT_MD" "${TRACK_TASK_CLAUDE_USAGE_FILE:-}"
-
 else
   cat > "$FALLBACK_MD" <<EOF
-# Kakao Healthcare CareChat Java Backend Prep Baseline Report
+# Kakao Healthcare CareChat Java Backend Prep Smoke Test Report
 
 - Status: Claude synthesis failed, fallback report created
 - Candidate profile: $PROFILE
 - Source repository root: $SOURCE_DIR
 - Target file list: $TARGET_LIST
-- Note: rerun baseline after checking Claude/auth environment
+- stderr log: $STDERR_LOG
 EOF
   cp "$FALLBACK_MD" "$REPORT_MD"
 fi
 
 echo "Wrote: $TARGET_LIST"
 echo "Wrote: $INPUT_NOTE"
+echo "Wrote: $STDOUT_LOG"
+echo "Wrote: $STDERR_LOG"
 echo "Wrote: $CLAUDE_JSON"
 echo "Wrote: $REPORT_MD"
