@@ -126,7 +126,11 @@ PY
     ;;
   recommend-topics)
     run_tracked "career-os:recommend-topics" "morning topic 추천" \
-      "$TASK_ROOT/skills/cj-oliveyoung-java-backend-prep/scripts/run_morning_topic_recommendation.sh"
+      "$TASK_ROOT/skills/study-topic-recommender/scripts/run_topic_recommendation.sh"
+    ;;
+  live-coding-dispatch)
+    run_tracked "career-os:live-coding-dispatch" "live-coding dispatch" \
+      "$TASK_ROOT/skills/study-topic-recommender/scripts/run_live_coding_dispatch.sh"
     ;;
   recommend-positions)
     run_tracked "career-os:position-recommendation" "position 추천" \
@@ -170,7 +174,7 @@ PY
       "$TASK_ROOT/skills/knowledge-gap-analyzer/scripts/run_smoke_test.sh"
     ;;
   *)
-    echo "usage: run_now.sh [baseline | daily [topic] | study-pack <topic> | question-bank <topic> | recommend-topics | recommend-positions | foodville-coffeechat | replenish-topics | maintain-study-pack <topic> | master [topic] | smoke]" >&2
+    echo "usage: run_now.sh [baseline | daily [topic] | study-pack <topic> | question-bank <topic> | recommend-topics | live-coding-dispatch | recommend-positions | foodville-coffeechat | replenish-topics | maintain-study-pack <topic> | master [topic] | smoke]" >&2
     echo "  daily topic keys: see config/topic-file-map.json" >&2
     echo "  study-pack topic keys: see config/topics.json (study-pack namespace)" >&2
     echo "  question-bank topic keys: see config/topics.json (question-bank namespace)" >&2
