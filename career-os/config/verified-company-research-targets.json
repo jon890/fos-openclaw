@@ -1,0 +1,107 @@
+{
+  "_meta": {
+    "purpose": "포지션 추천 전 검증된 회사군을 폭넓게 탐색하기 위한 회사/채널 레퍼런스. Wanted, 공식 career, 기술블로그를 함께 확인한다.",
+    "policy": "서버/백엔드 정규직 공고만 추천 후보로 올린다. 회사명만 보고 추천하지 말고 active 공고, JD fit, 회사/규모 업사이드, 기술블로그/엔지니어링 시그널을 함께 본다.",
+    "usage": "position-recommender runner가 이 파일을 프롬프트 컨텍스트로 포함한다. 사람이 수동 web_search/web_fetch를 할 때도 이 목록을 우선 탐색 대상으로 사용한다."
+  },
+  "priorityCompanies": [
+    {
+      "tier": "A",
+      "company": "KakaoPay",
+      "koreanName": "카카오페이",
+      "careerUrls": [
+        "https://kakaopay.career.greetinghr.com/"
+      ],
+      "wantedKeywords": ["카카오페이 서버 개발자", "카카오페이 백엔드", "kakaopay backend"],
+      "techBlogs": ["https://tech.kakaopay.com/", "https://tech.kakao.com/blog/"],
+      "preferredDomains": ["payment", "settlement", "offline-payment", "finance", "platform"],
+      "notes": "결제/정산/인증/오프라인 결제는 후보자의 Outbox, 캐시 정합성, 운영 안정성 경험과 강하게 연결된다."
+    },
+    {
+      "tier": "A",
+      "company": "KakaoBank",
+      "koreanName": "카카오뱅크",
+      "careerUrls": ["https://recruit.kakaobank.com/"],
+      "wantedKeywords": ["카카오뱅크 서버 개발자", "카카오뱅크 백엔드"],
+      "techBlogs": ["https://tech.kakaobank.com/"],
+      "preferredDomains": ["banking", "payment", "risk", "platform", "backend"],
+      "notes": "인터넷은행 도메인. 정합성/트랜잭션/보안/운영 안정성 중심이면 강력 후보."
+    },
+    {
+      "tier": "A",
+      "company": "Kakao",
+      "koreanName": "카카오",
+      "careerUrls": ["https://careers.kakao.com/index"],
+      "wantedKeywords": ["카카오 서버 개발자", "카카오 백엔드", "kakao backend"],
+      "techBlogs": ["https://tech.kakao.com/blog/"],
+      "preferredDomains": ["platform", "messaging", "search", "commerce", "backend"],
+      "notes": "계열/팀별 편차가 크므로 서버 개발 밀도와 서비스 핵심성 확인 필요."
+    },
+    {
+      "tier": "A",
+      "company": "NAVER / NAVER Financial / NAVER Pay",
+      "koreanName": "네이버/네이버파이낸셜/네이버페이",
+      "careerUrls": ["https://recruit.navercorp.com/", "https://recruit.naverfincorp.com/"],
+      "wantedKeywords": ["네이버 백엔드", "네이버 서버 개발자", "네이버페이 백엔드", "네이버파이낸셜 서버 개발자"],
+      "techBlogs": ["https://d2.naver.com/home"],
+      "preferredDomains": ["payment", "search", "platform", "finance", "large-scale-backend"],
+      "notes": "브랜드/엔지니어링 레버리지 최상. 공식 active 공고 타이밍을 계속 감시한다."
+    },
+    {
+      "tier": "A",
+      "company": "LINE / LINE Plus",
+      "koreanName": "라인/라인플러스",
+      "careerUrls": ["https://careers.linecorp.com/"],
+      "wantedKeywords": ["LINE 백엔드", "라인플러스 서버 개발자", "LINE backend engineer"],
+      "techBlogs": ["https://engineering.linecorp.com/ko"],
+      "preferredDomains": ["messaging", "platform", "fintech", "reliability", "distributed-system"],
+      "notes": "분산시스템/신뢰성/글로벌 서비스 시그널이 강하면 우선 후보."
+    },
+    {
+      "tier": "A",
+      "company": "Coupang / Coupang Pay",
+      "koreanName": "쿠팡/쿠팡페이",
+      "careerUrls": ["https://www.coupang.jobs/", "https://www.wanted.co.kr/company/53"],
+      "wantedKeywords": ["쿠팡 백엔드", "쿠팡 서버 개발자", "쿠팡페이 백엔드", "coupang backend"],
+      "techBlogs": ["https://medium.com/coupang-engineering"],
+      "preferredDomains": ["commerce", "fulfillment", "payment", "logistics", "platform"],
+      "notes": "브랜드/트래픽/보상 레버리지 최상. 7년+/리딩 기대치와 업무 강도 확인 필요."
+    },
+    {
+      "tier": "A-",
+      "company": "Bucketplace",
+      "koreanName": "오늘의집/버킷플레이스",
+      "careerUrls": ["https://www.bucketplace.com/careers/?team=dev", "https://www.wanted.co.kr/company/179"],
+      "wantedKeywords": ["오늘의집 백엔드", "버킷플레이스 backend", "오늘의집 Core Platform"],
+      "techBlogs": ["https://www.bucketplace.com/careers/?team=dev"],
+      "preferredDomains": ["commerce", "content", "community", "core-platform", "home-service"],
+      "notes": "커머스+콘텐츠+시공/홈서비스 플랫폼. Rails/Kotlin 비중과 팀 안정성 확인 필요."
+    },
+    {
+      "tier": "A-",
+      "company": "Woowa Bros",
+      "koreanName": "우아한형제들/배민",
+      "careerUrls": ["https://career.woowahan.com/", "https://www.wanted.co.kr/company/102"],
+      "wantedKeywords": ["우아한형제들 백엔드", "배민 서버 개발자", "배민공통서비스 백엔드"],
+      "techBlogs": ["https://techblog.woowahan.com/"],
+      "preferredDomains": ["order", "payment", "settlement", "experiment", "display", "store", "ads", "platform"],
+      "notes": "기술조직/도메인은 여전히 좋지만 DH 매각설·쿠팡이츠 경쟁·수익성 압박 때문에 팀 선별 필요."
+    },
+    {
+      "tier": "A-",
+      "company": "Karrot",
+      "koreanName": "당근",
+      "careerUrls": ["https://about.daangn.com/jobs/"],
+      "wantedKeywords": ["당근 백엔드", "당근 server engineer", "karrot backend"],
+      "techBlogs": ["https://medium.com/daangn"],
+      "preferredDomains": ["local-commerce", "marketplace", "ads", "platform", "backend"],
+      "notes": "마켓플레이스/지역 서비스/광고 플랫폼 쪽이면 검토. Kotlin/Ruby 등 스택 확인 필요."
+    }
+  ],
+  "discoveryChecklist": [
+    "Wanted 공고는 가능하면 API status=active 또는 현재 마감일을 확인한다.",
+    "공식 career 페이지와 Wanted/LinkedIn/JobKorea 등 외부 공고의 내용이 다를 수 있으므로 최종 판단은 공식 페이지를 우선한다.",
+    "기술블로그가 잘 갖춰진 회사는 엔지니어링 문화 신호로 가점하되, 블로그 존재만으로 JD fit을 대체하지 않는다.",
+    "추천 결과에는 회사/규모 업사이드와 사업 리스크를 반드시 분리해서 쓴다."
+  ]
+}

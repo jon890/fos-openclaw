@@ -21,8 +21,13 @@ POSITION_CONTEXT="AI 서비스 백엔드 위주" run_now.sh recommend-positions
 
 ## Behavior
 
+- Use `config/position-context-index.md` as the index for durable recommendation context files.
 - Use `config/candidate-profile.md` as the source of truth.
 - Use `config/position-decision-criteria.md` as the evolving decision rubric for ranking, exclusions, and user feedback.
+- Use `config/company-upside-reference.md` for company/scale upside, brand leverage, and business risk.
+- Use `config/verified-company-research-targets.json` for broad verified-company discovery targets.
+- Use `config/tech-blog-sources.json` to judge whether a company has strong engineering-blog signals.
+- For verified-company scans, read `references/verified-company-discovery.md`.
 - Use selected local fos-study resume/task docs when helpful.
 - Do not invent experience or metrics not supported by the profile/docs.
 - Recommend positions in tiers:
@@ -34,6 +39,9 @@ POSITION_CONTEXT="AI 서비스 백엔드 위주" run_now.sh recommend-positions
   - why it fits
   - evidence from candidate experience
   - likely JD keywords
+  - company/scale upside
+  - engineering-blog / tech-culture signal when available
+  - business or seniority risk
   - gaps to prepare
   - first action: study-pack / question-bank / resume rewrite / company research.
 - Output is a private career recommendation report under `data/runtime/position-recommendation.md` and stdout. Do not publish to fos-study unless explicitly requested.
