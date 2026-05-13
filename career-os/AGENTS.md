@@ -41,7 +41,7 @@
 
 ## 워크플로 진입점 (요약)
 
-단일 디스패처: `skills/command-router/scripts/run_now.sh` (plan005 분해 이후, ADR-017). 본 plan005 실행 전까지는 `skills/cj-oliveyoung-java-backend-prep/scripts/run_now.sh`가 진입점.
+단일 디스패처: `scripts/command-router/run_now.sh` (plan006 후, ADR-019). plan005 분해 직후·plan006 이전엔 `skills/command-router/scripts/run_now.sh`(ADR-017), 그 전까진 `skills/cj-oliveyoung-java-backend-prep/scripts/run_now.sh`.
 
 14개 명령 (plan005 wire-up 포함): `baseline` · `daily [topic]` · `recommend-positions` · `recommend-topics` · `replenish-topics` · `study-pack <topic>` · `maintain-study-pack <topic>` · `question-bank <topic>` · `master [topic]` · `foodville-coffeechat` · `smoke` · `bootcamp-batch` · `live-coding-dispatch` · `auto-question-bank`.
 

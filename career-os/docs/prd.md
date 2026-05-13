@@ -18,7 +18,7 @@ career-os 워크스페이스의 **제품 범위·MVP 기능 명세**. 현재 act
 
 ## 기능 목록 (14개 dispatch 명령)
 
-`skills/command-router/scripts/run_now.sh`가 단일 진입점(plan005 분해 이후, ADR-017). 모든 명령은 `_shared/bin/track_task.sh`로 래핑되어 토큰·비용·duration이 `logs/task-runs.jsonl`에 자동 기록됨.
+`scripts/command-router/run_now.sh`가 단일 진입점(plan006 후, ADR-019). 모든 명령은 `_shared/bin/track_task.sh`로 래핑되어 토큰·비용·duration이 `logs/task-runs.jsonl`에 자동 기록됨.
 
 | 명령 | 산출물 | 외부 git push | 빈도 |
 |---|---|---|---|

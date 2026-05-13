@@ -221,7 +221,7 @@ data/runtime/cj-foodville-coffeechat-prep.md (사본)
 ```
 config/topics.json (bootcamp namespace, plan002 이후)
   ↓
-skills/study-pack-batch/scripts/run_bootcamp_batch.sh:
+scripts/study-pack-batch/run_bootcamp_batch.sh:
   - dailyRecommendCount 만큼 추천 큐 산출
   - 미생성 토픽 우선, dailyGenerateCount 개만큼 study-pack-writer 위임
   ↓
@@ -238,7 +238,7 @@ config/live-coding-seed-pool.json (primary)
 config/live-coding-seed-candidates.json (reservoir)
 data/generated-artifacts.json (이미 만든 outputPath 제외)
   ↓
-skills/study-topic-recommender/scripts/run_live_coding_dispatch.sh:
+scripts/study-topic-recommender/run_live_coding_dispatch.sh:
   - 미커버 seed 1개 선택 (primary → candidate 순)
   - data/runtime/live-coding-generated-topic.json에 임시 topic 작성
   - lock: data/runtime/locks/live-coding-dispatch.lock
@@ -253,7 +253,7 @@ TOPIC_CONFIG_OVERRIDE 환경변수로 run_now.sh study-pack 위임
 ```
 QUESTION_BANK_TOPIC_OVERRIDE 또는 기본값 experience-qbank-ai-service-team
   ↓
-skills/experience-question-bank-writer/scripts/run_question_bank_auto.sh:
+scripts/experience-question-bank-writer/run_question_bank_auto.sh:
   - Discord [시작] 알림
   - run_now.sh question-bank <topic> 위임
   ↓

@@ -41,13 +41,15 @@ apartment/skills/apartment-daily-report/scripts/run_report.sh
 ### career-os
 
 ```bash
-career-os/skills/cj-oliveyoung-java-backend-prep/scripts/run_now.sh baseline
-career-os/skills/cj-oliveyoung-java-backend-prep/scripts/run_now.sh daily [topic]
-career-os/skills/cj-oliveyoung-java-backend-prep/scripts/run_now.sh study-pack <topic>
-career-os/skills/cj-oliveyoung-java-backend-prep/scripts/run_now.sh question-bank <topic>
-career-os/skills/cj-oliveyoung-java-backend-prep/scripts/run_now.sh master [topic]
-career-os/skills/cj-oliveyoung-java-backend-prep/scripts/run_now.sh smoke
+career-os/scripts/command-router/run_now.sh baseline
+career-os/scripts/command-router/run_now.sh daily [topic]
+career-os/scripts/command-router/run_now.sh study-pack <topic>
+career-os/scripts/command-router/run_now.sh question-bank <topic>
+career-os/scripts/command-router/run_now.sh master [topic]
+career-os/scripts/command-router/run_now.sh smoke
 ```
+
+career-os는 plan006(ADR-019)에서 워크스페이스 한정 컨벤션을 채택했습니다: 실행 파일은 `career-os/scripts/<skill-name>/`, Claude 컨텍스트 자산은 `career-os/skills/<skill-name>/`(SKILL.md + references/). 다른 워크스페이스(apartment 등)는 `skills/<name>/scripts/` 표준 구조 유지.
 
 `run_now.sh`가 유일한 디스패치 지점입니다. `career-os/config/*.json`에서 토픽 설정을 해석하고, 토픽별 리졸버(`resolve_study_pack_topic.py`, `resolve_question_bank_topic.py`, `resolve_master_topic.py`)가 `export KEY=value` 라인을 출력하면 이를 `eval`로 소비한 뒤, `track_task.sh`를 통해 해당 스킬 러너를 `exec`합니다. 토픽 키는 `career-os/config/{topic-file-map,study-pack-topics,experience-question-bank-topics,interview-master-topics}.json`에 정의되어 있습니다.
 
