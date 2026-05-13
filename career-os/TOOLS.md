@@ -7,6 +7,6 @@ Current MVP target:
 - Analyze markdown files only
 - Ignore `.claude/**`
 - Focus area: Java backend interview preparation
-- Company target: CJ OliveYoung Wellness Platform
+- Company target: see `config/mvp-target.json` (single source of truth)
 - Self-assessed weak area: DB
 - Use `config/.env` for task-local secrets such as `GITHUB_TOKEN`

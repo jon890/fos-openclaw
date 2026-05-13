@@ -1,0 +1,19 @@
+{
+  "primary": {
+    "company": "CJ Foodville",
+    "team": "Digital Channel Backend",
+    "role": "Java Backend",
+    "interview_date": "",
+    "notes": "현재 집중 중인 타깃. interview_date는 일정 확정 시 채워넣을 것."
+  },
+  "history": [
+    {
+      "company": "CJ OliveYoung",
+      "team": "Wellness Platform",
+      "role": "Java Backend",
+      "interview_date": "2026-04-21",
+      "deprecated_at": "2026-05-13",
+      "notes": "면접 일정 종료 후 비활성화. 관련 산출물(study-pack, question-bank, interview/cj-oliveyoung-wellness-backend.md 등)은 참고용으로 보존, 재생성하지 않음."
+    }
+  ]
+}
