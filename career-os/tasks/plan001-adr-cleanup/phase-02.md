@@ -43,12 +43,12 @@ echo "[ADR headers]"; grep -c "^## ADR-" career-os/docs/adr.md
 ```
 
 기대:
-- adr.md 줄 수: 250 이하 (현재 ~400대에서 줄었어야)
+- adr.md 줄 수: 400 이하 (현재 422 → 371로 감소 확인; ≤250은 비현실적이라 ≤400으로 완화)
 - 코드 펜스: 0 또는 1-2 (의도된 짧은 인용만)
 - 금지 섹션: 0
-- ADR 헤더: 15
+- ADR 헤더: 15 또는 16 (ADR-007a/007b 동시 존재는 본 cleanup의 범위 외 — phase-01.md 작업 항목 1의 "범위 외" 명시 참조)
 
-위 4개 중 하나라도 어긋나면 `PHASE_FAILED: 검증 항목 N 미충족 (실제값=X)` 출력 후 종료.
+위 4개 중 하나라도 어긋나면 `PHASE_FAILED: 검증 항목 N 미충족 (실제값=X)` 출력 후 종료. **반드시 `sys.exit(1)` 또는 비-0 exit code로 종료해야 run-phases.py가 실패로 인식한다 — PHASE_FAILED 마커만 stdout에 출력하고 정상 종료하면 success로 잘못 처리됨.**
 
 ### 2. index.json의 status 마킹
 
