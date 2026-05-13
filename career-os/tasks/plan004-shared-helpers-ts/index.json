@@ -19,7 +19,7 @@
   "phases": [
     {
       "number": 1,
-      "title": "docs-first: ADR-018 (TS Bun 마이그레이션) + code-architecture _shared/ 트리 + AGENTS.md",
+      "title": "docs-first: ADR-019 (TS Bun 마이그레이션) + code-architecture _shared/ 트리 + AGENTS.md",
       "file": "phase-01.md",
       "status": "pending",
       "allowedTools": ["Read", "Write", "Edit", "Bash", "Grep"],

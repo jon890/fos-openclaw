@@ -9,11 +9,11 @@
 
 phase-03/04 가 만든 3 TS 헬퍼를 caller 가 사용하도록 갱신하고, 옛 동등물 (`claude_lib.sh`, `format_cost_summary.py`, `extract_claude_result.py`, 워크스페이스별 `notify_discord.sh`) 을 일괄 삭제. 통합 smoke + index.json status=completed + push.
 
-범위 외: extractor / renderer / runner / dispatcher 의 TS 화 (별도 plan), update_artifacts.py (당분간 Python 유지 — ADR-018 결정).
+범위 외: extractor / renderer / runner / dispatcher 의 TS 화 (별도 plan), update_artifacts.py (당분간 Python 유지 — ADR-019 결정).
 
 ## 관련 docs
 
-- `career-os/docs/adr.md` ADR-018 (정책), ADR-014 (회계 패턴).
+- `career-os/docs/adr.md` ADR-019 (정책), ADR-014 (회계 패턴).
 - `_shared/lib/{notify_discord, format_cost_summary, invoke_claude_skills}.ts` (phase-03/04 산출물).
 
 ## 갱신할 caller (실측 기반)
@@ -259,7 +259,7 @@ git add -A career-os/skills/ _shared/ career-os/tasks/plan004-shared-helpers-ts/
 git commit -m "$(cat <<'EOF'
 refactor(career-os, _shared): caller 8+ 일괄 TS 헬퍼로 전환 + 옛 sh/py 폐기 (plan004 phase-05)
 
-ADR-018 마지막 단계.
+ADR-019 마지막 단계.
 
 caller 갱신:
 - 6 runner (study-pack-writer / study-pack-maintainer / question-bank / master / position / foodville) source claude_lib.sh 제거 + claude_persist_usage 호출 → bun run invoke_claude_skills.ts persist-usage
@@ -297,7 +297,9 @@ push 실패 시 `PHASE_FAILED: push (<stderr>)`.
 
 ## Blocked 조건
 
-- caller 갱신 후 syntax 실패 → `PHASE_FAILED: syntax (<file>)`.
-- 옛 이름 잔존 → `PHASE_FAILED: 잔존 참조 (이름)`.
-- tsc 실패 → `PHASE_FAILED: tsc`.
-- push 권한 없음 → `PHASE_BLOCKED: push 권한`.
+**중요 — exit code 명시**: 아래 어느 마커든 출력만 하지 말고 반드시 `sys.exit(1)` (FAILED) 또는 `sys.exit(2)` (BLOCKED) — shell에서는 `exit 1` / `exit 2` — 비-0 exit code로 종료한다. 마커만 출력하고 정상 종료하면 `run-phases.py`가 success로 잘못 처리한다 (plan001-adr-cleanup 1차 실행 사례).
+
+- caller 갱신 후 syntax 실패 → `PHASE_FAILED: syntax (<file>)` + `exit 1`.
+- 옛 이름 잔존 → `PHASE_FAILED: 잔존 참조 (이름)` + `exit 1`.
+- tsc 실패 → `PHASE_FAILED: tsc` + `exit 1`.
+- push 권한 없음 → `PHASE_BLOCKED: push 권한` + `exit 2`.

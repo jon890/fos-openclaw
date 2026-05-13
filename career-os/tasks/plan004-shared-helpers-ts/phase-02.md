@@ -14,7 +14,7 @@ ai-nodes 루트에 Bun 환경을 부트스트랩한다 (package.json + tsconfig.
 ## 관련 docs
 
 - `career-os/docs/code-architecture.md` _shared/ 트리 (phase-01 갱신본).
-- `career-os/docs/adr.md` ADR-018 (phase-01 산출물).
+- `career-os/docs/adr.md` ADR-019 (phase-01 산출물).
 
 ## 작업 항목
 
@@ -42,7 +42,7 @@ cat > package.json <<'JSON'
   "name": "ai-nodes",
   "version": "0.0.0",
   "private": true,
-  "description": "ai-nodes 워크스페이스 공용 TS 헬퍼 (ADR-018)",
+  "description": "ai-nodes 워크스페이스 공용 TS 헬퍼 (ADR-019)",
   "type": "module",
   "devDependencies": {
     "@types/bun": "latest",
@@ -121,7 +121,7 @@ cd /home/bifos/ai-nodes
 mkdir -p _shared/types
 cat > _shared/types/index.ts <<'TS'
 // _shared/types/index.ts
-// ai-nodes 워크스페이스 공용 TS 타입 (ADR-018)
+// ai-nodes 워크스페이스 공용 TS 타입 (ADR-019)
 
 /**
  * `claude --print --output-format json` 의 envelope.
@@ -261,6 +261,8 @@ push 는 phase-05.
 
 ## Blocked 조건
 
-- Bun 미설치 시 `PHASE_BLOCKED: Bun 미설치` (사용자 설치 후 재실행).
-- bun install 네트워크 실패 시 `PHASE_BLOCKED: 네트워크`.
-- tsc 에러 시 `PHASE_FAILED: tsc`.
+**중요 — exit code 명시**: 아래 어느 마커든 출력만 하지 말고 반드시 `sys.exit(1)` (FAILED) 또는 `sys.exit(2)` (BLOCKED) — shell에서는 `exit 1` / `exit 2` — 비-0 exit code로 종료한다. 마커만 출력하고 정상 종료하면 `run-phases.py`가 success로 잘못 처리한다 (plan001-adr-cleanup 1차 실행 사례).
+
+- Bun 미설치 시 `PHASE_BLOCKED: Bun 미설치` + `exit 2` (사용자 설치 후 재실행).
+- bun install 네트워크 실패 시 `PHASE_BLOCKED: 네트워크` + `exit 2`.
+- tsc 에러 시 `PHASE_FAILED: tsc` + `exit 1`.

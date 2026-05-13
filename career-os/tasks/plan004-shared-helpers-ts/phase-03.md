@@ -13,7 +13,7 @@
 
 ## 관련 docs
 
-- `career-os/docs/adr.md` ADR-018 (phase-01 결정).
+- `career-os/docs/adr.md` ADR-019 (phase-01 결정).
 - `_shared/types/index.ts` (phase-02 산출물 — `TaskRunEntry`, `NotificationPayload` 사용).
 
 ## 1. notify_discord.ts
@@ -34,7 +34,7 @@
 ```typescript
 #!/usr/bin/env bun
 // _shared/lib/notify_discord.ts
-// Discord webhook 알림. ADR-018.
+// Discord webhook 알림. ADR-019.
 // Usage:
 //   bun run _shared/lib/notify_discord.ts "메시지"
 //   또는 from-import: await notifyDiscord("메시지")
@@ -104,7 +104,7 @@ if (import.meta.main) {
 ```typescript
 #!/usr/bin/env bun
 // _shared/lib/format_cost_summary.ts
-// logs/task-runs.jsonl 최신 entry → 한 줄 cost 요약. ADR-018.
+// logs/task-runs.jsonl 최신 entry → 한 줄 cost 요약. ADR-019.
 // Usage:
 //   bun run _shared/lib/format_cost_summary.ts <workspace-root> <task-name>
 
@@ -257,7 +257,7 @@ bun run _shared/lib/format_cost_summary.ts 2>&1 | grep -q "usage:"
 ```
 feat(_shared/lib): notify_discord.ts + format_cost_summary.ts (plan004 phase-03)
 
-ADR-018. 워크스페이스별 notify_discord.sh 와 _shared/bin/format_cost_summary.py 의 후속.
+ADR-019. 워크스페이스별 notify_discord.sh 와 _shared/bin/format_cost_summary.py 의 후속.
 
 - notify_discord.ts: DISCORD_WEBHOOK_URL 없으면 silent skip, network 에러도 비치명적. 워크스페이스 격리 원칙 (각 워크스페이스의 config/.env).
 - format_cost_summary.ts: logs/task-runs.jsonl 최신 entry → 한 줄 cost 요약. .py 출력 형식과 정확히 동일.
@@ -269,4 +269,6 @@ push 는 phase-05.
 
 ## Blocked 조건
 
-- 검증 1-3 실패 시 `PHASE_FAILED: <항목>`.
+**중요 — exit code 명시**: 아래 어느 마커든 출력만 하지 말고 반드시 `sys.exit(1)` (FAILED) 또는 `sys.exit(2)` (BLOCKED) — shell에서는 `exit 1` / `exit 2` — 비-0 exit code로 종료한다. 마커만 출력하고 정상 종료하면 `run-phases.py`가 success로 잘못 처리한다 (plan001-adr-cleanup 1차 실행 사례).
+
+- 검증 1-3 실패 시 `PHASE_FAILED: <항목>` + `exit 1`.
