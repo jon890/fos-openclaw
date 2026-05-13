@@ -39,3 +39,5 @@ ADR-009 (reservoir), ADR-010 (점수 기반 선택), ADR-012 (10픽 mix target),
 - `config/topics.json` — study-pack 토픽 정의
 - `config/live-coding-seed-pool.json` / `live-coding-seed-candidates.json` — live-coding seed
 - `config/sources.json` — tech-blog / AI / geek reservoir
+
+실행 파일은 `career-os/scripts/study-topic-recommender/`(ADR-019).

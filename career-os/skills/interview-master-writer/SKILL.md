@@ -54,7 +54,7 @@ Avoid feeding the entire task tree in one run. Avoid overlapping with existing q
 - Runner: `scripts/run_master.sh`
 - Topic resolver: `scripts/resolve_master_topic.py`
 - Topic config: `config/topics.json (master namespace)`
-- Output validator: reuses `skills/study-pack-writer/scripts/extract_and_validate_study_pack.py`
+- Output validator: reuses `scripts/study-pack-writer/extract_and_validate_study_pack.py`
 
 ## Invocation
 
@@ -72,3 +72,5 @@ Use commit messages like:
 - `docs(interview): update draft senior-backend master playbook`
 
 If push fails, surface that clearly instead of silently stopping.
+
+실행 파일은 `career-os/scripts/interview-master-writer/`(ADR-019).

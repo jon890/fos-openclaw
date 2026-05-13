@@ -54,3 +54,5 @@ scripts/command-router/run_now.sh maintain-study-pack <topic>
 ```
 
 Use this instead of plain `study-pack` when overlap / update strategy matters.
+
+실행 파일은 `career-os/scripts/study-pack-maintainer/`(ADR-019).

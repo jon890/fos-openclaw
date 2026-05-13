@@ -80,3 +80,5 @@ Use commit messages like:
 - `docs(interview): update draft slot-team question bank`
 
 If push fails, surface it clearly.
+
+실행 파일은 `career-os/scripts/experience-question-bank-writer/`(ADR-019).

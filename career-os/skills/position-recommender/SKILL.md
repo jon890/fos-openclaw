@@ -48,3 +48,5 @@ POSITION_CONTEXT="AI 서비스 백엔드 위주" run_now.sh recommend-positions
   - gaps to prepare
   - first action: study-pack / question-bank / resume rewrite / company research.
 - Output is a private career recommendation report under `data/runtime/position-recommendation.md` and stdout. Do not publish to fos-study unless explicitly requested.
+
+실행 파일은 `career-os/scripts/position-recommender/`(ADR-019).

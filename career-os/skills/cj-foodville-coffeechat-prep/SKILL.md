@@ -18,8 +18,10 @@ Run:
 Direct runner:
 
 ```bash
-/home/bifos/ai-nodes/career-os/skills/cj-foodville-coffeechat-prep/scripts/run_foodville_coffeechat_prep.sh
+/home/bifos/ai-nodes/career-os/scripts/cj-foodville-coffeechat-prep/run_foodville_coffeechat_prep.sh
 ```
+
+실행 파일은 `career-os/scripts/cj-foodville-coffeechat-prep/`(ADR-019).
 
 Optional context:
 

@@ -97,3 +97,5 @@ To add a new topic, add an entry to `config/topics.json (study-pack namespace)` 
   - `docs(mysql): add draft explain-plan study pack`
   - `docs(redis): update draft cache-aside study pack`
 - If push fails, surface that clearly instead of silently stopping.
+
+실행 파일은 `career-os/scripts/study-pack-writer/`(ADR-019).

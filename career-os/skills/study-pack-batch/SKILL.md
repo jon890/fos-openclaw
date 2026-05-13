@@ -31,17 +31,17 @@ career-os/scripts/command-router/run_now.sh bootcamp-batch
 
 # 직접 실행 (테스트/디버그)
 TASK_ROOT=~/ai-nodes/career-os \
-  career-os/skills/study-pack-batch/scripts/run_bootcamp_batch.sh
+  career-os/scripts/study-pack-batch/run_bootcamp_batch.sh
 
 # 드라이런
 DRY_RUN=1 TASK_ROOT=~/ai-nodes/career-os \
-  career-os/skills/study-pack-batch/scripts/run_bootcamp_batch.sh
+  career-os/scripts/study-pack-batch/run_bootcamp_batch.sh
 ```
 
 ## 의존성
 
-- `skills/study-pack-writer/scripts/resolve_study_pack_topic.py` — 토픽 키 → env 변수 리졸버
-- `skills/study-pack-writer/scripts/run_study_pack.sh` — 개별 study-pack 생성 러너
+- `scripts/study-pack-writer/resolve_study_pack_topic.py` — 토픽 키 → env 변수 리졸버
+- `scripts/study-pack-writer/run_study_pack.sh` — 개별 study-pack 생성 러너
 - `config/topics.json` — bootcamp + study-pack namespace
 
 ## 관련 ADR
@@ -50,3 +50,5 @@ DRY_RUN=1 TASK_ROOT=~/ai-nodes/career-os \
 - ADR-014: 비용 측정 정책
 - ADR-016: topic-pool-replenisher 분리
 - ADR-017: plan005 WIP wire-up 분해 (본 skill = WIP 1/3)
+
+실행 파일은 `career-os/scripts/study-pack-batch/`(ADR-019).

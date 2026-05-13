@@ -17,8 +17,10 @@ description: "study-pack candidate reservoir 자동 보충 + primary auto-promot
 ## 진입점
 
 ```bash
-career-os/skills/topic-pool-replenisher/scripts/run_topic_replenishment.sh
+career-os/scripts/topic-pool-replenisher/run_topic_replenishment.sh
 ```
+
+실행 파일은 `career-os/scripts/topic-pool-replenisher/`(ADR-019).
 
 dispatcher를 통해 실행:
 

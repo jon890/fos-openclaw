@@ -30,3 +30,5 @@ description: 후보자의 코드/문서 갭을 분석. baseline(전체 큐레이
 - ADR-003: baseline chunking 제거 (단일 호출)
 - ADR-014: 스터디 진행 추적
 - ADR-017: skill 폴더 분해 계획
+
+실행 파일은 `career-os/scripts/knowledge-gap-analyzer/`(ADR-019).

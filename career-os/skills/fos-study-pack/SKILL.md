@@ -49,3 +49,5 @@ Typical user prompts that should trigger this skill:
 - Do not force the user to choose between create/update modes.
 - When overlap matters, let Claude inspect candidate docs and decide.
 - Keep operational commentary short; the main value is execution.
+
+실행 파일은 `career-os/scripts/fos-study-pack/`(ADR-019).
