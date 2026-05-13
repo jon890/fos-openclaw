@@ -28,7 +28,7 @@
 
 ## Engineering blog signals
 
-- `config/tech-blog-sources.json`
+- `config/sources.json` (`techBlog` 카테고리)
   - 기술블로그/엔지니어링 블로그 소스.
   - 회사의 엔지니어링 문화, 대규모 운영, 결제/정산/커머스/플랫폼/SRE 시그널을 판단할 때 사용한다.
 

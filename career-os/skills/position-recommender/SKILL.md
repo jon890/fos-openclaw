@@ -21,11 +21,11 @@ POSITION_CONTEXT="AI 서비스 백엔드 위주" run_now.sh recommend-positions
 
 ## Behavior
 
-- Use `config/position-context-index.md` as the index for durable recommendation context files.
+- Use `skills/position-recommender/references/position-context-index.md` as the index for durable recommendation context files.
 - Use `config/candidate-profile.md` as the source of truth.
-- Use `config/position-decision-criteria.md` as the evolving decision rubric for ranking, exclusions, and user feedback.
-- Use `config/company-upside-reference.md` for company/scale upside, brand leverage, and business risk.
-- Use `config/verified-company-research-targets.json` for broad verified-company discovery targets.
+- Use `skills/position-recommender/references/position-decision-criteria.md` as the evolving decision rubric for ranking, exclusions, and user feedback.
+- Use `skills/position-recommender/references/company-upside-reference.md` for company/scale upside, brand leverage, and business risk.
+- Use `skills/position-recommender/references/verified-company-research-targets.json` for broad verified-company discovery targets.
 - Use `config/sources.json` (key: `techBlog`) to judge whether a company has strong engineering-blog signals.
 - For verified-company scans, read `references/verified-company-discovery.md`.
 - Use selected local fos-study resume/task docs when helpful.
