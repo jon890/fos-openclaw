@@ -473,3 +473,79 @@ docs/ 안에 5문서(prd / data-schema / flow / code-architecture / adr) 외에 
 - learn/README.md 가 학습 노트 정책의 가이드 (어떤 게 learn 에 들어오고 어떤 게 ADR 로 가는지).
 - code-architecture.md 디렉터리 트리에서 decisions/ + audit/ 항목 제거.
 - AGENTS.md 5문서 라우팅 표의 ADR 카운트 갱신.
+
+---
+
+## ADR-019 — career-os: Claude Code skill 폴더와 실행 스크립트 디렉터리 분리
+
+- Status: Accepted
+- Date: 2026-05-14
+
+### 맥락
+
+career-os의 모든 skill은 Claude Code 표준 구조(`skills/<name>/SKILL.md` + `references/` + `scripts/`)를 따라 왔다. 이 구조에서 `scripts/`에는 실제로 두 가지 다른 성격의 자산이 섞여 있다:
+
+1. **Claude가 컨텍스트로 참조하는 자산** — SKILL.md + references/* 의 프롬프트·스키마.
+2. **openclaw / cron / 사용자가 호출하는 실행 파일** — `run_now.sh` 및 도메인별 runner / extractor / 도구.
+
+Claude Code skill 진입은 SKILL.md를 로드해 사람이 그 안내를 읽고 호출하는 패턴이지, Claude가 skill 내부의 `scripts/`를 자동으로 실행하는 패턴이 아니다. 결과적으로 `skills/<name>/scripts/`는 "Claude Skill 디렉터리 안에 있지만 Claude가 다루는 자산이 아닌" 모호한 영역이 됐다.
+
+이 모호함의 부작용:
+- 새 자산이 들어올 때 references와 scripts 사이 어느 쪽인지 매번 판단 필요.
+- skill 디렉터리를 컨텍스트로 로드할 때 실행 스크립트들이 같이 보여 토큰 낭비.
+- skill의 "참조 자산" 책임과 "실행 디스패치" 책임 경계가 흐려져 plan005 같은 분해 사이클에서도 정리가 깔끔하지 않음.
+
+### 결정
+
+career-os 워크스페이스에 한해 다음 구조를 채택한다:
+
+- `career-os/scripts/<skill-name>/` 신설 — 모든 실행 파일(`run_*.sh`, `*.py` 도구)이 이쪽으로 이동.
+- `career-os/skills/<skill-name>/`은 SKILL.md + references/ 만 유지(Claude 컨텍스트 자산).
+- skill 이름과 scripts 디렉터리 이름은 1:1 매칭(`scripts/<name>/`의 `<name>`이 skill 폴더명과 동일).
+
+depends_on: plan005-cj-oliveyoung-decomposition. plan005가 11개 skill 구조를 확정한 뒤에야 일관된 이전이 가능.
+
+거절한 대안:
+- `career-os/scripts/` 평면 구조(skill 경계 없음): 같은 이름 충돌 위험 + 스크립트-skill 추적 어려움.
+- ai-nodes 전체 워크스페이스 컨벤션 변경(apartment 포함): 다른 워크스페이스는 별도 사이클에서 본인이 판단. 워크스페이스 격리 원칙에 따라 본 결정은 career-os 한정.
+- references/도 같이 빼서 `career-os/references/<name>/`로: references는 Claude가 SKILL.md와 함께 컨텍스트로 읽는 자산이라 skill 디렉터리 안에 두는 게 자연스러움.
+
+### 결과
+
+- skill 디렉터리가 SKILL.md + references/ 만 남아 가벼워짐 — Claude 컨텍스트 로드 효율 상승.
+- dispatcher / runner / 도구 경로가 `scripts/<name>/`에 집중되어 운영 자산 위치가 명확.
+- ai-nodes 워크스페이스 간 비대칭 — apartment / stock-investment / travel 등은 기존 `skills/<name>/scripts/` 패턴 유지. 본 ADR은 career-os 만 적용.
+- plan-and-build의 caller path 추적이 단순해진다(스크립트는 `scripts/` 아래만, references는 `skills/` 아래만).
+
+### 적용
+
+- 이전 phase 명세는 `tasks/plan006-workspace-scripts-restructure/` 참조.
+- 새 디렉터리 트리는 `docs/code-architecture.md`의 "디렉터리 책임" 섹션.
+- ai-nodes/CLAUDE.md의 워크스페이스 컨벤션 문단은 career-os 만 새 구조로 갱신 — apartment 예시는 기존 구조 유지.
+
+---
+
+## ADR-020 — 공용 헬퍼 TS(Bun) 마이그레이션: 점진 + _shared/lib·types 단일 위치
+
+- Status: Accepted
+- Date: 2026-05-13
+
+### 맥락
+ai-nodes 의 자동화 스크립트는 shell + Python 혼재 상태로 자랐다 (_shared/bin/ 의 claude_lib.sh / format_cost_summary.py / extract_claude_result.py / track_task.sh 와 워크스페이스별 notify_discord.sh, 그 외 30+ 파일). 사용자가 TS 코드는 한눈에 읽히지만 Python 은 어렵다는 점 + 공용 호출 래퍼가 6+ runner 에 흩어진 동일 패턴을 한 곳으로 모으면 drift 위험이 줄어든다는 점 두 가지를 만족시킬 마이그레이션이 필요.
+
+### 결정
+- 런타임은 Bun 단일 채택. shebang `#!/usr/bin/env bun` + `bun run script.ts` 둘 다 사용 가능. node_modules 만 ai-nodes 루트에 둠.
+- TS 코드는 `_shared/lib/` 에, 공통 타입은 `_shared/types/` 에 둔다. 워크스페이스별 TS 복제 금지 — 공용은 단일 위치.
+- 마이그레이션은 점진적. 본 plan(004)은 공용 헬퍼 3개만: notify_discord.ts / invoke_claude_skills.ts / format_cost_summary.ts. extractor·renderer·runner·dispatcher 는 별도 plan.
+- 옛 헬퍼는 새 TS 가 등장하면 즉시 폐기. shim·thin wrapper 보존 금지. caller 가 일관 상태 — 한 사이클에 하나만 산다.
+
+### 결과
+- 자주 쓰이는 호출 패턴 (Claude CLI subprocess + usage capture + retry + Discord webhook + cost summary) 이 단일 TS 모듈로 일원화. 새 runner 추가 시 import 만 하면 됨.
+- 사용자가 읽기 어려워하던 Python 헬퍼 1개가 사라짐 (format_cost_summary.py). claude_lib.sh 도 사라짐.
+- node_modules 도입 → ai-nodes 루트의 디렉터리 무게 증가. 단점.
+- 모든 caller 가 한꺼번에 갱신되어야 일관 상태 — 부분 마이그레이션 금지. plan004 phase-05 가 그 일관성을 강제.
+
+### 적용
+- 신규 TS 파일은 모두 `_shared/lib/` 또는 `_shared/types/` 에.
+- 새 runner 가 Claude CLI 를 직접 호출하지 않는다 — `invoke_claude_skills.ts` 만 사용.
+- 다음 plan(extractor·renderer TS 화) 은 본 ADR 정책 따라 진행.

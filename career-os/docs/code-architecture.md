@@ -167,17 +167,34 @@ career-os/
         └── (study-pack / question-bank / master 산출물이 여기로 push됨)
 ```
 
-## 외부 의존성 (`_shared/bin/`)
+## 외부 의존성 (`_shared/`)
 
-career-os 워크스페이스 바깥, ai-nodes 루트의 `_shared/bin/`에 모든 워크스페이스가 공유하는 헬퍼.
+career-os 워크스페이스 바깥, ai-nodes 루트의 `_shared/` 에 모든 워크스페이스가 공유하는 헬퍼. (ADR-020)
+
+```
+~/ai-nodes/
+├── package.json                              # Bun 프로젝트 루트
+├── tsconfig.json
+├── .gitignore                                # node_modules 포함
+└── _shared/                                  ← 모든 워크스페이스 공용 코드 (ADR-020)
+    ├── bin/                                  ← shell 계열. 점진 폐기 대상.
+    │   └── track_task.sh                     # 트래커 (당분간 shell 유지)
+    ├── lib/                                  ← TS(Bun) 헬퍼. plan004 이후 추가.
+    │   ├── notify_discord.ts                 # Discord webhook 알림
+    │   ├── invoke_claude_skills.ts           # Claude CLI 호출 + usage capture + retry
+    │   └── format_cost_summary.ts            # logs/task-runs.jsonl → 한 줄 cost 요약
+    └── types/                                ← TS 공통 타입.
+        └── (ClaudeUsage / TaskRunEntry / NotificationPayload 등)
+```
 
 | 파일 | 책임 |
 |---|---|
-| `track_task.sh` | 모든 runner 래퍼. JSONL 로그 + openclaw status diff + usage file 전달. **누락 시 모든 실행 실패**. |
-| `claude_lib.sh` | sourceable. `claude_persist_usage <raw-json-path>` — raw Claude JSON envelope을 `$TRACK_TASK_CLAUDE_USAGE_FILE`로 cp (ADR-014). |
-| `format_cost_summary.py` | logs/task-runs.jsonl 최신 항목 → 한 줄 cost summary. run_now.sh의 알림에 부착. |
-| `extract_claude_result.py` | Claude `--output-format json` → `.result` 추출 + usage 인자 전달. **gold standard**. baseline/daily/smoke/foodville 사용. |
-| `update_artifacts.py` | `data/generated-artifacts.json` upsert. study-pack/question-bank/master publish 후. |
+| `_shared/bin/track_task.sh` | 모든 runner 래퍼. JSONL 로그 + openclaw status diff + usage file 전달. **누락 시 모든 실행 실패**. |
+| `_shared/lib/invoke_claude_skills.ts` | Bun. Claude CLI 호출 + usage 전파 + 재시도 + 검증 통합 헬퍼. `claude_lib.sh` + `extract_claude_result.py` 의 후속. |
+| `_shared/lib/notify_discord.ts` | Bun. Discord webhook 알림. 워크스페이스별 `notify_discord.sh` 의 후속. |
+| `_shared/lib/format_cost_summary.ts` | Bun. logs/task-runs.jsonl 최신 항목 → 한 줄 cost 요약. `format_cost_summary.py` 의 후속. |
+| `_shared/bin/update_artifacts.py` | `data/generated-artifacts.json` upsert (당분간 Python 유지, 별도 plan). |
+| `_shared/types/` | TS 공통 타입 디렉터리. ClaudeUsage / TaskRunEntry / NotificationPayload 등. |
 
 ## Runner 패턴 (ADR-014 이후 표준)
 
