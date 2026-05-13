@@ -74,4 +74,4 @@ PY
 
 # Notification ownership lives in run_now.sh study-pack.
 # This wrapper should only select/prepare the live-coding topic and dispatch once.
-exec env TOPIC_CONFIG_OVERRIDE="$TEMP_CONFIG" bash "$TASK_ROOT/skills/command-router/scripts/run_now.sh" study-pack "$TOPIC_KEY"
+exec env TOPIC_CONFIG_OVERRIDE="$TEMP_CONFIG" bash "$TASK_ROOT/scripts/command-router/run_now.sh" study-pack "$TOPIC_KEY"

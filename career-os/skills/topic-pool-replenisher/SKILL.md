@@ -23,5 +23,5 @@ career-os/skills/topic-pool-replenisher/scripts/run_topic_replenishment.sh
 dispatcher를 통해 실행:
 
 ```bash
-career-os/skills/command-router/scripts/run_now.sh replenish-topics
+career-os/scripts/command-router/run_now.sh replenish-topics
 ```

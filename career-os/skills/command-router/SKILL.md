@@ -29,7 +29,7 @@ career-os 워크스페이스의 단일 dispatch 진입점.
 ## 호출 방법
 
 ```bash
-career-os/skills/command-router/scripts/run_now.sh <command> [args...]
+career-os/scripts/command-router/run_now.sh <command> [args...]
 ```
 
-plan006(ADR-019) 이후에는 `career-os/scripts/command-router/run_now.sh`로 재배치 예정.
+실행 파일은 `career-os/scripts/command-router/`(ADR-019).

@@ -10,7 +10,7 @@ Recommend realistic target positions for the candidate.
 ## Entrypoint
 
 ```bash
-/home/bifos/ai-nodes/career-os/skills/command-router/scripts/run_now.sh recommend-positions
+/home/bifos/ai-nodes/career-os/scripts/command-router/run_now.sh recommend-positions
 ```
 
 Optional freeform context:

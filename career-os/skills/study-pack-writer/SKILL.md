@@ -77,7 +77,7 @@ Domain-specific extensions:
 This skill is normally invoked via the `command-router` dispatcher:
 
 ```bash
-skills/command-router/scripts/run_now.sh study-pack <topic>
+scripts/command-router/run_now.sh study-pack <topic>
 ```
 
 Where `<topic>` is a key in `config/topics.json (study-pack namespace)` (e.g. `explain-plan`, `composite-index`).
