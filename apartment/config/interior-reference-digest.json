@@ -1,0 +1,107 @@
+{
+  "target": {
+    "name": "구리 럭키아파트 5동 1004호",
+    "complex": "구리 럭키아파트",
+    "unitContext": "같은/유사 평수 20평대 구축 아파트",
+    "settlementDate": "2026-09-09",
+    "budgetKrw": 30000000
+  },
+  "stylePreferences": [
+    "화이트/베이지 기반",
+    "우드 포인트",
+    "밝고 따뜻한 분위기",
+    "구축 올수리 느낌",
+    "거실 베란다 확장",
+    "단열 강화"
+  ],
+  "currentDecisionNote": "/home/bifos/ai-nodes/apartment/docs/interior/lucky-5-1004-interior-decisions.md",
+  "outputRoot": "/home/bifos/ai-nodes/apartment/data/interior-reference-digest",
+  "sourcePriority": [
+    {
+      "name": "오늘의집",
+      "domains": [
+        "ohou.se",
+        "contents.ohou.se",
+        "ozip.me"
+      ],
+      "reason": "사진, 평형, 공사 범위, 업체 포트폴리오 확인에 강함"
+    },
+    {
+      "name": "네이버 블로그",
+      "domains": [
+        "blog.naver.com",
+        "m.blog.naver.com"
+      ],
+      "reason": "지역 업체의 실제 시공 후기와 단지명 검색에 강함"
+    },
+    {
+      "name": "업체 포트폴리오",
+      "domains": [],
+      "reason": "시공 범위와 자재/디테일 확인에 유용"
+    },
+    {
+      "name": "브랜드/플랫폼 보조 자료",
+      "domains": [
+        "lxzin.com",
+        "hanssem.com",
+        "homecc.com",
+        "zipdoc.co.kr",
+        "soomgo.com",
+        "apartmend.com"
+      ],
+      "reason": "자재, 단열, 창호, 공사 기준 참고용"
+    }
+  ],
+  "searchQueries": {
+    "exactComplex": [
+      "구리 럭키아파트 인테리어",
+      "구리 럭키아파트 24평 인테리어",
+      "구리 럭키아파트 리모델링",
+      "구리 럭키아파트 베란다 확장",
+      "구리 럭키아파트 샷시 교체"
+    ],
+    "nearbyAndSimilar": [
+      "구리 구축 아파트 20평대 인테리어 베이지 우드",
+      "수택동 구축 아파트 인테리어 거실 확장",
+      "인창동 구축 아파트 인테리어 24평",
+      "구리 20평대 아파트 리모델링 욕실 주방",
+      "구리 아파트 베란다 확장 단열 샷시"
+    ],
+    "topicFocused": [
+      "20평대 아파트 거실 확장 단열 샷시 비용",
+      "구축 아파트 거실 확장 샷시 단열 인테리어",
+      "600각 타일 거실 주방 구축 아파트 인테리어",
+      "화이트 베이지 우드 20평대 아파트 인테리어"
+    ]
+  },
+  "scoringRubric": {
+    "sameComplexOrUnit": 30,
+    "nearbyGuriSimilarAgeAndSize": 20,
+    "livingRoomExpansionOrInsulation": 15,
+    "windowSashDetails": 12,
+    "matchesStyle": 10,
+    "budgetOrScopeTransparency": 8,
+    "usefulPhotosOrFloorplan": 8,
+    "vendorAndMaterialInfo": 5,
+    "penaltyLowInfoAdOnly": -15,
+    "penaltyTooLuxuryOrUnrealistic": -10,
+    "penaltyNotApartmentOrWrongScale": -20
+  },
+  "dailyReport": {
+    "maxRecommendations": 5,
+    "preferredRecommendations": 3,
+    "includeTodayDecisionQuestion": true,
+    "discordSafe": true,
+    "autoAppendReferenceCandidates": true,
+    "autoAppendDecisions": false,
+    "scheduleRecommendation": "0 9 * * * Asia/Seoul"
+  },
+  "referenceNotebook": "/home/bifos/ai-nodes/apartment/docs/interior/interior-references.md",
+  "evaluationFocus": [
+    "처음 인테리어를 진행하는 사용자 관점에서 업체 신뢰도와 설명 품질을 1차 필터링",
+    "동일 단지/유사 평형 사례 우선",
+    "견적 투명성, 공사 범위 설명, 하자/AS 언급, 실제 사진 품질 확인",
+    "과도하게 광고성인 글은 감점",
+    "거실 확장/단열/샷시/욕실/주방/수납/작업공간 배치 힌트 우선"
+  ]
+}
