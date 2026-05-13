@@ -222,8 +222,93 @@ def normalize_articles(payload):
             "verification": a.get("verificationTypeCode"),
             "priceChange": a.get("priceChangeState"),
             "confirmDate": a.get("articleConfirmYmd"),
+            "featureDesc": a.get("articleFeatureDesc"),
+            "tags": a.get("tagList") or [],
         })
     return items
+
+
+def classify_occupancy(article, detail_payload=None):
+    """Classify whether a sale listing looks owner-occupancy friendly.
+
+    Naver's list endpoint often omits occupancy/tenant deposit fields. The detail
+    endpoint exposes `articlePrice.allWarrantPrice`, which corresponds to the UI's
+    기전세금. For the user's mortgage-backed 실거주 purchase flow, any positive
+    기전세금 should be treated as tenant-occupied / 전세 끼고 매매 and filtered out.
+    """
+    detail = (detail_payload or {}).get("articleDetail") or {}
+    addition = (detail_payload or {}).get("articleAddition") or {}
+    price = (detail_payload or {}).get("articlePrice") or {}
+
+    text_parts = [
+        article.get("featureDesc"),
+        detail.get("articleFeatureDescription"),
+        addition.get("articleFeatureDesc"),
+        " ".join(article.get("tags") or []),
+        " ".join(detail.get("tagList") or []),
+        " ".join(addition.get("tagList") or []),
+    ]
+    text = " ".join(str(x) for x in text_parts if x).strip()
+    all_warrant = price.get("allWarrantPrice")
+    all_rent = price.get("allRentPrice")
+
+    negative_keywords = [
+        "세안고", "전세안고", "전세 안고", "전세승계", "월세승계", "갭투자",
+        "투자", "임차인", "세입자", "만기", "갱신권",
+    ]
+    positive_keywords = [
+        "입주", "즉시입주", "즉시 입주", "입주가능", "입주 가능", "입주협의",
+        "공실", "주인거주", "주인 거주", "집주인거주", "집주인 거주",
+    ]
+
+    risk = "unknown"
+    reason = "occupancy detail unavailable"
+    if isinstance(all_warrant, (int, float)) and all_warrant > 0:
+        risk = "tenant-occupied"
+        reason = f"기전세금 {all_warrant}만원"
+    elif isinstance(all_rent, (int, float)) and all_rent > 0:
+        risk = "tenant-occupied"
+        reason = f"기월세 {all_rent}만원"
+    elif any(k in text for k in negative_keywords):
+        risk = "tenant-occupied"
+        reason = "tenant/gap keyword in listing text"
+    elif any(k in text for k in positive_keywords):
+        risk = "owner-occupancy-friendly"
+        reason = "occupancy-friendly keyword in listing text"
+    elif detail_payload:
+        risk = "phone-check-needed"
+        reason = "no tenant deposit/negative keyword found in detail"
+
+    return {
+        "risk": risk,
+        "reason": reason,
+        "allWarrantPriceManwon": all_warrant,
+        "allRentPriceManwon": all_rent,
+        "text": text,
+    }
+
+
+def enrich_articles_with_details(session, headers, articles, errors, label, max_details=80):
+    enriched = []
+    for idx, article in enumerate(articles):
+        if idx >= max_details:
+            article["occupancy"] = classify_occupancy(article)
+            enriched.append(article)
+            continue
+        article_no = article.get("articleNo")
+        if not article_no:
+            article["occupancy"] = classify_occupancy(article)
+            enriched.append(article)
+            continue
+        payload, code, err = call_api(session, f"{API_BASE}/articles/{article_no}", headers)
+        if err:
+            errors.append({"endpoint": f"{label}.detail.{article_no}", "code": code, "error": err[:200]})
+            article["occupancy"] = classify_occupancy(article)
+        else:
+            article["occupancy"] = classify_occupancy(article, payload)
+        enriched.append(article)
+        time.sleep(0.2)
+    return enriched
 
 
 def build_recent_from_realprice(overview_norm):
@@ -337,6 +422,11 @@ def main():
     overview_norm = normalize_overview(overview_raw)
     sale_articles = normalize_articles(articles_a1)
     lease_articles = normalize_articles(articles_b1)
+    if sale_articles and os.environ.get("NAVER_ARTICLE_DETAIL_ENABLED", "1") != "0":
+        max_details = int(os.environ.get("NAVER_ARTICLE_DETAIL_MAX", "80"))
+        sale_articles = enrich_articles_with_details(
+            session, headers, sale_articles, errors, "articles.A1", max_details=max_details
+        )
     pricing = {}
     if prices_a1:
         pricing["매매"] = normalize_prices(prices_a1, "매매")
