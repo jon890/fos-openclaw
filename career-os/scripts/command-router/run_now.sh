@@ -70,16 +70,12 @@ case "$MODE" in
     run_tracked "career-os:foodville-coffeechat" "Foodville coffeechat 준비" \
       "$TASK_ROOT/scripts/cj-foodville-coffeechat-prep/run_foodville_coffeechat_prep.sh"
     ;;
-  replenish-topics)
-    run_tracked "career-os:replenish-topics" "topic reservoir 보충" \
-      "$TASK_ROOT/scripts/topic-pool-replenisher/run_topic_replenishment.sh"
-    ;;
   smoke)
     run_tracked "career-os:smoke" "smoke test" \
       "$TASK_ROOT/scripts/knowledge-gap-analyzer/run_smoke_test.sh"
     ;;
   *)
-    echo "usage: run_now.sh [baseline | daily [topic] | recommend-topics | live-coding-dispatch | recommend-positions | foodville-coffeechat | replenish-topics | smoke]" >&2
+    echo "usage: run_now.sh [baseline | daily [topic] | recommend-topics | live-coding-dispatch | recommend-positions | foodville-coffeechat | smoke]" >&2
     echo "  daily topic keys: see config/topic-file-map.json" >&2
     echo "  study-pack / interview-asset (Q&A + master playbook): native skill 진입점 (claude -p '/<skill> <topic>') 사용 — ai-nodes ADR-002" >&2
     exit 1

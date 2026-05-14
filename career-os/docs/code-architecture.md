@@ -121,10 +121,7 @@ career-os/
 │   │   ├── run_live_coding_dispatch.sh
 │   │   ├── refresh_topic_inventory.py    ADR-009/010/012/013 종합 엔진
 │   │   └── feed_discovery.py             ADR-013 RSS/Atom 파서
-│   ├── topic-pool-replenisher/
-│   │   ├── run_topic_replenishment.sh
-│   │   ├── replenish_topic_reservoir.py  ADR-011 보충 엔진
-│   │   └── promote_candidate_topics.py
+│   (topic-pool-replenisher scripts 폐기 — plan015, plan016에서 study-topic-recommender가 흡수 예정)
 │   (study-pack-writer + interview-asset-writer scripts 폐기 — plan013/015 native skill로 흡수, .claude/skills/ 트리 참조)
 │   ├── position-recommender/{run_position_recommendation.sh, extract_position_report.py,
 │   │                          collect_live_postings.py (deferred), publish_job_analysis.sh (deferred)}
@@ -136,9 +133,6 @@ career-os/
 │   │   ├── SKILL.md
 │   │   └── references/{baseline,daily}-prompt.md
 │   ├── study-topic-recommender/SKILL.md
-│   ├── topic-pool-replenisher/
-│   │   ├── SKILL.md
-│   │   └── references/topic-replenishment-prompt.md
 │   ├── study-pack-writer/{SKILL.md, references/}   (plan013-2에서 native skill 명세로 재작성. plan014에서 옛 maintain-study-pack + bootcamp-batch 기능 흡수)
 │   ├── interview-asset-writer/
 │   │   ├── SKILL.md   (plan015에서 native skill 명세로 재작성. Q&A 질문 은행 + 마스터 플레이북 두 형식 흡수. 옛 experience-question-bank-writer + interview-master-writer 통합)

@@ -26,7 +26,6 @@ career-os 워크스페이스의 **제품 범위·MVP 기능 명세**. 현재 act
 | `daily [topic]` | 일일 집중 리포트, 토픽 미지정 시 가장 오래된 약점 자동 선택 (`data/reports/daily/YYYY-MM-DD/`) | 없음 | 매일 (현재 정체) |
 | `recommend-positions` | 활성 채용 공고 + 후보자 프로필 매칭 추천 (`data/runtime/position-recommendation.md`) | 없음 | 매일 |
 | `recommend-topics` | 오전 학습 토픽 추천 (`data/runtime/morning-topic-recommendation.md`) | 없음 | 매일 |
-| `replenish-topics` | 피드 소스로부터 토픽 풀 보충 (Python 내부 Claude 호출) | 없음 | 매일 |
 | `study-pack <topic>` | 토픽 1개 풀 마크다운 스터디팩 → fos-study 푸시. overlap 점검 + update vs new 판단 + self-check 내장 (plan014에서 옛 `maintain-study-pack` 흡수) | ✓ | 토픽별 1회 또는 갱신 |
 | `foodville-coffeechat` | CJ 푸드빌 커피챗 준비 + 백엔드 사이트 인사이트 리포트 | 없음 | 면접 단계별 |
 | `smoke` | 최소 smoke 점검 (실행 검증용) | 없음 | 워크플로 변경 후 |
