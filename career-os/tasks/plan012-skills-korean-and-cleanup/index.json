@@ -2,9 +2,9 @@
   "name": "plan012-skills-korean-and-cleanup",
   "description": "career-os skills 정리·한글화. (1) fos-study-pack 폴더 제거 + 자연어 라우팅 기능을 study-pack-writer로 흡수. (2) maintainer SKILL.md에 docs-audit 활용 권장 명시(수동 링크, cross-skill 자동 호출은 안 함). (3) 7개 영문 위주 SKILL.md(study-pack-writer / study-pack-maintainer / experience-question-bank-writer / interview-master-writer / position-recommender / cj-foodville-coffeechat-prep — 흡수 후 6개)를 description + prose 한글화. 코드 식별자(skill명·command명·파일경로·함수명)는 영어 유지.",
   "created_at": "2026-05-14T12:50:00+00:00",
-  "updated_at": "2026-05-14T12:50:00+00:00",
-  "status": "pending",
-  "current_phase": 0,
+  "updated_at": "2026-05-14T12:53:51.808194+00:00",
+  "status": "running",
+  "current_phase": 2,
   "total_phases": 4,
   "error_message": null,
   "blocked_reason": null,
@@ -23,17 +23,31 @@
       "number": 1,
       "title": "docs-first: ADR-025 + code-architecture/prd/AGENTS 갱신",
       "file": "phase-01.md",
-      "status": "pending",
-      "allowedTools": ["Read", "Write", "Edit", "Bash", "Grep"],
+      "status": "completed",
+      "allowedTools": [
+        "Read",
+        "Write",
+        "Edit",
+        "Bash",
+        "Grep"
+      ],
       "model": "sonnet",
-      "timeout": 1200
+      "timeout": 1200,
+      "commitSha": "ac6ba1f69cbd"
     },
     {
       "number": 2,
       "title": "fos-study-pack → study-pack-writer 자연어 라우팅 흡수 + 폴더 제거",
       "file": "phase-02.md",
-      "status": "pending",
-      "allowedTools": ["Read", "Write", "Edit", "Bash", "Glob", "Grep"],
+      "status": "completed",
+      "allowedTools": [
+        "Read",
+        "Write",
+        "Edit",
+        "Bash",
+        "Glob",
+        "Grep"
+      ],
       "model": "sonnet",
       "timeout": 1200
     },
@@ -42,7 +56,13 @@
       "title": "6개 SKILL.md 한글화 (description + prose) + maintainer에 docs-audit 활용 권장 명시",
       "file": "phase-03.md",
       "status": "pending",
-      "allowedTools": ["Read", "Write", "Edit", "Bash", "Grep"],
+      "allowedTools": [
+        "Read",
+        "Write",
+        "Edit",
+        "Bash",
+        "Grep"
+      ],
       "model": "sonnet",
       "timeout": 1200
     },
@@ -51,7 +71,13 @@
       "title": "통합 smoke + 잔재 grep + push + trailing cleanup",
       "file": "phase-04.md",
       "status": "pending",
-      "allowedTools": ["Read", "Write", "Edit", "Bash", "Grep"],
+      "allowedTools": [
+        "Read",
+        "Write",
+        "Edit",
+        "Bash",
+        "Grep"
+      ],
       "model": "sonnet",
       "timeout": 1200
     }

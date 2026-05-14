@@ -1,6 +1,6 @@
 ---
 name: study-pack-writer
-description: Generate and publish reusable study-pack markdown documents into the local fos-study repository for interview preparation and technical blogging. Use when a study topic changes day to day and you want one complete article-like learning package with draft labeling, practical examples, runnable exercises, interview framing, and immediate git commit/push to fos-study.
+description: "Generate and publish reusable study-pack markdown documents into the local fos-study repository for interview preparation and technical blogging. Use when a study topic changes day to day and you want one complete article-like learning package with draft labeling, practical examples, runnable exercises, interview framing, and immediate git commit/push to fos-study. 주제를 자연어로 표현한 요청(예: '/study-pack ...', '~에 대한 스터디팩 만들어줘', '스터디팩 만들어줘', 'fos-study에 정리해줘')도 처리한다. 자연어 요청은 내부에서 topic key로 변환 후 동일 흐름. (기존 fos-study-pack skill 흡수, ADR-025)"
 ---
 
 # Study Pack Writer
