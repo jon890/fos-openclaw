@@ -27,8 +27,7 @@ Claude는 다음을 `Read` 도구로 직접 로드:
 2. `career-os/config/candidate-profile.md` — 11섹션 prose, 후보자 이력 (필수)
 3. `career-os/config/mvp-target.json` — `primary.company`, `primary.role` (현재 면접 타깃)
 4. `career-os/task/*` 또는 `career-os/resume/*` — `inputFiles` 명시되면 그 파일들, 아니면 candidate-profile에서 참조하는 경로
-5. `references/question-bank-prompt.md` — Q&A 형식 prompt 구조 가이드
-6. (선택) `sources/fos-study/<유사 outputPath>.md` — overlap 회피
+5. (선택) `sources/fos-study/<유사 outputPath>.md` — overlap 회피
 
 ## Workflow
 
@@ -60,15 +59,32 @@ Inputs 1~5 모두 Read. `inputFiles` 명시되면 task/resume 추가 Read.
 
 #### 4-A. Q&A 질문 은행 형식
 
-- 5개 main Q + 각 Q에 follow-up 1-2개 + answer points 3-5개 + 1분 답변 + 압박 질문 방어
-- 백엔드 면접 관점 + 후보자 실제 task/resume 인용 (구체적 근거)
+저장 경로: `career-os/sources/fos-study/interview/experience-based/<topic>.md`
+
+본문 구조 (각 항목 모두 필수):
+- **메인 질문 정확히 5개** + 각 메인 질문에 **follow-up 정확히 5개** + 각 메인 질문에 다음 부속 섹션:
+  - **interviewer intent** — 면접관이 왜 이 질문을 던지는지
+  - **answer points** — 답변 핵심 포인트 3-5개
+  - **1분 답변 구조** — 도입·핵심·마무리 흐름
+  - **압박 질문 방어** — 추가 압박 시 대응
+  - **피해야 할 약한 답변** (weak answers to avoid) — 면접관이 negative로 받는 표현/접근
+- **자기소개 1분 + 동기·회사 적합도** (확장 영역 2개) 별도 섹션
+- 모든 내용은 후보자의 *실제 task/resume*에서 구체 근거 인용 (generic advice 금지)
+- trade-off · 실제 설계 맥락 우선 (slogan 금지)
 
 #### 4-B. 마스터 플레이북 형식
 
+저장 경로: `career-os/sources/fos-study/interview/<topic>.md` (master-playbook은 cross-track이라 family 폴더 없이 interview/ 바로 아래)
+
+본문 구조:
 - 5 섹션 모두 포함: 자기소개 / 커리어 narrative / 기술 의사결정 스타일 / 역질문 / 최종 체크리스트
 - **회사 불문 cross-track 톤** — 특정 회사명·면접일 직접 박지 않음 (mvp-target.json 값 참고만)
 
-`Write` 도구로 `career-os/sources/fos-study/<outputPath>.md`에 직접 저장.
+#### 공통 출력 규칙
+
+- `Write` 도구로 *markdown 직접 작성* (JSON 출력 금지, JSON schema 따르지 않음 — native skill 패턴)
+- 메타 보고 문구 금지 ("파일이 생성되었습니다", "문서 구성 요약", "아래와 같이" 등) — 본문 자체를 작성
+- 첫 줄 `# [초안] <topic-title>` 형식. 작성 후에는 본문만 출력하지 *작성했다는 보고*는 하지 않음.
 
 ### 5. Self-check (재작성 ≤3회)
 
@@ -132,6 +148,3 @@ bun --env-file=career-os/.env _shared/lib/notify_discord.ts \
 - **재작성 ≤3회 cap**: 무한 루프 차단. 그래도 실패하면 본질 문제 (topic 모호, 입력 부족) — 사용자 개입 필요.
 - **Publish + notify Bash 통합**: 옛 외부 publish/notify shell을 Bash 도구로 직접. 의존 줄임.
 
-## References
-
-- `references/question-bank-prompt.md` — Q&A 형식 prompt 구조 (Claude가 참고)
