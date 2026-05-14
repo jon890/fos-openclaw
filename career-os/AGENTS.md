@@ -12,7 +12,7 @@
 | [`docs/data-schema.md`](docs/data-schema.md) | config / logs / runtime / 산출물 JSON 스키마 | 데이터 파일 다룰 때 / 새 config 도입 |
 | [`docs/flow.md`](docs/flow.md) | 사용자·데이터 플로우 (명령별 입력→runner→산출물) | 새 흐름 추가 / 디버깅 |
 | [`docs/code-architecture.md`](docs/code-architecture.md) | 디렉터리 레이어·책임·외부 의존·Runner/Dispatcher 패턴 | 코드 구조 변경 / 새 스킬 추가 |
-| [`docs/adr.md`](docs/adr.md) | 모든 아키텍처 결정 누적 기록 (현재 ADR-001~021) | 결정의 *왜*를 알아야 할 때 |
+| [`docs/adr.md`](docs/adr.md) | 모든 아키텍처 결정 누적 기록 (현재 ADR-001~022) | 결정의 *왜*를 알아야 할 때 |
 
 `tasks/`는 docs와 별개의 영역으로, `skills/planning`이 생성하고 `skills/plan-and-build`가 실행하는 **워크스페이스 단위 실행 계획**의 영구 저장소다. `<workspace>/tasks/plan{N}-<slug>/` 형태로 각 plan이 자기 디렉터리를 갖고, 그 안에 `index.json` + `phase-NN.md`가 들어간다. 완료된 plan도 history 보존 목적으로 삭제하지 않는다.
 
@@ -67,7 +67,7 @@
 - daily는 baseline보다 더 작게 — 토픽 기반 3-5개 문서.
 - 비용 데이터는 `logs/task-runs.jsonl`의 `cost_usd` / `model` / `tokens_*` 필드로 자동 기록 (ADR-014 이후 측정 가능 정책).
 - `workspace-audit`의 `health.token_outlier`가 평균 ±2σ 이탈 보고. `format_cost_summary.py`가 실시간 알림에 비용 부착.
-- 비밀 정보는 `config/.env` (GITHUB_TOKEN, DISCORD_WEBHOOK_URL 등).
+- 비밀 정보는 `.env` (워크스페이스 root, ADR-021): `DISCORD_CHANNEL_ID`, `GITHUB_TOKEN`, `GITHUB_REPO_*` 등. 템플릿은 `.env.example`.
 - 영구 자산은 `~/.openclaw/workspace`가 아닌 워크스페이스 내부에 저장.
 
 ## 규칙
