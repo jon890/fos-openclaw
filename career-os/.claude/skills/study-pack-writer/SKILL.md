@@ -20,9 +20,10 @@ Claude는 다음을 `Read` 도구로 직접 로드:
 1. `career-os/config/topics.json` — `study-pack` namespace에서 `<topic-key>` 검색 → `outputPath` / `domain` / `title` / `promptAppend`
 2. `career-os/config/candidate-profile.md` — 11섹션 prose, 후보자 이력
 3. `career-os/config/mvp-target.json` — `primary.company`, `primary.role` (현재 면접 타깃)
-4. `references/study-pack-prompt.md` — prompt 구조 가이드
-5. `references/study-pack-writing-rules.md` — 작성 규칙 상세
-6. (선택) `sources/fos-study/<유사 outputPath>.md` — overlap 회피
+4. `career-os/config/topic-profiles.json` — 토픽 family별 (mysql/redis/kafka/spring-jpa) emphasis + output path 패턴. topic-key가 어느 family에 속하는지 `topicHints` 매칭으로 파악
+5. `references/study-pack-prompt.md` — prompt 구조 가이드
+6. `references/study-pack-writing-rules.md` — 작성 규칙 상세
+7. (선택) `sources/fos-study/<유사 outputPath>.md` — overlap 회피
 
 ## Workflow
 
@@ -30,9 +31,9 @@ Claude는 다음을 `Read` 도구로 직접 로드:
 
 인자가 topic-key (kebab-case)면 `topics.json["study-pack"]` 매칭. 자연어면 description/domain으로 유사 매칭. 매칭 실패 시 **freeform 모드**: domain·outputPath 본인이 결정. stderr에 결정 근거 1줄 로그.
 
-### 2. Context 로드 (4 Read)
+### 2. Context 로드 (Read)
 
-위 Inputs 1~5 모두 Read.
+위 Inputs 1~6 모두 Read. topic-profiles.json에서 `<topic-key>`가 어느 family의 `topicHints`에 속하는지 매칭 → 해당 family의 `emphasis` 적용.
 
 ### 3. Overlap 점검 (선택)
 

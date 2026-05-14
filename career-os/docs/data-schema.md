@@ -174,6 +174,22 @@ namespace 안의 topic key는 namespace별로 독립적이라 같은 key가 두 
 }
 ```
 
+### config/topic-profiles.json
+
+study-pack-writer가 토픽 family별로 작성 emphasis와 출력 경로 패턴을 참고하는 메타데이터. SKILL.md Inputs에서 Read. 옛 `.claude/skills/study-pack-writer/references/topic-profiles.md`를 JSON으로 옮긴 것 (config 컨벤션 정렬).
+
+```json
+{
+  "<family-key>": {
+    "topicHints": ["string"],
+    "emphasis": ["string"],
+    "outputPathPatterns": ["string"]
+  }
+}
+```
+
+현재 family: `mysql`, `redis`, `kafka`, `spring-jpa`. topic-key가 어느 family의 `topicHints`에 속하는지 매칭 → 해당 family의 `emphasis`와 `outputPathPatterns` 적용.
+
 ### config/baseline-core-files.json
 
 `config/baseline-core-files.txt` (ADR-003) → JSON 전환 (plan002).
