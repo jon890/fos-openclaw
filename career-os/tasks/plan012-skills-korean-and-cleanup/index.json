@@ -2,7 +2,7 @@
   "name": "plan012-skills-korean-and-cleanup",
   "description": "career-os skills 정리·한글화. (1) fos-study-pack 폴더 제거 + 자연어 라우팅 기능을 study-pack-writer로 흡수. (2) maintainer SKILL.md에 docs-audit 활용 권장 명시(수동 링크, cross-skill 자동 호출은 안 함). (3) 7개 영문 위주 SKILL.md(study-pack-writer / study-pack-maintainer / experience-question-bank-writer / interview-master-writer / position-recommender / cj-foodville-coffeechat-prep — 흡수 후 6개)를 description + prose 한글화. 코드 식별자(skill명·command명·파일경로·함수명)는 영어 유지.",
   "created_at": "2026-05-14T12:50:00+00:00",
-  "updated_at": "2026-05-14T13:02:11.834341+00:00",
+  "updated_at": "2026-05-14T13:08:09.694026+00:00",
   "status": "completed",
   "current_phase": 4,
   "total_phases": 4,
@@ -82,7 +82,7 @@
       ],
       "model": "sonnet",
       "timeout": 1200,
-      "commitSha": "46c4892"
+      "commitSha": "c1cb802b85ef"
     }
   ]
 }
