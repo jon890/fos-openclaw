@@ -34,43 +34,47 @@ career-os의 일상적 사용 패턴과 각 명령의 데이터 흐름. 새 워�
 
 각 명령은 `run_now.sh <command>` → `run_tracked()` 헬퍼 → `_shared/bin/track_task.sh` → 실제 runner 스크립트 순으로 흐른다. 완료/실패 시 자동으로 Discord 알림 + cost summary 부착. 알림은 `bun --env-file=career-os/.env _shared/lib/notify_discord.ts` 경유 (ADR-021).
 
-### `baseline`
+### `/interview-prep-analyzer` (native skill — plan017, baseline + daily 두 모드 자연어 분기)
+
+native skill 패턴: `claude -p "/interview-prep-analyzer [args]"` → SKILL.md 자동 로드 → Claude가 도구로 직접 처리.
+
+호출 시그니처:
 
 ```
-config/baseline-core-files.json
-  ↓
-build_target_file_list.py → data/reports/baseline/YYYY-MM-DD/target-files.txt
-  ↓
-sources/fos-study/<core-files>.md 읽기
-  ↓
-config/candidate-profile.md 결합
-  ↓
-claude --print --output-format json (단일 호출, ADR-003)
-  ↓
-extract_claude_result.py + claude_persist_usage (ADR-014)
-  ↓
-data/reports/baseline/YYYY-MM-DD/report.md
-  ↓
-실패 시: report.fallback.md (90s 타임아웃 등)
+  /interview-prep-analyzer                  → baseline 자동 (인자 없음)
+  /interview-prep-analyzer "오늘 점검"       → daily 자연어
+  /interview-prep-analyzer "<topic>"        → daily, 명시 토픽
+  /interview-prep-analyzer "전체 진단"       → baseline 명시
 ```
 
-### `daily [topic]`
+[모드 분기 — 자연어 추론]
 
 ```
-DAILY_TOPIC 또는 data/study-progress.json에서 가장 오래된 약점 토픽 선택 (ADR-001)
-  ↓
-config/topic-file-map.json에서 토픽 → 파일 목록 조회
-  ↓
-build_target_file_list.py → 3-5개 파일 선별 (ADR-001)
-  ↓
-claude --print --output-format json
-  ↓
-extract_claude_result.py + claude_persist_usage
-  ↓
-data/reports/daily/YYYY-MM-DD/report.md
-  ↓
-data/study-progress.json 자동 업데이트 (ADR-002)
+  ┌────────────────────────────────────┐       ┌────────────────────────────────────┐
+  │ baseline 모드                       │       │ daily 모드                          │
+  │ ───────                             │       │ ───────                             │
+  │ Read: config/baseline-core-files    │       │ Topic 선택:                         │
+  │ Read: 10 파일 (큐레이션)            │       │  - 인자 명시 → 그대로               │
+  │ Claude 분석 → 7 섹션                │       │  - 없으면 data/study-progress.json  │
+  │ Write: data/reports/baseline/       │       │    → 가장 오래된 토픽 자연어 선택   │
+  │  YYYY-MM-DD/report.md               │       │ Read: config/topic-file-map.json    │
+  │                                     │       │ Read: 3-5 파일                      │
+  │                                     │       │ Claude 분석 → 5 섹션                │
+  │                                     │       │ Write: data/reports/daily/          │
+  │                                     │       │  YYYY-MM-DD/report.md               │
+  │                                     │       │ Edit: data/study-progress.json      │
+  │                                     │       │  → 토픽 lastVisited = 오늘 갱신     │
+  └────────────────────────────────────┘       └────────────────────────────────────┘
 ```
+
+공통:
+- Read: `config/mvp-target.json` + `config/candidate-profile.md`
+- `fos-study git pull --rebase --autostash` (사전)
+- Discord 알림 [완료] + cost
+
+옛 외부 subprocess 흐름 (dispatcher → run_baseline/daily/smoke.sh → 6 Python script → claude --print → extract → 갱신)은 plan017에서 폐기됨. smoke 모드 자체도 폐기 — Claude 호출 sanity는 다른 skill 사용 중에 자연 확인.
+
+상세 동작: `career-os/.claude/skills/interview-prep-analyzer/SKILL.md` Workflow 섹션 참조.
 
 ### `recommend-positions`
 
@@ -142,10 +146,6 @@ data/reports/daily/YYYY-MM-DD/cj-foodville-coffeechat/report.md
 data/runtime/cj-foodville-coffeechat-prep.md (사본)
 ```
 
-### `smoke`
-
-최소 동작 점검. `_shared/bin/extract_claude_result.py` gold 경로를 따른다. baseline의 축소판.
-
 ### live-coding seed 선택 (study-topic-recommender 흡수 — plan016)
 
 `claude -p "/study-topic-recommender live-coding 1개 골라줘"` — study-topic-recommender가 live-coding seed 선택을 내부적으로 처리.
@@ -171,7 +171,7 @@ data/runtime/cj-foodville-coffeechat-prep.md (사본)
 
 ## 의도적 비대칭
 
-- baseline / daily / smoke: 외부 publish 안 함. 내부 학습용.
+- interview-prep-analyzer (baseline + daily): 외부 publish 안 함. 내부 학습용. (plan017, ADR-027)
 - study-pack / question-bank: fos-study에 commit + push 강제.
 - recommend-positions / foodville-coffeechat: data/runtime 또는 data/reports에만, 외부 publish X.
 - study-topic-recommender (native): 산출물이 사람이 읽고 다음 단계로 가는 입력. replenish + recommend + live-coding seed 흡수 완료 (plan015/016, ADR-026).

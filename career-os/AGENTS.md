@@ -12,7 +12,7 @@
 | [`docs/data-schema.md`](docs/data-schema.md) | config / logs / runtime / 산출물 JSON 스키마 | 데이터 파일 다룰 때 / 새 config 도입 |
 | [`docs/flow.md`](docs/flow.md) | 사용자·데이터 플로우 (명령별 입력→runner→산출물) | 새 흐름 추가 / 디버깅 |
 | [`docs/code-architecture.md`](docs/code-architecture.md) | 디렉터리 레이어·책임·외부 의존·Runner/Dispatcher 패턴 | 코드 구조 변경 / 새 스킬 추가 |
-| [`docs/adr.md`](docs/adr.md) | 모든 아키텍처 결정 누적 기록 (현재 ADR-001~025). 모노레포 레벨 결정은 [`ai-nodes/docs/adr.md`](../docs/adr.md) | 결정의 *왜*를 알아야 할 때 |
+| [`docs/adr.md`](docs/adr.md) | 모든 아키텍처 결정 누적 기록 (현재 ADR-001~027). 모노레포 레벨 결정은 [`ai-nodes/docs/adr.md`](../docs/adr.md) | 결정의 *왜*를 알아야 할 때 |
 
 `tasks/`는 docs와 별개의 영역으로, `skills/planning`이 생성하고 `skills/plan-and-build`가 실행하는 **워크스페이스 단위 실행 계획**의 영구 저장소다. `<workspace>/tasks/plan{N}-<slug>/` 형태로 각 plan이 자기 디렉터리를 갖고, 그 안에 `index.json` + `phase-NN.md`가 들어간다. 완료된 plan도 history 보존 목적으로 삭제하지 않는다.
 
@@ -45,9 +45,9 @@
 
 옛 진입점 (plan006 후, ADR-019): `scripts/command-router/run_now.sh`. plan005 분해 직후~plan006 전: `skills/command-router/scripts/run_now.sh`(ADR-017). 그 전: `skills/cj-oliveyoung-java-backend-prep/scripts/run_now.sh`. 마이그 안 된 skill은 옛 진입점 여전히 사용.
 
-5개 dispatcher 명령 (plan013~016에서 study-pack / question-bank / master / replenish-topics / recommend-topics / live-coding-dispatch 진입점은 native skill 또는 폐기 처리됨): `baseline` · `daily [topic]` · `recommend-positions` · `foodville-coffeechat` · `smoke`.
+2개 dispatcher 명령 (plan013~017에서 study-pack / question-bank / master / replenish-topics / recommend-topics / live-coding-dispatch / baseline / daily / smoke 진입점은 native skill 또는 폐기 처리됨): `recommend-positions` · `foodville-coffeechat`.
 
-native skill 진입점 (ai-nodes ADR-002, plan013~016): `claude -p "/study-pack <topic>"` (주제 중심 학습 문서) · `claude -p "/interview-asset <topic>"` (후보자 이력 중심 Q&A 질문 은행 + 마스터 플레이북) · `claude -p "/study-topic-recommender"` (아침 토픽 추천 + replenish + live-coding seed 선택 통합).
+native skill 진입점 (ai-nodes ADR-002, plan013~017): `claude -p "/study-pack <topic>"` (주제 중심 학습 문서) · `claude -p "/interview-asset <topic>"` (후보자 이력 중심 Q&A 질문 은행 + 마스터 플레이북) · `claude -p "/study-topic-recommender"` (아침 토픽 추천 + replenish + live-coding seed 선택 통합) · `claude -p "/interview-prep-analyzer [args]"` (면접 준비 갭 분석 — baseline 전체 진단 + daily 집중 점검 자연어 분기, ADR-027, plan017).
 
 각 명령의 입력/산출물/git push 여부 상세는 `docs/prd.md` 기능 표, 데이터 흐름은 `docs/flow.md` 참조.
 
