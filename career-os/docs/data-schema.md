@@ -348,7 +348,18 @@ caller가 `.env`를 ts에 전달하는 방법: `bun --env-file=career-os/.env _s
 }
 ```
 
-`run_daily.sh` 성공 후 자동 업데이트.
+`interview-prep-analyzer` daily 모드 성공 후 자동 업데이트 (plan017, ADR-027). 옛 `run_daily.sh` 후속.
+
+### data/reports/ (interview-prep-analyzer 산출물 — plan017)
+
+`interview-prep-analyzer` 실행 산출물. 외부 publish 없음 — 내부 학습용.
+
+| 경로 | 모드 | 내용 |
+|---|---|---|
+| `data/reports/baseline/YYYY-MM-DD/report.md` | baseline | 큐레이션 10파일 + 7섹션 고위험 영역 종합 진단 |
+| `data/reports/daily/YYYY-MM-DD/report.md` | daily | 토픽 1개 3-5파일 + 5섹션 집중 점검 |
+
+baseline 모드는 `config/baseline-core-files.json` 큐레이션 집합 사용. daily 모드는 토픽 기반 fos-study 파일 선택 + `data/study-progress.json` 갱신.
 
 ### data/generated-artifacts.json
 
