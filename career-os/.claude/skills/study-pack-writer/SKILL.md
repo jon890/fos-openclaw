@@ -83,7 +83,7 @@ git push origin main
 
 ### 7. Discord 알림
 
-권장 실행 경로는 OpenClaw wrapper가 호출하는 `scripts/study-pack-writer/run_with_discord_notify.sh "<topic>"` 이다. 이 wrapper는 `claude --permission-mode acceptEdits -p "/study-pack-writer <topic>"`로 실행하며 다음 알림을 보장한다.
+권장 실행 경로는 OpenClaw wrapper가 호출하는 `scripts/study-pack-writer/run_with_discord_notify.ts "<topic>"` 이다. 이 wrapper는 `claude --permission-mode acceptEdits -p "/study-pack-writer <topic>"`로 실행하며 다음 알림을 보장한다.
 
 - `[시작] study-pack-writer: <topic>` — Claude 실행 직전
 - `[완료] study-pack-writer: <topic> (fos-study <sha>)` — exit 0 후
@@ -112,7 +112,7 @@ bun --env-file=career-os/.env ../_shared/lib/notify_discord.ts \
 
 - **Self-check 본 skill 안에 박는 이유**: 옛 외부 validator를 Claude 자체 검증으로. SKILL.md 단일 진실 출처.
 - **재작성 ≤3회**: 무한 루프 차단. 3회로도 통과 못 하면 본질 문제 (topic 모호, 입력 부족) — 사용자 개입 필요.
-- **Publish + notify 통합**: 기본은 `scripts/study-pack-writer/run_with_discord_notify.sh` wrapper가 시작/완료/에러 알림을 담당한다. native skill의 완료 알림은 보조 경로로 유지한다.
+- **Publish + notify 통합**: 기본은 `scripts/study-pack-writer/run_with_discord_notify.ts` wrapper가 시작/완료/에러 알림을 담당한다. native skill의 완료 알림은 보조 경로로 유지한다.
 
 ## References
 
