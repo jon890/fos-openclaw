@@ -54,14 +54,6 @@ case "$MODE" in
     run_tracked "career-os:daily" "daily focus report" \
       "$TASK_ROOT/scripts/knowledge-gap-analyzer/run_daily.sh"
     ;;
-  recommend-topics)
-    run_tracked "career-os:recommend-topics" "morning topic 추천" \
-      "$TASK_ROOT/scripts/study-topic-recommender/run_topic_recommendation.sh"
-    ;;
-  live-coding-dispatch)
-    run_tracked "career-os:live-coding-dispatch" "live-coding dispatch" \
-      "$TASK_ROOT/scripts/study-topic-recommender/run_live_coding_dispatch.sh"
-    ;;
   recommend-positions)
     run_tracked "career-os:position-recommendation" "position 추천" \
       "$TASK_ROOT/scripts/position-recommender/run_position_recommendation.sh"
@@ -75,7 +67,7 @@ case "$MODE" in
       "$TASK_ROOT/scripts/knowledge-gap-analyzer/run_smoke_test.sh"
     ;;
   *)
-    echo "usage: run_now.sh [baseline | daily [topic] | recommend-topics | live-coding-dispatch | recommend-positions | foodville-coffeechat | smoke]" >&2
+    echo "usage: run_now.sh [baseline | daily [topic] | recommend-positions | foodville-coffeechat | smoke]" >&2
     echo "  daily topic keys: see config/topic-file-map.json" >&2
     echo "  study-pack / interview-asset (Q&A + master playbook): native skill 진입점 (claude -p '/<skill> <topic>') 사용 — ai-nodes ADR-002" >&2
     exit 1
