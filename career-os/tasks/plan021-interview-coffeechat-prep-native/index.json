@@ -2,9 +2,9 @@
   "name": "plan021-interview-coffeechat-prep-native",
   "description": "cj-foodville-coffeechat-prep → interview-coffeechat-prep native skill rename + 회사 추상화 + mvp-target.json `primary.coffeechat` 객체 묶기 + zod 스키마 도입 + Python collector → TS 마이그 + 회사 자산 docs/prep → data/prep 이동 + dispatcher case 즉시 폐기 (ADR-029). 회사 전환 시 mvp-target.json `primary.coffeechat` 통째 교체로 끝. zod 의존성 추가 (작은 라이브러리, Bun 호환). common-pitfalls 6-6 회피: draft 별도 파일 (SKILL.md + collect_company_sites.ts + mvp_target_schema.ts).",
   "created_at": "2026-05-16T00:00:00+00:00",
-  "updated_at": "2026-05-16T00:00:00+00:00",
-  "status": "pending",
-  "current_phase": 1,
+  "updated_at": "2026-05-16T05:30:45.241849+00:00",
+  "status": "running",
+  "current_phase": 4,
   "total_phases": 5,
   "error_message": null,
   "blocked_reason": null,
@@ -21,44 +21,76 @@
       "number": 1,
       "title": "draft 작성 (SKILL.md draft + collect_company_sites.ts draft + mvp_target_schema.ts draft)",
       "file": "phase-01.md",
-      "status": "pending",
-      "allowedTools": ["Read", "Write", "Bash", "Grep"],
+      "status": "completed",
+      "allowedTools": [
+        "Read",
+        "Write",
+        "Bash",
+        "Grep"
+      ],
       "model": "sonnet",
-      "timeout": 2400
+      "timeout": 2400,
+      "commitSha": "38c46dffc74d"
     },
     {
       "number": 2,
       "title": "zod 의존성 추가 + mvp_target_schema.ts 적용 + mvp-target.json `primary.coffeechat` 객체 마이그",
       "file": "phase-02.md",
-      "status": "pending",
-      "allowedTools": ["Read", "Write", "Edit", "Bash", "Grep"],
+      "status": "completed",
+      "allowedTools": [
+        "Read",
+        "Write",
+        "Edit",
+        "Bash",
+        "Grep"
+      ],
       "model": "sonnet",
-      "timeout": 1800
+      "timeout": 1800,
+      "commitSha": "d38ed1a70323"
     },
     {
       "number": 3,
       "title": "collect_company_sites.ts 적용 + 동등성 검증 (Python vs ts 출력) + Python + shell runner 폐기",
       "file": "phase-03.md",
-      "status": "pending",
-      "allowedTools": ["Read", "Write", "Edit", "Bash", "Grep"],
+      "status": "completed",
+      "allowedTools": [
+        "Read",
+        "Write",
+        "Edit",
+        "Bash",
+        "Grep"
+      ],
       "model": "sonnet",
-      "timeout": 1800
+      "timeout": 1800,
+      "commitSha": "e27bf6d6a170"
     },
     {
       "number": 4,
       "title": "skill rename (cj-foodville-coffeechat-prep → interview-coffeechat-prep) + SKILL.md Write + dispatcher case 폐기 + docs/prep → data/prep 이동",
       "file": "phase-04.md",
-      "status": "pending",
-      "allowedTools": ["Read", "Write", "Edit", "Bash", "Grep"],
+      "status": "completed",
+      "allowedTools": [
+        "Read",
+        "Write",
+        "Edit",
+        "Bash",
+        "Grep"
+      ],
       "model": "sonnet",
-      "timeout": 1800
+      "timeout": 1800,
+      "commitSha": "f748304f4519"
     },
     {
       "number": 5,
       "title": "5문서 + AGENTS.md 갱신 + 정적 검증 + push + trailing + index.json completed",
       "file": "phase-05.md",
       "status": "pending",
-      "allowedTools": ["Read", "Edit", "Bash", "Grep"],
+      "allowedTools": [
+        "Read",
+        "Edit",
+        "Bash",
+        "Grep"
+      ],
       "model": "sonnet",
       "timeout": 1200
     }
