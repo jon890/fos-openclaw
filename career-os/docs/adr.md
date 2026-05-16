@@ -833,11 +833,17 @@ plan013~022 (ADR-002/026/027/028/029/030)로 모든 dispatcher case가 native sk
 1. **command-router 디렉터리 일괄 폐기**:
    - `career-os/scripts/command-router/` (run_now.sh + setup_env.sh)
    - `career-os/.claude/skills/command-router/SKILL.md`
-2. **ts lib 2개 폐기** (caller 0 도달):
+2. **_shared/lib ts 2개 폐기** (caller 0 도달):
    - `_shared/lib/invoke_claude_skills.ts`
    - `_shared/lib/format_cost_summary.ts`
    - `_shared/types/index.ts`에서 관련 타입 정리
-3. **5문서 + AGENTS.md 갱신**:
+3. **`career-os/scripts/_lib/` 5 파일 일괄 폐기** (plan013/021/022 cleanup 잔재):
+   - `build_prompt.ts` — 옛 prompt 조립 (foodville runner가 마지막 caller, plan021 phase-03 폐기로 caller 0)
+   - `extract_and_validate_study_pack.ts` — caller 0 (plan013 정리 누락)
+   - `fos_study_git.ts` — `publish_job_analysis.sh`가 유일 caller (plan022 phase-03 폐기로 caller 0)
+   - `resolve_study_pack_topic.ts` — caller 0
+   - `study_pack_publish.ts` — caller 0
+4. **5문서 + AGENTS.md 갱신**:
    - dispatcher 진입점 0 → native skill 진입점 단일화 표기
    - 외부 의존성 섹션에서 invoke_claude_skills + format_cost_summary 제거
    - track_task.sh는 *career-os에서 사용 0*이지만 apartment에서 사용 중 → ai-nodes 모노레포 레벨에서 유지 (워크스페이스 격리 원칙)
