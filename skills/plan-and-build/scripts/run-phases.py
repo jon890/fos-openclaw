@@ -173,7 +173,12 @@ def run_phase(
 
     tools = ",".join(allowed_tools) if allowed_tools else DEFAULT_TOOLS
 
-    cmd = ["claude", "--print", "--allowedTools", tools]
+    cmd = [
+        "claude",
+        "--print",
+        "--allowedTools", tools,
+        "--dangerously-skip-permissions",
+    ]
     if model:
         cmd.extend(["--model", model])
 
