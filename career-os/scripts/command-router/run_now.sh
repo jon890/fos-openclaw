@@ -8,7 +8,7 @@ TRACKER="${TRACKER:-$HOME/ai-nodes/_shared/bin/track_task.sh}"
 NOTIFY_SCRIPT="bun --env-file=$HOME/ai-nodes/career-os/.env run $HOME/ai-nodes/_shared/lib/notify_discord.ts"
 FORMAT_COST="$HOME/ai-nodes/_shared/lib/format_cost_summary.ts"
 LOCK_DIR="$TASK_ROOT/data/runtime/locks"
-MODE="${1:-recommend-positions}"
+MODE="${1:-}"
 
 mkdir -p "$LOCK_DIR"
 
@@ -42,15 +42,14 @@ run_tracked() {
 }
 
 case "$MODE" in
-  recommend-positions)
-    run_tracked "career-os:position-recommendation" "position 추천" \
-      "$TASK_ROOT/scripts/position-recommender/run_position_recommendation.sh"
-    ;;
   *)
-    echo "usage: run_now.sh [recommend-positions]" >&2
-    echo "  interview-prep-analyzer (baseline + daily): claude -p '/interview-prep-analyzer [args]' — ai-nodes ADR-002, plan017" >&2
-    echo "  study-pack / interview-asset (Q&A + master playbook): native skill 진입점 (claude -p '/<skill> <topic>') 사용 — ai-nodes ADR-002" >&2
-    echo "  study-topic-recommender: claude -p '/study-topic-recommender' — ai-nodes ADR-002, plan016" >&2
+    echo "usage: run_now.sh (dispatcher case 0개 — plan023에서 디렉터리 폐기 예정)" >&2
+    echo "모든 진입점은 native skill 직접 호출:" >&2
+    echo "  claude -p '/position-recommender [args]' — ADR-030, plan022" >&2
+    echo "  claude -p '/interview-prep-analyzer [args]' — ADR-002, plan017" >&2
+    echo "  claude -p '/study-pack-writer <topic>' — ADR-002, plan013" >&2
+    echo "  claude -p '/interview-asset-writer <topic>' — ADR-002, plan014" >&2
+    echo "  claude -p '/study-topic-recommender' — ADR-002, plan016" >&2
     exit 1
     ;;
 esac
