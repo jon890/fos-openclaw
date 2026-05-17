@@ -23,7 +23,7 @@ career-os 워크스페이스의 **제품 범위·MVP 기능 명세**. 현재 act
 | 명령 | 산출물 | 외부 git push | 빈도 |
 |---|---|---|---|
 | `recommend-positions` | 활성 채용 공고 + 후보자 프로필 매칭 추천 (`data/runtime/position-recommendation.md`) | 없음 | 매일 |
-| `foodville-coffeechat` | CJ 푸드빌 커피챗 준비 + 백엔드 사이트 인사이트 리포트 | 없음 | 면접 단계별 |
+| `/interview-coffeechat-prep` (native) | mvp-target.json `primary.coffeechat` 기업 사이트 자동 수집 + 후보자 프로필 결합 + Claude 분석 → 비공개 전략 리포트 (`data/reports/daily/YYYY-MM-DD/<coffeechat.report_slug>/report.md` + `data/runtime/<coffeechat.report_slug>.md`) | 없음 | 면접 단계별 |
 | `/interview-prep-analyzer` (native) | 면접 준비 갭 분석. baseline 모드: 큐레이션 10파일 + 7섹션 고위험 영역 도출 (`data/reports/baseline/YYYY-MM-DD/report.md`). daily 모드: 토픽 1개 3-5파일 + 5섹션 + study-progress.json 갱신 (`data/reports/daily/YYYY-MM-DD/report.md`). 자연어 분기 (ADR-027, plan017) | 없음 | baseline: 면접 시즌 시작 시. daily: 매일 |
 | `/study-topic-recommender` (native) | 아침 토픽 추천 10픽 + 오늘의 3선 (`data/runtime/morning-topic-recommendation.md`) + replenish + live-coding seed 선택 (ADR-026, plan016) | 없음 | 매일 |
 | `/study-pack-writer <topic>` (native) | 토픽 1개 풀 마크다운 스터디팩 → fos-study 푸시. overlap 점검 + update vs new 판단 + self-check 내장 (plan014에서 옛 `maintain-study-pack` 흡수) | ✓ | 토픽별 1회 또는 갱신 |

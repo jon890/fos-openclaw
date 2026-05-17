@@ -2,9 +2,9 @@
   "name": "plan021-interview-coffeechat-prep-native",
   "description": "cj-foodville-coffeechat-prep → interview-coffeechat-prep native skill rename + 회사 추상화 + mvp-target.json `primary.coffeechat` 객체 묶기 + zod 스키마 도입 + Python collector → TS 마이그 + 회사 자산 docs/prep → data/prep 이동 + dispatcher case 즉시 폐기 (ADR-029). 회사 전환 시 mvp-target.json `primary.coffeechat` 통째 교체로 끝. zod 의존성 추가 (작은 라이브러리, Bun 호환). common-pitfalls 6-6 회피: draft 별도 파일 (SKILL.md + collect_company_sites.ts + mvp_target_schema.ts).",
   "created_at": "2026-05-16T00:00:00+00:00",
-  "updated_at": "2026-05-16T05:30:45.241849+00:00",
-  "status": "running",
-  "current_phase": 4,
+  "updated_at": "2026-05-16T05:41:44.255137+00:00",
+  "status": "completed",
+  "current_phase": 5,
   "total_phases": 5,
   "error_message": null,
   "blocked_reason": null,
@@ -78,13 +78,13 @@
       ],
       "model": "sonnet",
       "timeout": 1800,
-      "commitSha": "f748304f4519"
+      "commitSha": "58e23c924878"
     },
     {
       "number": 5,
       "title": "5문서 + AGENTS.md 갱신 + 정적 검증 + push + trailing + index.json completed",
       "file": "phase-05.md",
-      "status": "pending",
+      "status": "completed",
       "allowedTools": [
         "Read",
         "Edit",
@@ -92,7 +92,8 @@
         "Grep"
       ],
       "model": "sonnet",
-      "timeout": 1200
+      "timeout": 1200,
+      "commitSha": "58e23c924878"
     }
   ]
 }

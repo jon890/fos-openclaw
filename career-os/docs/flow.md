@@ -162,20 +162,32 @@ native skill 패턴: `claude -p "/interview-asset-writer <topic>"` → SKILL.md 
 
 이전 외부 subprocess 흐름 (dispatcher → run_question_bank.sh → claude --json-schema → render_question_bank.ts → publish)은 plan015에서 폐기됨. JSON schema 강제는 native self-check 7항목으로 대체.
 
-### `foodville-coffeechat`
+### `/interview-coffeechat-prep` (native skill — plan021, ADR-029)
+
+native skill 패턴: `claude -p "/interview-coffeechat-prep"` → SKILL.md 자동 로드 → Claude가 도구로 직접 처리.
 
 ```
-collect_foodville_sites.py → data/source/cj-foodville-sites/manifest.json
+호출: claude -p "/interview-coffeechat-prep"
   ↓
-references/coffeechat-review-prompt.md + 전략 노트 + 사이트 스냅샷
+Read: config/mvp-target.json (zod parse → primary.coffeechat 객체)
   ↓
-claude --print --output-format json
+Bash: bun career-os/scripts/interview-coffeechat-prep/collect_company_sites.ts
+  → data/source/<coffeechat.source_dir>/ (sites HTML + txt + manifest.json)
   ↓
-_shared/bin/extract_claude_result.py (generic, usage 인자 포함)
+Read: candidate-profile.md + data/prep/<coffeechat.prep_dir>/{strategy,checklist}.md
+      + 수집된 sites text + references/coffeechat-prompt.md
   ↓
-data/reports/daily/YYYY-MM-DD/cj-foodville-coffeechat/report.md
-data/runtime/cj-foodville-coffeechat-prep.md (사본)
+Claude 분석 → report.md 작성
+  ↓
+Write: data/reports/daily/YYYY-MM-DD/<coffeechat.report_slug>/report.md
+       data/runtime/<coffeechat.report_slug>.md (사본)
+  ↓
+Discord 알림 [완료]
 ```
+
+회사 불가지론 — 회사명·URL은 `config/mvp-target.json`의 `primary.coffeechat` 객체에서만 읽음. 준비 자산(`strategy.md` + `checklist.md`)은 `data/prep/<coffeechat.prep_dir>/`에 위치 (ADR-029).
+
+상세 동작: `career-os/.claude/skills/interview-coffeechat-prep/SKILL.md` Workflow 섹션 참조.
 
 ### live-coding seed 선택 (study-topic-recommender 흡수 — plan016)
 
@@ -204,7 +216,7 @@ data/runtime/cj-foodville-coffeechat-prep.md (사본)
 
 - interview-prep-analyzer (baseline + daily): 외부 publish 안 함. 내부 학습용. (plan017, ADR-027)
 - study-pack / question-bank: fos-study에 commit + push 강제.
-- recommend-positions / foodville-coffeechat: data/runtime 또는 data/reports에만, 외부 publish X.
+- recommend-positions / interview-coffeechat-prep: data/runtime 또는 data/reports에만, 외부 publish X.
 - study-topic-recommender (native): 산출물이 사람이 읽고 다음 단계로 가는 입력. replenish + recommend + live-coding seed 흡수 완료 (plan015/016, ADR-026).
 
 ## 실패 시 동작
