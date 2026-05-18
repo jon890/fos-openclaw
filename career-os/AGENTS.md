@@ -16,6 +16,10 @@
 
 `tasks/`는 docs와 별개의 영역으로, `skills/planning`이 생성하고 `skills/plan-and-build`가 실행하는 **워크스페이스 단위 실행 계획**의 영구 저장소다. `<workspace>/tasks/plan{N}-<slug>/` 형태로 각 plan이 자기 디렉터리를 갖고, 그 안에 `index.json` + `phase-NN.md`가 들어간다. 완료된 plan도 history 보존 목적으로 삭제하지 않는다.
 
+워크스페이스 표준 구조는 [`../docs/workspace-structure.md`](../docs/workspace-structure.md) (ai-nodes ADR-004) 청사진을 따른다. career-os는 ADR-019 (`scripts/` 분리)의 의도된 비대칭 예외 — `scripts/<skill-name>/`(실행 파일) + `skills/<skill-name>/`(SKILL.md + references) 분리 구조. 다른 워크스페이스로 확산 의도 없음.
+
+plan 진행 cycle: `skills/planning` (8단계 + task 파일 작성·commit·push) → `skills/plan-and-build` (별도 세션에서 phase 자동 실행 + critic 검증). 세션 격리 원칙 — planning은 task 생성·commit까지, 실 phase 실행은 별도 세션.
+
 워크플로 스크립트나 파일 선택 전략을 바꾸기 전에 반드시 `docs/adr.md`를 먼저 확인한다. 새 결정은 항상 `docs/adr.md` 맨 아래에 누적한다.
 
 ## 목적
@@ -49,7 +53,22 @@
 
 이력: 옛 진입점은 `skills/cj-oliveyoung-java-backend-prep/scripts/run_now.sh` → ADR-017에서 `skills/command-router/scripts/run_now.sh` → ADR-019 (plan006 후)에서 `scripts/command-router/run_now.sh` 순으로 변화. plan013~022에서 모든 dispatcher case가 native skill 또는 폐기 처리됨. plan023에서 command-router 디렉터리 자체 폐기.
 
-native skill 진입점 7개 (ai-nodes ADR-002, plan013~022): `claude -p "/study-pack-writer <topic>"` (주제 중심 학습 문서) · `claude -p "/interview-asset-writer <topic>"` (후보자 이력 중심 Q&A 질문 은행 + 마스터 플레이북) · `claude -p "/study-topic-recommender"` (아침 토픽 추천 + replenish + live-coding seed 선택 통합) · `claude -p "/interview-prep-analyzer [args]"` (면접 준비 갭 분석 — baseline 전체 진단 + daily 집중 점검 자연어 분기, ADR-027, plan017) · `claude --permission-mode acceptEdits -p "/candidate-baseline-suggester"` (fos-study 학습 이력 기반 후보자 자산 Append 갱신 — candidate-profile · baseline-core-files · weak_spots, ADR-028, plan020) · `claude -p "/interview-coffeechat-prep"` (mvp-target.json `primary.coffeechat` 기업 사이트 수집 + 전략 리포트, ADR-029, plan021) · `claude -p "/position-recommender [자연어 컨텍스트] [채용공고 file]"` (활성 공고 수집 + 후보자 프로필 매칭, 3 티어 추천, ADR-030, plan022).
+### native skill 7개 (ai-nodes ADR-002 + plan013~023)
+
+```bash
+cd career-os
+
+# 학습·면접 자산 생성 (fos-study commit + push)
+claude -p "/study-pack-writer <topic>"                                          # 주제 중심 학습 문서
+claude -p "/interview-asset-writer <topic>"                                     # 후보자 이력 Q&A 은행 + 마스터 플레이북
+
+# 추천·분석 (비공개 career-os 리포트)
+claude -p "/study-topic-recommender [context]"                                  # 아침 토픽 추천 + replenish + live-coding seed (ADR-026)
+claude -p "/interview-prep-analyzer [baseline|daily|topic]"                     # baseline 전체 / daily 집중 자연어 분기 (ADR-027)
+claude --permission-mode acceptEdits -p "/candidate-baseline-suggester"         # 후보자 자산 Append 갱신 (ADR-028)
+claude -p "/interview-coffeechat-prep"                                          # 커피챗 기업 사이트 수집 + 전략 리포트 (ADR-029)
+claude -p "/position-recommender [컨텍스트] [채용공고 file]"                    # 활성 공고 수집 + 3 티어 추천 (ADR-030)
+```
 
 각 명령의 입력/산출물/git push 여부 상세는 `docs/prd.md` 기능 표, 데이터 흐름은 `docs/flow.md` 참조.
 
@@ -64,6 +83,8 @@ native skill 진입점 7개 (ai-nodes ADR-002, plan013~022): `claude -p "/study-
 - `_shared/lib/mvp_target_schema.ts` — Bun/zod. `config/mvp-target.json` 스키마 검증 단일 출처. `parseMvpTarget()` + `CoffeechatSchema` 포함 (plan021 ADR-029 신규).
 - `_shared/bin/extract_claude_result.py` — career-os 사용 0. apartment + stock-investment caller 잔존 — 별도 워크스페이스 plan 대기.
 - `_shared/bin/update_artifacts.py` — career-os 사용 0 (ADR-033 / plan025 이후. `sources/fos-study/` 직접 스캔으로 단일화). 파일 자체는 별도 plan에서 폐기 검토.
+- Bun runtime — TS 헬퍼 실행. 설치 후 ai-nodes 루트에서 `bun install` 1회 (zod, fast-xml-parser, dotenv).
+- `claude` CLI — native skill 호출 (`claude -p "/<skill>"`). 인증 + 로그인 필요. ai-nodes 모노레포 공통.
 
 ## 운영 원칙
 
