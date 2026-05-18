@@ -6,22 +6,25 @@
  * ADR-010: score-based backend selection with mix targets.
  * ADR-012: 10-item daily curation (backend 3 / tech-blog 3 / AI 3 / geek 1) + today pick 3.
  * ADR-013: secondary 카테고리에 RSS/Atom discovery로 실제 최신 글 1편을 부착.
+ * ADR-033: sources/fos-study를 generated study artifact 단일 진실원으로 사용.
  */
 
-import { appendFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from "fs";
+import { appendFileSync, existsSync, mkdirSync, readFileSync, statSync, writeFileSync } from "fs";
 import { homedir } from "os";
 import { join } from "path";
 import {
   discoverForItem,
-  type FeedEntry,
   type ReservoirItem,
 } from "./feed_discovery.js";
+import { scanFosStudyInventory } from "./fos_study_inventory.js";
+import { deterministicDedupe, type DuplicateCandidateInput } from "./duplicate_detection.js";
 
 // ── paths ─────────────────────────────────────────────────────────────────────
 
 const TASK_ROOT = join(homedir(), "ai-nodes", "career-os");
 const CONFIG = join(TASK_ROOT, "config");
 const RUNTIME = join(TASK_ROOT, "data", "runtime");
+const FOS_STUDY_ROOT = join(TASK_ROOT, "sources", "fos-study");
 mkdirSync(RUNTIME, { recursive: true });
 
 const HISTORY_PATH = join(RUNTIME, "topic-inventory-history.jsonl");
@@ -104,14 +107,6 @@ export interface LiveSeed {
   [key: string]: unknown;
 }
 
-export interface Artifact {
-  outputPath?: string;
-  kind?: string;
-  createdAt?: string;
-  updatedAt?: string;
-  [key: string]: unknown;
-}
-
 export interface HistoryEntry {
   generatedAt?: string;
   keys?: string[];
@@ -142,10 +137,6 @@ export interface SourcesConfig {
   techBlog?: { items: ReservoirItem[] };
   ai?: { items: ReservoirItem[] };
   geek?: { items: ReservoirItem[] };
-}
-
-export interface ArtifactsFile {
-  artifacts: Artifact[];
 }
 
 // ── JSON helpers ──────────────────────────────────────────────────────────────
@@ -241,27 +232,23 @@ const liveSeedCandidates: LiveSeed[] = readJson<{ seeds: LiveSeed[] }>(
   join(CONFIG, "live-coding-seed-candidates.json")
 ).seeds ?? [];
 
-const artifacts: Artifact[] = safeLoad<ArtifactsFile>(
-  join(TASK_ROOT, "data", "generated-artifacts.json"),
-  { artifacts: [] }
-).artifacts ?? [];
-
 const sources = safeLoad<SourcesConfig>(join(CONFIG, "sources.json"), {});
 const techBlogItems: ReservoirItem[] = sources.techBlog?.items ?? [];
 const aiTopicItems: ReservoirItem[] = sources.ai?.items ?? [];
 const geekNewsItems: ReservoirItem[] = sources.geek?.items ?? [];
 
+// ── fos-study scan (ADR-033) ──────────────────────────────────────────────────
+
+const fosInventory = scanFosStudyInventory({ root: FOS_STUDY_ROOT });
+const fosStudyPaths = new Set(fosInventory.markdownPathsRelative);
+
 // ── derived sets ──────────────────────────────────────────────────────────────
 
-const studyPaths = new Set(
-  artifacts.filter((a) => a.kind === "study-pack").map((a) => a.outputPath)
-);
-const livePaths = new Set(
-  artifacts.filter((a) => a.kind === "live-coding").map((a) => a.outputPath)
-);
+const studyPaths = fosStudyPaths;
+const livePaths = fosStudyPaths;
 
 const uncoveredCurated: TopicItem[] = Object.entries(studyTopics)
-  .filter(([, entry]) => !studyPaths.has(entry.outputPath))
+  .filter(([, entry]) => !studyPaths.has(entry.outputPath ?? ""))
   .map(([key, entry]) => ({
     key,
     title: key,
@@ -271,21 +258,12 @@ const uncoveredCurated: TopicItem[] = Object.entries(studyTopics)
     tag: "new" as const,
   }));
 
-const remainingLive = liveSeeds.filter((s) => !livePaths.has(s.outputPath));
+const remainingLive = liveSeeds.filter((s) => !livePaths.has(s.outputPath ?? ""));
 const remainingLiveCandidates = liveSeedCandidates.filter(
-  (s) => !livePaths.has(s.outputPath)
+  (s) => !livePaths.has(s.outputPath ?? "")
 );
 
-// recent study artifact domain counts (last 10)
-const recentStudyArtifacts = artifacts
-  .filter((a) => a.kind === "study-pack")
-  .map((a) => {
-    let ts = new Date(a.updatedAt ?? a.createdAt ?? "");
-    if (isNaN(ts.getTime())) ts = new Date(0);
-    return { ts, artifact: a };
-  })
-  .sort((a, b) => b.ts.getTime() - a.ts.getTime());
-
+// recentDomainCounts — fos-study mtime fallback (ADR-033)
 function artifactDomainLabel(outputPath: string): string {
   if (outputPath.startsWith("database/mysql/")) return "mysql";
   if (outputPath.startsWith("database/redis/")) return "redis";
@@ -299,19 +277,42 @@ function artifactDomainLabel(outputPath: string): string {
   return "other";
 }
 
-const recentDomains = recentStudyArtifacts
-  .slice(0, 10)
-  .map(({ artifact }) => artifactDomainLabel(artifact.outputPath ?? ""));
-
-const recentDomainCounts = countMap(recentDomains);
+const recentDomainCounts: Map<string, number> = (() => {
+  const withMtime = fosInventory.markdownPathsRelative.map((p) => {
+    let mtime = 0;
+    try {
+      mtime = statSync(join(FOS_STUDY_ROOT, p)).mtime.getTime();
+    } catch {
+      // ignore unreadable files
+    }
+    return { path: p, mtime };
+  });
+  withMtime.sort((a, b) => b.mtime - a.mtime);
+  const recent = withMtime.slice(0, 10).map(({ path }) => artifactDomainLabel(path));
+  return countMap(recent);
+})();
 
 // candidate recommendations (filter out already promoted)
 const candidateRecommendations: TopicItem[] = studyCandidates.filter((item) => {
   const promotedPath = item.promotionTarget?.outputPath;
-  return !(promotedPath && studyPaths.has(promotedPath));
+  return !(promotedPath && fosStudyPaths.has(promotedPath));
 });
 
-// history
+// ── deterministic dedupe (ADR-033) ────────────────────────────────────────────
+
+const dedupeInputs: DuplicateCandidateInput[] = [
+  ...Object.entries(studyTopics)
+    .filter(([, entry]) => entry.outputPath)
+    .map(([key, entry]) => ({ key, candidatePath: entry.outputPath! })),
+  ...studyCandidates
+    .filter((item) => item.outputPath)
+    .map((item) => ({ key: item.key ?? "", candidatePath: item.outputPath! })),
+];
+
+const dedupeResult = deterministicDedupe(dedupeInputs, fosInventory.markdownPathsRelative);
+
+// ── history ───────────────────────────────────────────────────────────────────
+
 const recentHistory = loadRecentHistory(SECONDARY_COOLDOWN_ENTRIES);
 const backendKeyHistory = loadRecentHistory(BACKEND_KEY_COOLDOWN_ENTRIES);
 const recentBackendKeyCounts = countMap(
@@ -654,34 +655,42 @@ async function main(): Promise<void> {
     ai: aiRecommendations[0] ?? null,
   };
 
-  // ── write topic-inventory.json ────────────────────────────────────────────
+  // ── write topic-inventory.json (ADR-033 새 스냅샷 스키마) ─────────────────
 
   const inventory = {
     generatedAt: new Date().toISOString(),
-    counts: {
-      curatedStudyTopics: Object.keys(studyTopics).length,
-      uncoveredCuratedStudyTopics: uncoveredCurated.length,
-      studyTopicCandidates: candidateRecommendations.length,
-      liveCodingPrimarySeeds: liveSeeds.length,
-      liveCodingRemainingPrimarySeeds: remainingLive.length,
-      liveCodingCandidateSeeds: liveSeedCandidates.length,
-      liveCodingRemainingCandidateSeeds: remainingLiveCandidates.length,
-      techBlogReservoir: techBlogItems.length,
-      aiReservoir: aiTopicItems.length,
-      geekReservoir: geekNewsItems.length,
+    sourceOfTruth: {
+      kind: "fos-study",
+      root: "sources/fos-study",
+      scannedMarkdownCount: fosInventory.scannedMarkdownCount,
+      excludedDirs: fosInventory.excludedDirs,
     },
-    recentDomainCounts: Object.fromEntries(recentDomainCounts),
-    pools: {
-      uncoveredCuratedStudyTopics: uncoveredCurated,
-      candidateStudyTopics: candidateRecommendations,
-      remainingLiveCodingSeeds: remainingLive,
-      remainingLiveCodingCandidateSeeds: remainingLiveCandidates,
+    counts: {
+      configCuratedStudyTopics: Object.keys(studyTopics).length,
+      configStudyTopicCandidates: studyCandidates.length,
+      existingFosStudyMarkdownFiles: fosInventory.scannedMarkdownCount,
+      remainingCuratedStudyTopics: uncoveredCurated.length,
+      remainingCandidateStudyTopics: candidateRecommendations.length,
+      remainingLiveCodingSeeds: remainingLive.length,
+      duplicateCandidates: dedupeResult.possibleDuplicates.length,
+    },
+    remaining: {
+      curatedStudyTopicKeys: uncoveredCurated.map((t) => t.key),
+      candidateStudyTopicKeys: candidateRecommendations.map((t) => t.key),
+      liveCodingSlugs: remainingLive.map((s) => s.slug),
+    },
+    excluded: dedupeResult,
+    claudeDuplicateReview: {
+      status: "skipped",
+      reviewedAt: null,
+      items: [],
     },
     recommendations: backendRecommendations,
     techBlogRecommendations,
     aiRecommendations,
     geekRecommendations,
     todayPick,
+    updateExistingRecommendations: [],
     discovery: {
       cacheDir: FEED_CACHE_DIR,
       cacheTtlHours: FEED_CACHE_TTL_HOURS,
@@ -779,11 +788,20 @@ async function main(): Promise<void> {
 
   lines.push(
     "",
+    "## 기존 문서 보강 후보",
+    "",
+    "- (phase-02에서 Claude duplicate review 결과로 채워짐)",
+    ""
+  );
+
+  lines.push(
     "## 재고 메모",
     `- 신규 curated study topic 남음: ${uncoveredCurated.length}개`,
     `- live-coding primary seed 남음: ${remainingLive.length}개`,
     `- live-coding candidate seed 남음: ${remainingLiveCandidates.length}개`,
     `- tech-blog reservoir: ${techBlogItems.length}개 / AI reservoir: ${aiTopicItems.length}개 / geek reservoir: ${geekNewsItems.length}개`,
+    `- fos-study 스캔: ${fosInventory.scannedMarkdownCount}개 .md 파일`,
+    `- deterministic 중복 후보: ${dedupeResult.possibleDuplicates.length}개`,
     "",
     '백엔드 항목은 `claude -p "/study-pack-writer <key>"`로 즉시 만들 수 있다.',
     "나머지 카테고리는 외부 reading 추천이라 별도 생성 단계 없이 그대로 학습한다."
