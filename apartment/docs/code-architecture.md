@@ -12,10 +12,14 @@ apartment/
 ├── .env.example                     # 템플릿
 │
 ├── config/
-│   ├── focus-unit.json              # 포커스 평형 메타데이터 (59A)
+│   ├── focus-unit.json              # 포커스 평형 메타데이터 단일 출처 (59A, ADR-002)
 │   ├── guri-buy-complexes.json      # Guri 광역 탐색 후보 단지 단일 출처
 │   ├── interior-reference-digest.json
 │   └── lucky-24-floorplan.json
+│
+├── scripts/                            # 워크스페이스 레벨 공용 헬퍼 (ADR-003)
+│   └── _lib/
+│       └── load_target_meta.ts         # focus-unit.json read + env override (ADR-002, plan002)
 │
 ├── docs/
 │   ├── prd.md
@@ -72,8 +76,6 @@ apartment/
     └── .usage-status/
 ```
 
-`WORKFLOW.md`, `TOOLS.md`, `docs/decisions/` — plan001 phase-01 이후 `docs/` 5문서로 흡수됨. phase-02에서 제거 예정.
-
 ## 2. skills/ 구조 표준
 
 `skills/<name>/{SKILL.md, references/, scripts/}` 통합 구조 — ai-nodes 표준.
@@ -112,17 +114,18 @@ fi
 | `extract_claude_result.py` | `_shared/bin/extract_claude_result.py` | 사용 중 | `claude --output-format json` envelope → report.md 파싱 |
 | `claude` CLI | 시스템 설치 | 사용 중 | Claude 호출 (90s 타임아웃 + fallback) |
 | `agent-browser` CLI | 로컬 설치 필수 | 사용 중 | Naver Bearer JWT 자동 추출 (ADR-001) |
+| Bun runtime | 시스템 (ai-nodes root `bun install`) | 사용 중 (ADR-003) | apartment ts 헬퍼 실행 (예: `scripts/_lib/load_target_meta.ts`, plan002) |
 | `notify_discord.ts` | `_shared/lib/notify_discord.ts` | 미사용 | Discord 알림 (apartment는 `notify_discord.sh` 직접 사용) |
 | `extract_claude_result.ts` | `_shared/lib/extract_claude_result.ts` | 미사용 | TS 버전 추출기 (apartment는 Python 버전 사용) |
 
-`notify_discord.ts` / `extract_claude_result.ts` — `_shared/lib/`에 존재하지만 apartment에서 미사용. apartment는 Shell + Python 표준.
+`notify_discord.ts` / `extract_claude_result.ts` — `_shared/lib/`에 존재하지만 apartment에서 미사용. apartment는 ADR-003 이후 Shell + Python + TS 점진 확장.
 
 ## 6. 언어 분포
 
 | 언어 | 파일 수 (추정) | 역할 |
 |---|---|---|
 | Shell | 5 | runner, notify_discord, smoke_test, guri_buy_search, env |
-| Python | 6 | collect_naver_api, collect_hogangnono, collect_kb, collect_sources, normalize_results, extract_claude_result |
-| TypeScript | 0 | (미사용) |
+| Python | 6 | collect_naver_api, collect_hogangnono, collect_kb, collect_sources, normalize_results, build_weekly_listing_trend |
+| TypeScript | 1 | `scripts/_lib/load_target_meta.ts` (ADR-003, plan002 — 첫 ts 파일) |
 
-career-os 표준 (ADR-020 TypeScript Bun)과 격차 존재. apartment는 현재 Python + Shell 표준 유지. TypeScript 전환은 별도 plan 결정 필요.
+apartment는 ADR-003으로 TypeScript 도입 시작 (plan002). 후속 plan003-006에서 `collect_*.py` / `normalize_results.py` / `build_weekly_listing_trend.py` 점진 마이그 계획 — 각 plan은 fetch 인터페이스(`fetch` / `Bun.fetch` / `axios`) 결정 등 새 ADR 동반.
