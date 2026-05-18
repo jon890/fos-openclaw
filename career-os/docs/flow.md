@@ -141,30 +141,97 @@ Discord 알림 [완료]
 
 상세 동작: `career-os/.claude/skills/position-recommender/SKILL.md` Workflow 섹션 참조.
 
-### `study-topic-recommender` (모닝 추천 — native skill, ADR-026)
+### `study-topic-recommender` (모닝 추천 — native skill, ADR-026 + ADR-033)
 
 native skill 패턴: `claude -p "/study-topic-recommender"` → SKILL.md 자동 로드 → Claude가 도구로 직접 처리.
 
-내부 흐름: promote detect → `bun career-os/scripts/study-topic-recommender/refresh_topic_inventory.ts` 호출 → 결과 출력 (+ 선택적 live-coding seed 선택).
+내부 흐름 (ADR-033 이후):
 
-알고리즘 (ADR-010/012/013): 점수 계산(recent penalty + weak area bonus + carry-over) + mix target(백엔드 3 + 기술블로그 3 + AI 3 + geek 1 = 10) + feed_discovery.ts(RSS 피드 최신 글 부착).
+```
+호출: claude -p "/study-topic-recommender"
+  ↓
+1. Promote detect — history 기반 study-pack-candidates → study-pack 승격 후보 안내 (자동 수정 X)
+  ↓
+2. Bash: bun career-os/scripts/study-topic-recommender/refresh_topic_inventory.ts
+   ├─ Read: config (study-pack-topics / study-pack-candidates / sources / live-coding-*)
+   ├─ Scan: sources/fos-study/**/*.md (exclude .git/.claude) — git pull 없음, 로컬 clone 기준
+   ├─ Deterministic dedupe (provider-free):
+   │    a. exact path match → excluded.exactPathMatches
+   │    b. normalized path match (lower-case + slash normalize) → excluded.normalizedPathMatches
+   │    c. slug/token overlap → excluded.possibleDuplicates (Claude review 후보)
+   ├─ 추천 점수 계산 + mix target + feed discovery (ADR-010/012/013)
+   └─ Write: data/runtime/topic-inventory.json (excluded.* + claudeDuplicateReview.status=skipped 초기값)
+  ↓
+3. Claude duplicate review (native skill 내부)
+   ├─ Read: inventory.excluded.possibleDuplicates
+   ├─ 각 후보를 의미 판정 → decision (new | update-existing | skip | needs-user-confirmation)
+   ├─ 성공 시: inventory.claudeDuplicateReview.{status=ok, reviewedAt, items[]} 갱신
+   └─ 실패 시: status=failed + warning, 추천 자체는 계속 (deterministic 결과만 반영)
+  ↓
+4. Write: data/runtime/morning-topic-recommendation.md
+   ├─ 백엔드/기술블로그/AI/Geek 4축 + 오늘의 3선 (기존 ADR-012 구조)
+   ├─ "기존 문서 보강 후보" 섹션 (최대 5개) — update-existing + needs-user-confirmation
+   └─ Claude review 실패 시 상단 warning 라인 추가
+  ↓
+5. Append: data/runtime/topic-inventory-history.jsonl
+  ↓
+6. (선택) live-coding seed 선택 — 자연어에 "live-coding" 포함 시
+  ↓
+Discord 알림 [완료]
+```
 
 산출물:
-- `data/runtime/topic-inventory.json`
-- `data/runtime/morning-topic-recommendation.md`
-- `data/runtime/topic-inventory-history.jsonl`
+
+- `data/runtime/topic-inventory.json` — ADR-033 스냅샷 스키마 (data-schema.md 참조)
+- `data/runtime/morning-topic-recommendation.md` — 사람이 읽는 마크다운
+- `data/runtime/topic-inventory-history.jsonl` — 매일 한 줄 append
 
 상세 동작: `career-os/.claude/skills/study-topic-recommender/SKILL.md` Workflow 섹션 참조.
 
-이전 외부 subprocess 흐름 (dispatcher → run_topic_recommendation.sh → refresh_topic_inventory.py)은 plan016 phase-03에서 폐기됨.
+이전 흐름:
 
-### `study-pack <topic>` (native skill — ai-nodes ADR-002, plan013)
+- 외부 subprocess (dispatcher → run_topic_recommendation.sh → refresh_topic_inventory.py)는 plan016 phase-03에서 폐기됨.
+- `data/generated-artifacts.json` 의존은 ADR-033 / plan025에서 제거 — fos-study 직접 스캔으로 단일화.
+
+### `study-pack <topic>` (native skill — ai-nodes ADR-002, plan013 + ADR-033)
 
 native skill 패턴: `claude -p "/study-pack-writer <topic>"` → SKILL.md 자동 로드 → Claude가 도구로 직접 처리.
 
+내부 흐름 (ADR-033 이후 duplicate guard 추가):
+
+```
+호출: claude -p "/study-pack-writer <topic-key-or-자연어>"
+  ↓
+1. Topic 해석 → topic-key / outputPath 확정
+  ↓
+2. Context 로드 (Read): study-pack-topics.json + candidate-profile.md + mvp-target.json + topic-profiles.json + references
+  ↓
+3. Duplicate guard (ADR-033 — recommender와 같은 decision schema)
+   ├─ Scan: sources/fos-study/**/*.md → exact path / normalized path / slug overlap
+   ├─ (선택) Claude 의미 판정 → decision (new | update-existing | skip | needs-user-confirmation)
+   └─ 분기:
+        - new                       → 새 markdown 작성 진행
+        - update-existing           → 새 파일 생성 금지 + 기존 matchedPath update 모드
+        - skip                      → 작성 중단 + 기존 문서 경로/사유 stderr 보고 + exit 1
+        - needs-user-confirmation   → 사용자 확인 없이 진행 금지 (non-interactive면 stderr + exit 1)
+  ↓
+4. 마크다운 작성 (Write) — sources/fos-study/<outputPath>.md
+  ↓
+5. Self-check (재작성 ≤3회) — 첫 줄 / 줄 수 / 펜스 언어 / 금지 prefix / writing-rules
+  ↓
+6. Publish (Bash) — git pull --rebase --autostash → add → commit → push
+  ↓
+7. Discord 알림
+```
+
+writer는 recommender에서 선택한 보강 후보뿐 아니라 *사용자가 직접 호출한 주제*에도 같은 게이트를 적용한다 — recommender와 writer가 공유하는 단일 진실원.
+
 상세 동작: `career-os/.claude/skills/study-pack-writer/SKILL.md` Workflow 섹션 참조.
 
-이전 외부 subprocess 흐름 (dispatcher → run_study_pack.sh → claude --print → extractor → publish)은 plan013 phase-03에서 폐기됨.
+이전 흐름:
+
+- 외부 subprocess (dispatcher → run_study_pack.sh → claude --print → extractor → publish)는 plan013 phase-03에서 폐기됨.
+- 옛 SKILL.md §3 overlap 점검은 자기 판단 의존이라 high/medium 중복을 지키지 못한 경우 발생 — ADR-033으로 duplicate decision schema 게이트로 격상.
 
 ### `interview-asset <topic>` (native skill — plan015, Q&A + master playbook 두 형식)
 

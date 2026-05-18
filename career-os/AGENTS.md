@@ -63,7 +63,7 @@ native skill 진입점 7개 (ai-nodes ADR-002, plan013~022): `claude -p "/study-
 - `_shared/lib/notify_discord.ts` — Bun. `openclaw message send --channel discord` subprocess. `DISCORD_CHANNEL_ID` env 필수, `--media <path>` 옵션 지원. 옛 `notify_discord*.sh` 후속 (ADR-021).
 - `_shared/lib/mvp_target_schema.ts` — Bun/zod. `config/mvp-target.json` 스키마 검증 단일 출처. `parseMvpTarget()` + `CoffeechatSchema` 포함 (plan021 ADR-029 신규).
 - `_shared/bin/extract_claude_result.py` — career-os 사용 0. apartment + stock-investment caller 잔존 — 별도 워크스페이스 plan 대기.
-- `_shared/bin/update_artifacts.py` — `data/generated-artifacts.json` upsert (당분간 Python 유지, 별도 plan).
+- `_shared/bin/update_artifacts.py` — career-os 사용 0 (ADR-033 / plan025 이후. `sources/fos-study/` 직접 스캔으로 단일화). 파일 자체는 별도 plan에서 폐기 검토.
 
 ## 운영 원칙
 
