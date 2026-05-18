@@ -17,7 +17,9 @@ import {
   type ReservoirItem,
 } from "./feed_discovery.js";
 import { scanFosStudyInventory } from "./fos_study_inventory.js";
-import { deterministicDedupe, type DuplicateCandidateInput } from "./duplicate_detection.js";
+import { deterministicDedupe, type DuplicateCandidateInput, type PossibleDuplicate } from "./duplicate_detection.js";
+
+const RENDER_ONLY = process.argv.includes("--render-only");
 
 // ── paths ─────────────────────────────────────────────────────────────────────
 
@@ -137,6 +139,25 @@ export interface SourcesConfig {
   techBlog?: { items: ReservoirItem[] };
   ai?: { items: ReservoirItem[] };
   geek?: { items: ReservoirItem[] };
+}
+
+export interface UpdateExistingItem {
+  key: string;
+  candidatePath: string;
+  matchedPath: string;
+  decision: string;
+  reason: string;
+}
+
+interface MorningMarkdownStats {
+  uncoveredCurated: number;
+  remainingLive: number;
+  remainingLiveCandidates: number;
+  techBlogItems: number;
+  aiTopicItems: number;
+  geekNewsItems: number;
+  scannedMarkdownCount: number;
+  possibleDuplicates: number;
 }
 
 // ── JSON helpers ──────────────────────────────────────────────────────────────
@@ -626,6 +647,156 @@ function renderSecondaryItem(
   return lines;
 }
 
+// ── duplicate review helpers (ADR-033) ───────────────────────────────────────
+
+function buildUpdateExisting(
+  review: { status: string; items?: UpdateExistingItem[] },
+  possibleDuplicates: PossibleDuplicate[]
+): UpdateExistingItem[] {
+  if (review.items && review.items.length > 0) {
+    return review.items
+      .filter((i) => i.decision === "update-existing" || i.decision === "needs-user-confirmation")
+      .slice(0, 5);
+  }
+  return possibleDuplicates
+    .map((p) => ({
+      key: p.key,
+      candidatePath: p.candidatePath,
+      matchedPath: p.matchedPath,
+      decision: "needs-user-confirmation",
+      reason: p.reason + " (Claude review skipped/failed — deterministic 추정)",
+    }))
+    .slice(0, 5);
+}
+
+function buildMorningMarkdown(
+  backendRecommendations: BackendItem[],
+  techBlogRecommendations: Recommendation[],
+  aiRecommendations: Recommendation[],
+  geekRecommendations: Recommendation[],
+  todayPick: { backend: BackendItem | null; techBlog: Recommendation | null; ai: Recommendation | null },
+  updateExisting: UpdateExistingItem[],
+  reviewStatus: string,
+  stats: MorningMarkdownStats
+): string {
+  const lines: string[] = [
+    "# 오늘의 학습/리딩 추천 (10픽 + 오늘의 3선)",
+    "",
+  ];
+
+  if (reviewStatus === "failed") {
+    lines.push("> ⚠️ Claude duplicate review 실패 — 추천은 deterministic dedupe 기준입니다.", "");
+  }
+
+  lines.push("## 백엔드 스터디 주제 (3)", "");
+  if (backendRecommendations.length > 0) {
+    for (let i = 0; i < backendRecommendations.length; i++) {
+      lines.push(...renderBackendItem(i + 1, backendRecommendations[i] as Recommendation), "");
+    }
+  } else {
+    lines.push(
+      '- (reservoir 비어 있음 — `claude -p "/study-topic-recommender"` 로 보충)',
+      ""
+    );
+  }
+
+  lines.push("## 회사·엔지니어링 기술 블로그 (3)", "");
+  if (techBlogRecommendations.length > 0) {
+    for (let i = 0; i < techBlogRecommendations.length; i++) {
+      lines.push(
+        ...renderSecondaryItem(i + 1, techBlogRecommendations[i], "source"),
+        ""
+      );
+    }
+  } else {
+    lines.push("- (`config/sources.json` techBlog 비어 있음)", "");
+  }
+
+  lines.push("## AI 관련 (3)", "");
+  if (aiRecommendations.length > 0) {
+    for (let i = 0; i < aiRecommendations.length; i++) {
+      lines.push(
+        ...renderSecondaryItem(i + 1, aiRecommendations[i], "category", "분야"),
+        ""
+      );
+    }
+  } else {
+    lines.push("- (`config/sources.json` ai 비어 있음)", "");
+  }
+
+  lines.push("## Geek/뉴스/산업 흐름 (1)", "");
+  if (geekRecommendations.length > 0) {
+    for (let i = 0; i < geekRecommendations.length; i++) {
+      lines.push(
+        ...renderSecondaryItem(i + 1, geekRecommendations[i], "source"),
+        ""
+      );
+    }
+  } else {
+    lines.push("- (`config/sources.json` geek 비어 있음)", "");
+  }
+
+  lines.push("## 오늘의 3선 (각 카테고리에서 1개씩)", "");
+  const pickLabels: [string, BackendItem | Recommendation | null][] = [
+    ["백엔드", todayPick.backend],
+    ["기술 블로그", todayPick.techBlog],
+    ["AI", todayPick.ai],
+  ];
+  for (const [label, pick] of pickLabels) {
+    if (!pick) {
+      lines.push(`- ${label}: (없음)`);
+      continue;
+    }
+    const article = (pick as Recommendation).discoveredArticle;
+    if (article?.url) {
+      const title = article.title || pick.title || pick.key || "제목 없음";
+      lines.push(`- **${label}**: ${title}`);
+      lines.push(`  - ${article.url}`);
+    } else {
+      const title = pick.title || pick.key || "제목 없음";
+      lines.push(`- **${label}**: ${title}`);
+    }
+  }
+
+  lines.push(
+    "",
+    "## 기존 문서 보강 후보 (최대 5)",
+    ""
+  );
+  if (reviewStatus === "failed") {
+    lines.push("> ⚠️ Claude duplicate review 실패 — deterministic 중복 필터 결과만 반영했습니다.", "");
+  }
+  if (updateExisting.length === 0) {
+    lines.push("- (보강 후보 없음 — 모든 추천은 새 study-pack 가능)", "");
+  } else {
+    for (let i = 0; i < updateExisting.length; i++) {
+      const item = updateExisting[i];
+      lines.push(
+        `${i + 1}. **${item.candidatePath}**`,
+        `   - 기존 문서: ${item.matchedPath}`,
+        `   - 판단: ${item.decision} (${item.reason})`,
+        "   - 추천 액션: 새 study-pack 생성 금지 → 기존 문서에 누락 항목 보강",
+        ""
+      );
+    }
+  }
+
+  lines.push(
+    "## 재고 메모",
+    `- 신규 curated study topic 남음: ${stats.uncoveredCurated}개`,
+    `- live-coding primary seed 남음: ${stats.remainingLive}개`,
+    `- live-coding candidate seed 남음: ${stats.remainingLiveCandidates}개`,
+    `- tech-blog reservoir: ${stats.techBlogItems}개 / AI reservoir: ${stats.aiTopicItems}개 / geek reservoir: ${stats.geekNewsItems}개`,
+    `- fos-study 스캔: ${stats.scannedMarkdownCount}개 .md 파일`,
+    `- deterministic 중복 후보: ${stats.possibleDuplicates}개`,
+    "",
+    '백엔드 항목은 `claude -p "/study-pack-writer <key>"`로 즉시 만들 수 있다.',
+    "나머지 카테고리는 외부 reading 추천이라 별도 생성 단계 없이 그대로 학습한다."
+  );
+
+  return lines.join("\n") + "\n";
+}
+
 // ── main ──────────────────────────────────────────────────────────────────────
 
 async function main(): Promise<void> {
@@ -672,7 +843,11 @@ async function main(): Promise<void> {
       remainingCuratedStudyTopics: uncoveredCurated.length,
       remainingCandidateStudyTopics: candidateRecommendations.length,
       remainingLiveCodingSeeds: remainingLive.length,
+      remainingLiveCodingCandidateSeeds: remainingLiveCandidates.length,
       duplicateCandidates: dedupeResult.possibleDuplicates.length,
+      techBlogReservoir: techBlogItems.length,
+      aiReservoir: aiTopicItems.length,
+      geekReservoir: geekNewsItems.length,
     },
     remaining: {
       curatedStudyTopicKeys: uncoveredCurated.map((t) => t.key),
@@ -690,7 +865,10 @@ async function main(): Promise<void> {
     aiRecommendations,
     geekRecommendations,
     todayPick,
-    updateExistingRecommendations: [],
+    updateExistingRecommendations: buildUpdateExisting(
+      { status: "skipped", items: [] },
+      dedupeResult.possibleDuplicates
+    ),
     discovery: {
       cacheDir: FEED_CACHE_DIR,
       cacheTtlHours: FEED_CACHE_TTL_HOURS,
@@ -706,110 +884,34 @@ async function main(): Promise<void> {
 
   // ── write morning-topic-recommendation.md ─────────────────────────────────
 
-  const lines: string[] = [
-    "# 오늘의 학습/리딩 추천 (10픽 + 오늘의 3선)",
-    "",
-  ];
-
-  lines.push("## 백엔드 스터디 주제 (3)", "");
-  if (backendRecommendations.length > 0) {
-    for (let i = 0; i < backendRecommendations.length; i++) {
-      lines.push(...renderBackendItem(i + 1, backendRecommendations[i]), "");
-    }
-  } else {
-    lines.push(
-      "- (reservoir 비어 있음 — `claude -p \"/study-topic-recommender\"` 로 보충)",
-      ""
-    );
-  }
-
-  lines.push("## 회사·엔지니어링 기술 블로그 (3)", "");
-  if (techBlogRecommendations.length > 0) {
-    for (let i = 0; i < techBlogRecommendations.length; i++) {
-      lines.push(
-        ...renderSecondaryItem(i + 1, techBlogRecommendations[i], "source"),
-        ""
-      );
-    }
-  } else {
-    lines.push("- (`config/sources.json` techBlog 비어 있음)", "");
-  }
-
-  lines.push("## AI 관련 (3)", "");
-  if (aiRecommendations.length > 0) {
-    for (let i = 0; i < aiRecommendations.length; i++) {
-      lines.push(
-        ...renderSecondaryItem(
-          i + 1,
-          aiRecommendations[i],
-          "category",
-          "분야"
-        ),
-        ""
-      );
-    }
-  } else {
-    lines.push("- (`config/sources.json` ai 비어 있음)", "");
-  }
-
-  lines.push("## Geek/뉴스/산업 흐름 (1)", "");
-  if (geekRecommendations.length > 0) {
-    for (let i = 0; i < geekRecommendations.length; i++) {
-      lines.push(
-        ...renderSecondaryItem(i + 1, geekRecommendations[i], "source"),
-        ""
-      );
-    }
-  } else {
-    lines.push("- (`config/sources.json` geek 비어 있음)", "");
-  }
-
-  lines.push("## 오늘의 3선 (각 카테고리에서 1개씩)", "");
-  const pickLabels: [string, Recommendation | null][] = [
-    ["백엔드", todayPick.backend],
-    ["기술 블로그", todayPick.techBlog],
-    ["AI", todayPick.ai],
-  ];
-  for (const [label, pick] of pickLabels) {
-    if (!pick) {
-      lines.push(`- ${label}: (없음)`);
-      continue;
-    }
-    const article = pick.discoveredArticle;
-    if (article?.url) {
-      const title = article.title || pick.title || pick.key || "제목 없음";
-      lines.push(`- **${label}**: ${title}`);
-      lines.push(`  - ${article.url}`);
-    } else {
-      const title = pick.title || pick.key || "제목 없음";
-      lines.push(`- **${label}**: ${title}`);
-    }
-  }
-
-  lines.push(
-    "",
-    "## 기존 문서 보강 후보",
-    "",
-    "- (phase-02에서 Claude duplicate review 결과로 채워짐)",
-    ""
+  const updateExisting = buildUpdateExisting(
+    { status: "skipped", items: [] },
+    dedupeResult.possibleDuplicates
   );
 
-  lines.push(
-    "## 재고 메모",
-    `- 신규 curated study topic 남음: ${uncoveredCurated.length}개`,
-    `- live-coding primary seed 남음: ${remainingLive.length}개`,
-    `- live-coding candidate seed 남음: ${remainingLiveCandidates.length}개`,
-    `- tech-blog reservoir: ${techBlogItems.length}개 / AI reservoir: ${aiTopicItems.length}개 / geek reservoir: ${geekNewsItems.length}개`,
-    `- fos-study 스캔: ${fosInventory.scannedMarkdownCount}개 .md 파일`,
-    `- deterministic 중복 후보: ${dedupeResult.possibleDuplicates.length}개`,
-    "",
-    '백엔드 항목은 `claude -p "/study-pack-writer <key>"`로 즉시 만들 수 있다.',
-    "나머지 카테고리는 외부 reading 추천이라 별도 생성 단계 없이 그대로 학습한다."
+  const mdContent = buildMorningMarkdown(
+    backendRecommendations,
+    techBlogRecommendations,
+    aiRecommendations,
+    geekRecommendations,
+    todayPick,
+    updateExisting,
+    "skipped",
+    {
+      uncoveredCurated: uncoveredCurated.length,
+      remainingLive: remainingLive.length,
+      remainingLiveCandidates: remainingLiveCandidates.length,
+      techBlogItems: techBlogItems.length,
+      aiTopicItems: aiTopicItems.length,
+      geekNewsItems: geekNewsItems.length,
+      scannedMarkdownCount: fosInventory.scannedMarkdownCount,
+      possibleDuplicates: dedupeResult.possibleDuplicates.length,
+    }
   );
 
   writeFileSync(
     join(RUNTIME, "morning-topic-recommendation.md"),
-    lines.join("\n") + "\n",
+    mdContent,
     "utf-8"
   );
 
@@ -871,7 +973,77 @@ async function main(): Promise<void> {
   );
 }
 
-main().catch((err) => {
-  console.error("refresh_topic_inventory error:", err);
-  process.exit(1);
-});
+// ── render-only mode (ADR-033) ────────────────────────────────────────────────
+
+async function renderOnly(): Promise<void> {
+  const inventoryPath = join(RUNTIME, "topic-inventory.json");
+  if (!existsSync(inventoryPath)) {
+    console.error("render-only error: topic-inventory.json 없음 — 먼저 일반 refresh를 실행하세요.");
+    process.exit(1);
+  }
+
+  const inventory = readJson<{
+    recommendations?: BackendItem[];
+    techBlogRecommendations?: Recommendation[];
+    aiRecommendations?: Recommendation[];
+    geekRecommendations?: Recommendation[];
+    todayPick?: { backend: BackendItem | null; techBlog: Recommendation | null; ai: Recommendation | null };
+    claudeDuplicateReview?: { status: string; items?: UpdateExistingItem[] };
+    excluded?: { possibleDuplicates?: PossibleDuplicate[] };
+    counts?: {
+      remainingCuratedStudyTopics?: number;
+      remainingLiveCodingSeeds?: number;
+      remainingLiveCodingCandidateSeeds?: number;
+      techBlogReservoir?: number;
+      aiReservoir?: number;
+      geekReservoir?: number;
+      duplicateCandidates?: number;
+    };
+    sourceOfTruth?: { scannedMarkdownCount?: number };
+  }>(inventoryPath);
+
+  const review = inventory.claudeDuplicateReview ?? { status: "skipped", items: [] };
+  const possibleDuplicates = inventory.excluded?.possibleDuplicates ?? [];
+  const updateExisting = buildUpdateExisting(review, possibleDuplicates);
+
+  const mdContent = buildMorningMarkdown(
+    inventory.recommendations ?? [],
+    inventory.techBlogRecommendations ?? [],
+    inventory.aiRecommendations ?? [],
+    inventory.geekRecommendations ?? [],
+    inventory.todayPick ?? { backend: null, techBlog: null, ai: null },
+    updateExisting,
+    review.status,
+    {
+      uncoveredCurated: inventory.counts?.remainingCuratedStudyTopics ?? 0,
+      remainingLive: inventory.counts?.remainingLiveCodingSeeds ?? 0,
+      remainingLiveCandidates: inventory.counts?.remainingLiveCodingCandidateSeeds ?? 0,
+      techBlogItems: inventory.counts?.techBlogReservoir ?? 0,
+      aiTopicItems: inventory.counts?.aiReservoir ?? 0,
+      geekNewsItems: inventory.counts?.geekReservoir ?? 0,
+      scannedMarkdownCount: inventory.sourceOfTruth?.scannedMarkdownCount ?? 0,
+      possibleDuplicates: inventory.counts?.duplicateCandidates ?? 0,
+    }
+  );
+
+  writeFileSync(join(RUNTIME, "morning-topic-recommendation.md"), mdContent, "utf-8");
+  console.log(JSON.stringify({
+    mode: "render-only",
+    inventory: inventoryPath,
+    markdown: join(RUNTIME, "morning-topic-recommendation.md"),
+    reviewStatus: review.status,
+    updateExistingCount: updateExisting.length,
+  }, null, 0));
+}
+
+if (RENDER_ONLY) {
+  renderOnly().catch((err) => {
+    console.error("render-only error:", err);
+    process.exit(1);
+  });
+} else {
+  main().catch((err) => {
+    console.error("refresh_topic_inventory error:", err);
+    process.exit(1);
+  });
+}

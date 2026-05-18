@@ -27,8 +27,10 @@ Claude는 다음을 `Read` 도구로 직접 로드:
 3. `career-os/config/sources.json` — `techBlog / ai / geek` reservoir items (feedUrl, filterKeywords 포함)
 4. `career-os/config/live-coding-seed-pool.json` — primary live-coding seed pool
 5. `career-os/config/live-coding-seed-candidates.json` — candidate live-coding seeds
-6. `career-os/data/generated-artifacts.json` — 생성된 산출물 목록 (promote 판단 기준)
-7. `career-os/data/runtime/topic-inventory-history.jsonl` — 최근 추천 history (cooldown 계산, 없으면 skip)
+6. `career-os/data/runtime/topic-inventory-history.jsonl` — 최근 추천 history (cooldown 계산, 없으면 skip)
+
+fos-study 산출물 진실원 (ADR-033): `career-os/sources/fos-study/` 트리의 `**/*.md` 직접 스캔.
+promote 판단 기준도 이 스캔 결과 기반 — 외부 아티팩트 목록 파일 불필요.
 
 ## Workflow
 
@@ -58,6 +60,50 @@ script 내부 흐름 (알고리즘 상수 참고용):
   - `data/runtime/topic-inventory.json` — 전체 pool + 추천 결과 + 통계
   - `data/runtime/morning-topic-recommendation.md` — 사람이 읽는 마크다운 (10픽 + 오늘의 3선)
   - `data/runtime/topic-inventory-history.jsonl` — 오늘 추천 history append
+
+### 2.5 Claude duplicate review (ADR-033)
+
+`data/runtime/topic-inventory.json`을 Read하고 `excluded.possibleDuplicates` 배열을 의미 판정한다.
+
+각 후보를 다음 4 decision label 중 하나로 분류:
+- `new` — 의미적으로 다른 주제. 새 study-pack 추천 가능.
+- `update-existing` — 같은 핵심 주제. 기존 문서 보강 후보.
+- `skip` — visible recommendation에서 제외.
+- `needs-user-confirmation` — 애매. 사용자 확인 필요.
+
+판정 결과를 inventory의 `claudeDuplicateReview` 객체에 Write:
+
+```json
+{
+  "status": "ok",
+  "reviewedAt": "ISO-8601 now",
+  "items": [
+    { "key": "...", "candidatePath": "...", "matchedPath": "...", "decision": "...", "reason": "..." }
+  ]
+}
+```
+
+판정 입력 최소화: candidate.candidatePath / matched.matchedPath / 옵션으로 matched 파일의 첫 30줄만. 본문 전체는 비용 큼.
+
+review 실행 자체가 실패하면 (Claude 호출 자체가 안 되거나 schema 위반):
+- `claudeDuplicateReview.status = "failed"` + `reviewedAt = now` + `items = []`로 Write
+- 추천 전체는 실패시키지 않음 — 다음 단계로 진행
+- morning markdown에 warning 표시 책임은 rendering 단계 (Step 2.6)
+
+`possibleDuplicates`가 0개이면 review skip. inventory의 `claudeDuplicateReview.status = "skipped"` 그대로 유지하고 다음 단계로 진행.
+
+### 2.6 morning markdown 재생성
+
+`claudeDuplicateReview`를 inventory에 반영한 뒤 markdown을 재생성한다. **주의: 일반 `refresh_topic_inventory.ts` 재호출은 inventory를 다시 계산하면서 Claude review 결과를 덮어쓸 수 있으므로 금지한다.**
+
+render-only 모드로 재생성:
+
+```bash
+bun --env-file=career-os/.env \
+  career-os/scripts/study-topic-recommender/refresh_topic_inventory.ts --render-only
+```
+
+`--render-only` 모드는 기존 `topic-inventory.json`을 읽고 markdown만 다시 쓴다. `claudeDuplicateReview` 결과가 반영된 "기존 문서 보강 후보 (최대 5)" 섹션과 (status=failed이면) 상단 warning 라인이 출력된다.
 
 ### 3. 결과 출력
 
@@ -112,8 +158,10 @@ echo "[self-check] OK"
 | topic-inventory.json 미생성 | 오류 원인 진단 후 사용자 보고 |
 | candidate 없음 (pool 고갈) | 경고 메시지 + inventory는 정상 기록 + 사용자에게 `replenish` 필요 안내 |
 | live-coding seed pool 비어있음 | 단계 4 skip + "seed pool 비어 있음 — config/live-coding-seed-pool.json 갱신 필요" 안내 |
-| generated-artifacts.json 부재 | 빈 목록으로 처리 (신규 환경 호환 — 파일은 첫 산출물 생성 시 만들어짐) |
 | history.jsonl 부재 | 빈 history로 처리 (첫 실행 시 정상 상태) |
+| Claude duplicate review 호출 실패 | `claudeDuplicateReview.status = "failed"`, items = []. 추천 전체는 계속. `--render-only`로 markdown warning 표시 |
+| possibleDuplicates 0개 | review skip. `status = "skipped"` 그대로. 보강 후보 섹션 "없음" 표시 |
+| review 결과 schema 위반 | "failed" 처리 + stderr 로그. 추천 계속 |
 
 ## Why this design
 
