@@ -23,7 +23,7 @@ career-os 워크스페이스의 **제품 범위·MVP 기능 명세**. 현재 act
 | 명령 | 산출물 | 외부 git push | 빈도 |
 |---|---|---|---|
 | `/position-recommender` (native) | 선택적 활성 공고 자동 수집 + 후보자 프로필 매칭 추천. 강력 추천 / 도전 추천 / 보류·주의 3 티어. (`data/runtime/position-recommendation.md` + `data/reports/daily/YYYY-MM-DD/position-recommendation/report.md`) (ADR-030, plan022) | 없음 (비공개) | 매일 (36회/30일) |
-| `/interview-coffeechat-prep` (native) | mvp-target.json `primary.coffeechat` 기업 사이트 자동 수집 + 후보자 프로필 결합 + Claude 분석 → 비공개 전략 리포트 (`data/reports/daily/YYYY-MM-DD/<coffeechat.report_slug>/report.md` + `data/runtime/<coffeechat.report_slug>.md`) | 없음 | 면접 단계별 |
+| `/interview-coffeechat-prep [mode]` (native) | mvp-target.json `primary.interview.<mode>` 기업 사이트 자동 수집 + 후보자 프로필 결합 + Claude 분석 → 비공개 + public-safe 리포트 두 파일 (`data/reports/daily/YYYY-MM-DD/<report_slug>/{report.md, report-public.md}`). mode = coffeechat / first-round / final-round / offer-chat. default coffeechat (ADR-029, ADR-034 — plan021 → plan026) | 없음 | 면접 단계별 |
 | `/interview-prep-analyzer` (native) | 면접 준비 갭 분석. baseline 모드: 큐레이션 10파일 + 7섹션 고위험 영역 도출 (`data/reports/baseline/YYYY-MM-DD/report.md`). daily 모드: 토픽 1개 3-5파일 + 5섹션 + study-progress.json 갱신 (`data/reports/daily/YYYY-MM-DD/report.md`). 자연어 분기 (ADR-027, plan017) | 없음 | baseline: 면접 시즌 시작 시. daily: 매일 |
 | `/study-topic-recommender` (native) | 아침 토픽 추천 10픽 + 오늘의 3선 + **기존 문서 보강 후보** 섹션(최대 5개, ADR-033) (`data/runtime/morning-topic-recommendation.md`) + replenish + live-coding seed 선택 (ADR-026, plan016) | 없음 | 매일 |
 | `/study-pack-writer <topic>` (native) | 토픽 1개 풀 마크다운 스터디팩 → fos-study 푸시. **duplicate guard(ADR-033)로 high/medium 중복은 새 파일 차단 → update-existing 전환** + self-check 내장 (plan014에서 옛 `maintain-study-pack` 흡수) | ✓ | 토픽별 1회 또는 갱신 |

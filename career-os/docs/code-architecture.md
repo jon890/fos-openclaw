@@ -125,6 +125,7 @@ career-os/
 │   │                     (plan002 이후 config/에서 이동)
 │   ├── interview-coffeechat-prep/{SKILL.md, references/}
    │   (plan021 ADR-029 rename: cj-foodville-coffeechat-prep → interview-coffeechat-prep. 회사명 박힘 제거)
+   │   (plan026 ADR-034: 4 mode 일반화. coffeechat / first-round / final-round / offer-chat. private + public-safe 두 산출물)
 │   ├── candidate-baseline-suggester/
 │   │   └── SKILL.md   (plan020에서 native skill 명세 작성. Append + 주석 마킹 + audit trail. ADR-028)
 │   └── docs-audit/

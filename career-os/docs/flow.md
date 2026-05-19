@@ -245,30 +245,35 @@ native skill 패턴: `claude -p "/interview-asset-writer <topic>"` → SKILL.md 
 
 이전 외부 subprocess 흐름 (dispatcher → run_question_bank.sh → claude --json-schema → render_question_bank.ts → publish)은 plan015에서 폐기됨. JSON schema 강제는 native self-check 7항목으로 대체.
 
-### `/interview-coffeechat-prep` (native skill — plan021, ADR-029)
+### `/interview-coffeechat-prep [mode]` (native skill — plan021 + plan026, ADR-029 + ADR-034)
 
-native skill 패턴: `claude -p "/interview-coffeechat-prep"` → SKILL.md 자동 로드 → Claude가 도구로 직접 처리.
+native skill 패턴: `claude -p "/interview-coffeechat-prep [mode]"` → SKILL.md 자동 로드 → Claude가 도구로 직접 처리.
+
+mode 분기 (ADR-034, plan026): coffeechat / first-round / final-round / offer-chat. default coffeechat.
+mode 결정: slash arg 우선, 자연어 키워드 fallback (`1차 면접` / `first-round` → first_round 등).
 
 ```
-호출: claude -p "/interview-coffeechat-prep"
+호출: claude -p "/interview-coffeechat-prep <mode>"
   ↓
-Read: config/mvp-target.json (zod parse → primary.coffeechat 객체)
+Read: config/mvp-target.json (zod parse → primary.interview.<mode> 객체)
   ↓
-Bash: bun career-os/scripts/interview-coffeechat-prep/collect_company_sites.ts
-  → data/source/<coffeechat.source_dir>/ (sites HTML + txt + manifest.json)
+Bash: bun career-os/scripts/interview-coffeechat-prep/collect_company_sites.ts --mode <mode>
+  → data/source/<mode_obj.source_dir>/ (sites HTML + txt + manifest.json)
   ↓
-Read: candidate-profile.md + data/prep/<coffeechat.prep_dir>/{strategy,checklist}.md
-      + 수집된 sites text + references/coffeechat-prompt.md
+Read: candidate-profile.md + data/prep/<mode_obj.prep_dir>/{strategy,checklist}.md
+      + 수집된 sites text + references/coffeechat-prompt.md (mode 분기 가이드)
   ↓
-Claude 분석 → report.md 작성
+Claude 분석 → report.md (private) + report-public.md (sanitized) 두 파일 작성
   ↓
-Write: data/reports/daily/YYYY-MM-DD/<coffeechat.report_slug>/report.md
-       data/runtime/<coffeechat.report_slug>.md (사본)
+Write: data/reports/daily/YYYY-MM-DD/<mode_obj.report_slug>/{report.md, report-public.md}
+       data/runtime/<mode_obj.report_slug>.md (private 사본)
   ↓
 Discord 알림 [완료]
 ```
 
-회사 불가지론 — 회사명·URL은 `config/mvp-target.json`의 `primary.coffeechat` 객체에서만 읽음. 준비 자산(`strategy.md` + `checklist.md`)은 `data/prep/<coffeechat.prep_dir>/`에 위치 (ADR-029).
+회사 불가지론 — 회사명·URL은 `config/mvp-target.json`의 `primary.interview.<mode>` 객체에서만 읽음. 준비 자산 (`strategy.md` + `checklist.md`) 은 `data/prep/<mode_obj.prep_dir>/`에 위치 (ADR-029 + ADR-034).
+
+public-safe 마스킹 정책: Claude 가 `references/coffeechat-prompt.md` 가이드에 따라 개인명·추수 액수·내부 리서치를 `report-public.md` 에서 sanitize. private 자료는 `report.md` 에 그대로.
 
 상세 동작: `career-os/.claude/skills/interview-coffeechat-prep/SKILL.md` Workflow 섹션 참조.
 

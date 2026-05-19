@@ -58,8 +58,12 @@ zod 검증 단일 출처: `_shared/lib/mvp_target_schema.ts` → `parseMvpTarget
 }
 ```
 
-- `primary.coffeechat` — 선택 필드. 커피챗 면접 준비가 활성일 때만 채운다. 회사 전환 시 이 객체 통째 교체 (ADR-029).
-- 이전 평면 변수 6개 (`coffeechat_skill_dir`, `coffeechat_report_slug`, `coffeechat_source_dir`, `coffeechat_collector_script`, `coffeechat_brand_snapshot`, `coffeechat_prep_dir`) → plan021에서 `coffeechat` 객체로 통합됨.
+- `primary.interview` — 면접 단계별 4 mode 컨테이너 (ADR-034, plan026).
+  - `primary.interview.coffeechat` — 커피챗 mode 객체 (필드: sites, source_dir, report_slug, prep_dir, strategy_filename, checklist_filename).
+  - `primary.interview.first_round` — 1차 면접 mode. 활성. 같은 형식.
+  - `primary.interview.final_round` — 최종 면접 mode. nullable, 별도 plan에서 활성화.
+  - `primary.interview.offer_chat` — 오퍼챗 mode. nullable, 별도 plan에서 활성화.
+- 이전 평면 변수 6개 (`coffeechat_skill_dir` 등) → plan021에서 `coffeechat` 객체로 통합. plan026에서 `primary.coffeechat` → `primary.interview.coffeechat` 위치 이동 (ADR-034).
 
 타깃 전환 시 `primary`를 `history` 앞에 push하고 새 `primary`를 채운다.
 
@@ -558,8 +562,9 @@ data/prep/
     └── checklist.md           면접 당일 최종 체크리스트
 ```
 
-- `<company-slug>` = `config/mvp-target.json`의 `primary.coffeechat.prep_dir` 값과 일치.
-- `interview-coffeechat-prep` native skill이 Read. 회사 전환 시 `mvp-target.json`의 `primary.coffeechat.prep_dir` 교체 + 새 `data/prep/<new-slug>/` 디렉터리 작성.
+- `<company-slug>` = `config/mvp-target.json`의 `primary.interview.<mode>.prep_dir` 값과 일치 (ADR-034, plan026).
+- `interview-coffeechat-prep` native skill이 Read. 회사 전환 시 `mvp-target.json`의 `primary.interview.<mode>.prep_dir` 교체 + 새 `data/prep/<new-slug>/` 디렉터리 작성.
+- 산출물 (private vs public-safe, ADR-034): `data/reports/daily/YYYY-MM-DD/<report_slug>/{report.md, report-public.md}` 두 파일. private = 후보자 비공개 자료, public-safe = sanitized (개인명·추수 액수·내부 리서치 마스킹).
 - git 추적 ✓ — 준비 자산은 히스토리 보존 가치 있음.
 
 ### data/runtime/locks/
