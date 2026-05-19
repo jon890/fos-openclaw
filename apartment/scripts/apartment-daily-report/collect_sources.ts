@@ -1,6 +1,8 @@
 #!/usr/bin/env bun
 
 import { runNaverApi } from "./collect_naver_api";
+import { runHogangnono } from "./collect_hogangnono";
+import { runKbLand } from "./collect_kbland";
 import { mkdirSync } from "fs";
 import { dirname } from "path";
 
@@ -9,7 +11,6 @@ const TARGET_ALIAS = process.env.TARGET_ALIAS ?? "LG원앙";
 const TARGET_LOCATION = process.env.TARGET_LOCATION ?? "경기 구리시 수택동 854-2 / 체육관로 54";
 const TARGET_UNIT_LABEL = process.env.TARGET_UNIT_LABEL ?? "59A";
 const TARGET_UNIT_EXCLUSIVE_AREA_M2 = parseFloat(process.env.TARGET_UNIT_EXCLUSIVE_AREA_M2 ?? "59");
-const SCRIPT_DIR = import.meta.dir;
 const NAVER_URL = process.env.NAVER_LAND_URL ?? "https://new.land.naver.com/complexes/1649";
 const HOGANGNONO_URL = process.env.HOGANGNONO_URL ?? "https://hogangnono.com/apt/5V184";
 const KB_URL = process.env.KB_LAND_URL ?? "https://kbland.kr/se/c/2906";
@@ -17,7 +18,7 @@ const KB_URL = process.env.KB_LAND_URL ?? "https://kbland.kr/se/c/2906";
 interface Source {
   name: string;
   url: string;
-  script?: string;
+  fetcher: (url: string) => Promise<Record<string, unknown>>;
 }
 
 interface TypeProfile {
@@ -28,26 +29,11 @@ interface TypeProfile {
 }
 
 const SOURCES: Source[] = [
-  { name: "Naver Land", url: NAVER_URL },
-  { name: "Hogangnono", url: HOGANGNONO_URL, script: `${SCRIPT_DIR}/collect_hogangnono.py` },
-  { name: "KB Land", url: KB_URL, script: `${SCRIPT_DIR}/collect_kbland.py` },
+  { name: "Naver Land", url: NAVER_URL, fetcher: runNaverApi as unknown as (u: string) => Promise<Record<string, unknown>> },
+  { name: "Hogangnono", url: HOGANGNONO_URL, fetcher: runHogangnono as unknown as (u: string) => Promise<Record<string, unknown>> },
+  { name: "KB Land", url: KB_URL, fetcher: runKbLand as unknown as (u: string) => Promise<Record<string, unknown>> },
 ];
 
-async function runPythonSource(script: string, url: string): Promise<Record<string, unknown>> {
-  const proc = Bun.spawn(["python3", script, url], {
-    stdout: "pipe",
-    stderr: "pipe",
-  });
-  const [stdout, stderr, exitCode] = await Promise.all([
-    new Response(proc.stdout).text(),
-    new Response(proc.stderr).text(),
-    proc.exited,
-  ]);
-  if (exitCode !== 0) {
-    throw new Error(`exit ${exitCode}: ${stderr.slice(0, 200)}`);
-  }
-  return JSON.parse(stdout) as Record<string, unknown>;
-}
 
 function getSource(sourceResults: Record<string, unknown>[], name: string): Record<string, unknown> {
   return sourceResults.find((s) => s.name === name) ?? {};
@@ -157,14 +143,7 @@ async function main(): Promise<void> {
 
   for (const src of SOURCES) {
     try {
-      let result: Record<string, unknown>;
-      if (!src.script) {
-        // Naver Land — ADR-006: TypeScript import 통합
-        result = (await runNaverApi(src.url)) as unknown as Record<string, unknown>;
-      } else {
-        // Hogangnono / KB Land — Bun.spawn(python3) 임시 (plan004까지)
-        result = await runPythonSource(src.script, src.url);
-      }
+      const result = await src.fetcher(src.url);
       sourceResults.push(result);
     } catch (e) {
       const errName = e instanceof Error ? e.constructor.name : "Error";
