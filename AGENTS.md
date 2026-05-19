@@ -6,7 +6,9 @@
 
 ## 1. 저장소 구조
 
-`~/ai-nodes`는 단일 프로젝트가 아닌 **멀티 워크스페이스 컨테이너**다. 최상위 디렉터리 각각은 자체 skills · data · logs · config를 가진 **독립 작업 워크스페이스**다. 워크스페이스는 서로 격리되며 다른 워크스페이스의 자산을 교차 참조하지 않는다.
+`~/ai-nodes`는 단일 프로젝트가 아닌 **멀티 워크스페이스 컨테이너**다.
+최상위 디렉터리 각각은 자체 skills · data · logs · config를 가진 **독립 작업 워크스페이스**다.
+워크스페이스는 서로 격리되며 다른 워크스페이스의 자산을 교차 참조하지 않는다.
 
 현재 워크스페이스 4개:
 
@@ -20,7 +22,9 @@
 공용 영역:
 
 - `_shared/bin/` — shell·Python 공용 헬퍼.
-- `_shared/lib/` — Bun TypeScript 공용 헬퍼. **워크스페이스 무관 헬퍼만** (ai-nodes ADR-001 정책: 특정 워크스페이스 config·sources·data 의존 금지). 워크스페이스 한정 헬퍼는 `<workspace>/scripts/<skill>/` 내부에 (plan023에서 `career-os/scripts/_lib/` 폐기, ADR-031).
+- `_shared/lib/` — Bun TypeScript 공용 헬퍼.
+  - **워크스페이스 무관 헬퍼만** (ai-nodes ADR-001 정책: 특정 워크스페이스 config·sources·data 의존 금지).
+  - 워크스페이스 한정 헬퍼는 `<workspace>/scripts/<skill>/` 내부에 (plan023에서 `career-os/scripts/_lib/` 폐기, ADR-031).
 - `_shared/types/` — 공용 TS 타입.
 - `skills/` — 저장소 전역 Claude Code 스킬 (`agent-browser`, `planning`, `plan-and-build`, `workspace-audit`, `docs-check`). `docs-check`는 ai-nodes 5문서 + ADR 건전성 감사 스킬.
 - `docs/` — ai-nodes 모노레포 레벨.
@@ -31,7 +35,8 @@
 
 ### 1-1. career-os 한정 컨벤션 (ADR-019)
 
-career-os만 `scripts/<skill-name>/`(실행 파일) + `skills/<skill-name>/`(SKILL.md + references) 분리 구조. 다른 워크스페이스는 `<workspace>/skills/<name>/scripts/` 표준 구조 유지.
+career-os만 `scripts/<skill-name>/`(실행 파일) + `skills/<skill-name>/`(SKILL.md + references) 분리 구조.
+다른 워크스페이스는 `<workspace>/skills/<name>/scripts/` 표준 구조 유지.
 
 워크스페이스 격리 원칙상 이 비대칭은 의도된 것 — 다른 워크스페이스로 컨벤션 확산은 별도 결정 필요.
 
@@ -44,7 +49,9 @@ career-os만 `scripts/<skill-name>/`(실행 파일) + `skills/<skill-name>/`(SKI
 - 실행 전후 파일 메트릭 스냅샷(`report.md`, 입력 노트, target 파일 목록 등).
 - Claude CLI usage JSON을 `TRACK_TASK_CLAUDE_USAGE_FILE` env로 수집.
 
-워크스페이스 러너는 트래커 통과를 보장해야 하며 우회 금지. apartment의 `run_report.sh`는 `TRACK_TASK_WRAPPED`로 자가 래핑. career-os는 plan023 이후 native skill 직접 호출로 전환 — `logs/task-runs.jsonl` 미사용.
+워크스페이스 러너는 트래커 통과를 보장해야 하며 우회 금지.
+apartment의 `run_report.sh`는 `TRACK_TASK_WRAPPED`로 자가 래핑.
+career-os는 plan023 이후 native skill 직접 호출로 전환 — `logs/task-runs.jsonl` 미사용.
 
 **load-bearing 의존성**: `_shared/bin/track_task.sh`가 없으면 모든 워크스페이스 러너 실패.
 
@@ -56,7 +63,9 @@ career-os만 `scripts/<skill-name>/`(실행 파일) + `skills/<skill-name>/`(SKI
 apartment/skills/apartment-daily-report/scripts/run_report.sh
 ```
 
-산출물: `apartment/data/YYYY-MM-DD/{report.md, raw-search.json, summary.json, claude.result.json}`. 종합 단계는 `claude --output-format json`(90초 타임아웃 시 대체 마크다운으로 폴백). JSON 처리는 `_shared/bin/extract_claude_result.py`(plan008 phase 진행 중 TS 마이그 예정).
+산출물: `apartment/data/YYYY-MM-DD/{report.md, raw-search.json, summary.json, claude.result.json}`.
+종합 단계는 `claude --output-format json` (90초 타임아웃 시 대체 마크다운으로 폴백).
+JSON 처리는 `_shared/bin/extract_claude_result.py` (plan008 phase 진행 중 TS 마이그 예정).
 
 ### 3-2. career-os
 
@@ -83,21 +92,27 @@ claude -p "/position-recommender [자연어 컨텍스트] [채용공고 file]"
 
 ### 3-4. 새 워크스페이스 추가
 
-`ai-nodes/docs/workspace-structure.md` 10번 체크리스트 참조. mkdir + AGENTS.md + CLAUDE.md 심링크 + 5문서 placeholder + tasks/ + config/ + .env.example. 첫 plan은 5문서 본문 작성 + ADR-001 자리.
+`ai-nodes/docs/workspace-structure.md` 10번 체크리스트 참조.
+mkdir + AGENTS.md + CLAUDE.md 심링크 + 5문서 placeholder + tasks/ + config/ + .env.example.
+첫 plan은 5문서 본문 작성 + ADR-001 자리.
 
 ## 4. Claude CLI 호출 패턴
 
 워크스페이스마다 호출 방식이 다르다. 혼용 금지 — 해당 워크스페이스 패턴 보존:
 
 - **apartment**: `claude --output-format json` + 90초 타임아웃 폴백. JSON → `_shared/bin/extract_claude_result.py`.
-- **career-os**: native skill 직접 호출 (`claude -p "/<skill-name>"`). 워크스페이스 한정 ts 헬퍼는 `career-os/scripts/<skill>/`에. 옛 `claude_lib.sh` + `invoke_claude_skills.ts` 통합 헬퍼는 plan013~023에서 모두 폐기 (ADR-031).
+- **career-os**: native skill 직접 호출 (`claude -p "/<skill-name>"`).
+  - 워크스페이스 한정 ts 헬퍼는 `career-os/scripts/<skill>/`에.
+  - 옛 `claude_lib.sh` + `invoke_claude_skills.ts` 통합 헬퍼는 plan013~023에서 모두 폐기 (ADR-031).
 - **새 runner 추가 시**: native skill 진입점 + 필요 ts 헬퍼는 `<workspace>/scripts/`에. `_shared/lib`는 워크스페이스 무관 공용 헬퍼만.
 
 패턴 변경 시 ADR로 결정 근거 남긴 뒤 진행.
 
 ## 5. 작업 규칙
 
-- `career-os/sources/fos-study`는 외부 동기 저장소(`github.com/jon890/fos-study`, `main`). study-pack 계열 실행 중이 아니면 프로젝트 코드처럼 편집하지 말 것. `.claude/**` 무시.
+- `career-os/sources/fos-study`는 외부 동기 저장소 (`github.com/jon890/fos-study`, `main`).
+  - study-pack 계열 실행 중이 아니면 프로젝트 코드처럼 편집하지 말 것.
+  - `.claude/**` 무시.
 - 자동 생성 리포트는 `<workspace>/data/reports/`로. 별도 큐레이션 싱크 없음.
 - career-os 아키텍처 결정은 `career-os/docs/adr.md`에 누적(개별 ADR 파일 신설 금지, ADR-018). 옛 `docs/decisions/`는 plan003에서 삭제됨.
 - 워크플로는 재실행 가능 + 날짜별 멱등. 실시간 수집보다 로컬 git-sync + 파일 읽기 우선.
@@ -135,7 +150,9 @@ Conventional Commits + 한글 subject:
 
 ## 8. plan 사이클 (career-os 패턴)
 
-career-os는 `tasks/plan{N}-<slug>/` 영구 plan 영역을 운영. `skills/planning`이 plan 작성, `skills/plan-and-build`가 자동 실행(`run-phases.py`). 본 패턴이 다른 워크스페이스에도 유용하다 판단되면 도입 가능 — 단 워크스페이스 격리 원칙상 별도 결정.
+career-os는 `tasks/plan{N}-<slug>/` 영구 plan 영역을 운영.
+`skills/planning`이 plan 작성, `skills/plan-and-build`가 자동 실행 (`run-phases.py`).
+본 패턴이 다른 워크스페이스에도 유용하다 판단되면 도입 가능 — 단 워크스페이스 격리 원칙상 별도 결정.
 
 ## 9. 외부 의존성
 
