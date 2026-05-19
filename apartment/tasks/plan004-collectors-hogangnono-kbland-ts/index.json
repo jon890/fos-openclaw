@@ -2,7 +2,7 @@
   "name": "plan004-collectors-hogangnono-kbland-ts",
   "description": "apartment Hogangnono + KB Land collector 2개 (collect_hogangnono.py + collect_kbland.py) → TypeScript 마이그. ADR-005 (Bun.fetch) + ADR-006 (import 통합) + ADR-007 (zod 결과 스키마) 후속 적용. plan003에서 도입된 collect_sources.ts의 runPythonSource 임시 분기 폐기 — 모든 source가 import 통합.",
   "created_at": "2026-05-19T00:00:00+00:00",
-  "updated_at": "2026-05-19T05:52:59+00:00",
+  "updated_at": "2026-05-19T05:53:27.175421+00:00",
   "status": "completed",
   "current_phase": 3,
   "total_phases": 3,
@@ -65,7 +65,8 @@
         "Grep"
       ],
       "model": "haiku",
-      "timeout": 600
+      "timeout": 600,
+      "commitSha": "79c260d09ee6"
     }
   ]
 }
