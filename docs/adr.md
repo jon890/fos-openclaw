@@ -201,8 +201,8 @@ career-os ADR-018 (docs/ 운영 정책) / ADR-021 (.env 워크스페이스 root 
 ### 맥락
 
 dooray-cli repo 가 "docs / ADR 작성 형식" 섹션에서 6 가지 가독성 + 토큰 효율 패턴을 정립.
-ai-nodes 의 기존 docs / CLAUDE.md / SKILL.md 측정 결과 200자 초과 라인이 모노레포 레벨 4 파일에서 86건, sigil(`§`) 12건.
-글로벌 `~/.claude/CLAUDE.md` `documentation_style` 은 `§` 미사용 정도만 강제 — 형식 정책은 부재.
+ai-nodes 의 기존 docs / CLAUDE.md / SKILL.md 측정 결과 200자 초과 라인이 모노레포 레벨 4 파일에서 86건, section mark 12건.
+글로벌 `~/.claude/CLAUDE.md` `documentation_style` 은 section mark 미사용 정도만 강제 — 형식 정책은 부재.
 AI 에이전트 컨텍스트 비용을 늘리지 않으면서 작성자 가독성도 보장하는 단일 형식 정책 필요.
 
 ### 결정
@@ -284,4 +284,4 @@ ai-nodes 워크스페이스 표준 패턴을 **분리**로 변경:
 - stock-investment / travel은 audit 시 본 표준 따름.
 - native skill 단일 진입점 (`claude -p "/<name>"`) 일관.
 
-**적용**: `apartment/tasks/plan007-skills-folder-retirement` phase-04 — workspace-structure.md 갱신 + ai-nodes/AGENTS.md §1-1 비대칭 표 제거. career-os 영향 없음 (이미 분리 패턴).
+**적용**: `apartment/tasks/plan007-skills-folder-retirement` phase-04 — workspace-structure.md 갱신 + ai-nodes/AGENTS.md 1-1 비대칭 표 제거. career-os 영향 없음 (이미 분리 패턴).
