@@ -76,7 +76,7 @@ bash apartment/scripts/apartment-interior-reference-digest/run_digest.sh
 
 산출물: `apartment/data/YYYY-MM-DD/{report.md, raw-search.json, summary.json, claude.result.json}`.
 종합 단계는 `claude --output-format json` (90초 타임아웃 시 대체 마크다운으로 폴백).
-JSON 처리는 `_shared/bin/extract_claude_result.py` (plan008 phase 진행 중 TS 마이그 예정).
+JSON 처리는 `_shared/lib/extract_claude_result.ts` (ai-nodes plan001 마이그 완료, Bun 실행).
 
 ### 3-2. career-os
 
@@ -111,7 +111,7 @@ mkdir + AGENTS.md + CLAUDE.md 심링크 + 5문서 placeholder + tasks/ + config/
 
 워크스페이스마다 호출 방식이 다르다. 혼용 금지 — 해당 워크스페이스 패턴 보존:
 
-- **apartment**: `claude --output-format json` + 90초 타임아웃 폴백. JSON → `_shared/bin/extract_claude_result.py`.
+- **apartment**: `claude --output-format json` + 90초 타임아웃 폴백. JSON → `_shared/lib/extract_claude_result.ts` (Bun).
 - **career-os**: native skill 직접 호출 (`claude -p "/<skill-name>"`).
   - 워크스페이스 한정 ts 헬퍼는 `career-os/scripts/<skill>/`에.
   - 옛 `claude_lib.sh` + `invoke_claude_skills.ts` 통합 헬퍼는 plan013~023에서 모두 폐기 (ADR-031).
@@ -169,10 +169,10 @@ career-os는 `tasks/plan{N}-<slug>/` 영구 plan 영역을 운영.
 
 - `_shared/bin/track_task.sh` — 모든 워크스페이스 트래커. **load-bearing**.
 - `_shared/lib/notify_discord.ts` — Discord 알림(openclaw subprocess 경유, ADR-021).
-- `_shared/lib/extract_claude_result.ts` — `claude --output-format json` envelope 파싱. apartment + career-os 사용.
+- `_shared/lib/extract_claude_result.ts` — `claude --output-format json` envelope 파싱. apartment + stock-investment + career-os 공용 (ai-nodes plan001 통합).
 - `_shared/lib/mvp_target_schema.ts` — career-os `config/mvp-target.json` zod 스키마 (ADR-029).
 - Bun runtime — TS 헬퍼 실행. 설치 후 ai-nodes 루트에서 `bun install` 1회 (root package.json: zod, fast-xml-parser, dotenv + @types/bun).
-- Python 3 — `_shared/bin/extract_claude_result.py` 잔존. apartment Python collector는 plan003~005 TS 마이그 + plan006 폐기 (ADR-008)로 0개. 기본 stdlib만 사용 (외부 pip 의존 없음).
+- Python 3 — apartment Python collector는 plan003~005 TS 마이그 + plan006 폐기 (ADR-008)로 0개. `_shared/bin/extract_claude_result.py`는 ai-nodes plan001에서 git rm — `_shared/lib/extract_claude_result.ts`로 통합. 현재 `_shared/bin/`에는 `track_task.sh` + `update_artifacts.py`만 잔존.
 - `agent-browser` CLI — JS-heavy 페이지(Naver Land 등) 수집. 로컬 설치 필수 (apartment ADR-001).
 - `claude` CLI — 모든 Claude 호출 워크플로 의존.
 

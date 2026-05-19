@@ -43,7 +43,7 @@ bash apartment/scripts/apartment-daily-report/run_smoke_test.sh
 ## 6. 외부 의존성
 
 - `_shared/bin/track_task.sh` — 모든 러너 래핑. **load-bearing**.
-- `_shared/bin/extract_claude_result.py` — claude JSON envelope 파싱.
+- `_shared/lib/extract_claude_result.ts` — claude JSON envelope 파싱 (ai-nodes plan001 마이그).
 - `claude` CLI — 모든 Claude 호출 의존.
 - `agent-browser` CLI — JS-heavy 페이지 수집 (ADR-001).
 

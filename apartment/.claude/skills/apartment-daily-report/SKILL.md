@@ -69,7 +69,7 @@ Default target for this workspace:
 ## External dependencies
 
 - `_shared/bin/track_task.sh` — runner self-wraps through this tracker.
-- `_shared/bin/extract_claude_result.py` — pulls `result` out of Claude CLI JSON into `report.md`.
+- `_shared/lib/extract_claude_result.ts` — pulls `result` out of Claude CLI JSON into `report.md` (Bun runtime; ai-nodes plan001 migrated from Python wrapper).
 - `claude` CLI on PATH.
 
 ## Architecture note

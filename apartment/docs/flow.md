@@ -23,7 +23,7 @@ apartment 워크스페이스의 **데이터 플로우 및 실행 흐름** 단일
                     ├─► Claude CLI (--output-format json, 90s timeout)
                     │     └─► claude.result.json
                     │
-                    ├─► extractor (_shared/bin/extract_claude_result.py)
+                    ├─► extractor (_shared/lib/extract_claude_result.ts, ai-nodes plan001)
                     │     └─► report.md (또는 fallback)
                     │
                     ├─► notify_discord.sh (완료/실패)
@@ -73,8 +73,9 @@ Step 8  Claude CLI 호출
         입력: summary.json + 프롬프트
         출력: claude.result.json
 
-Step 9  추출 (extract_claude_result.py)
+Step 9  추출 (extract_claude_result.ts, ai-nodes plan001)
         claude.result.json 파싱 → report.md
+        bun run "$EXTRACT" 호출 (Python wrapper에서 TS로 전환)
 
 Step 10 fallback (타임아웃 발생 시)
         90초 초과 → report.fallback.md 생성

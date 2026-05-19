@@ -109,21 +109,20 @@ fi
 | 의존성 | 위치 | 상태 | 역할 |
 |---|---|---|---|
 | `track_task.sh` | `_shared/bin/track_task.sh` | load-bearing | 모든 runner self-wrap. 없으면 runner 실패 |
-| `extract_claude_result.py` | `_shared/bin/extract_claude_result.py` | 사용 중 | `claude --output-format json` envelope → report.md 파싱 |
+| `extract_claude_result.ts` | `_shared/lib/extract_claude_result.ts` | 사용 중 (ai-nodes plan001) | `claude --output-format json` envelope → report.md 파싱 |
 | `claude` CLI | 시스템 설치 | 사용 중 | Claude 호출 (90s 타임아웃 + fallback) |
 | `agent-browser` CLI | 로컬 설치 필수 | 사용 중 | Naver Bearer JWT 자동 추출 (ADR-001) |
 | Bun runtime | 시스템 (ai-nodes root `bun install`) | 사용 중 (ADR-003) | apartment ts 헬퍼 실행 (예: `scripts/_lib/load_target_meta.ts`, plan002) |
 | `notify_discord.ts` | `_shared/lib/notify_discord.ts` | 미사용 | Discord 알림 (apartment는 `notify_discord.sh` 직접 사용) |
-| `extract_claude_result.ts` | `_shared/lib/extract_claude_result.ts` | 미사용 | TS 버전 추출기 (apartment는 Python 버전 사용) |
 
-`notify_discord.ts` / `extract_claude_result.ts` — `_shared/lib/`에 존재하지만 apartment에서 미사용. apartment는 ADR-003 이후 Shell + Python + TS 점진 확장.
+`notify_discord.ts` — `_shared/lib/`에 존재하지만 apartment에서 미사용 (apartment는 `notify_discord.sh` 사용). `extract_claude_result.ts`는 ai-nodes plan001 이후 apartment + stock-investment + career-os 공용. apartment는 ADR-003 이후 Shell + TS 표준 확장.
 
 ## 6. 언어 분포
 
 | 언어 | 파일 수 (추정) | 역할 |
 |---|---|---|
 | Shell | 5 | runner, notify_discord, smoke_test, guri_buy_search, env |
-| Python | 0 | apartment-daily-report 안 Python collector 0 (`extract_claude_result.py`는 `_shared/bin/` 공용) |
+| Python | 0 | apartment-daily-report 안 Python 0. ai-nodes plan001 이후 `_shared/bin/extract_claude_result.py` git rm — `_shared/lib/extract_claude_result.ts`가 단일 출처 |
 | TypeScript | 7 | `_lib/load_target_meta.ts` (plan002) + collect_sources / collect_naver_api / naver_api_schemas (plan003) + collect_hogangnono / collect_kbland (plan004) + normalize_results (plan005) |
 
 apartment는 ADR-003으로 TypeScript 도입 시작 (plan002). plan003 (Naver / sources) + plan004 (Hogangnono / KB) + plan005 (normalize) 마이그 완료. plan006 (build_weekly_listing_trend)는 ADR-008로 폐기 (dead code + PIL 의존 제거). apartment Python 완전 제거 — ai-nodes "stdlib only" 진술 정합화.
