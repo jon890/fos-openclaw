@@ -90,6 +90,8 @@ ln -s AGENTS.md CLAUDE.md
 
 모노레포 공통 결정 (모든 워크스페이스에 영향)은 `ai-nodes/docs/adr.md`에 격상. 워크스페이스 한정 결정만 `<workspace>/docs/adr.md`에.
 
+**형식 정책**: 5문서 본문 작성 시 `ai-nodes/docs/docs-style.md` 형식 정책 준수 (ADR-005). 6 패턴 + 한자어 회피 표 + 거울 구조 원칙.
+
 ---
 
 ## 5. tasks/plan{N}-<slug>/ 컨벤션

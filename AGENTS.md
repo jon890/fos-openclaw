@@ -23,7 +23,11 @@
 - `_shared/lib/` — Bun TypeScript 공용 헬퍼. **워크스페이스 무관 헬퍼만** (ai-nodes ADR-001 정책: 특정 워크스페이스 config·sources·data 의존 금지). 워크스페이스 한정 헬퍼는 `<workspace>/scripts/<skill>/` 내부에 (plan023에서 `career-os/scripts/_lib/` 폐기, ADR-031).
 - `_shared/types/` — 공용 TS 타입.
 - `skills/` — 저장소 전역 Claude Code 스킬 (`agent-browser`, `planning`, `plan-and-build`, `workspace-audit`, `docs-check`). `docs-check`는 ai-nodes 5문서 + ADR 건전성 감사 스킬.
-- `docs/` — ai-nodes 모노레포 레벨 ADR + 워크스페이스 표준 청사진 (`docs/workspace-structure.md` 신설, plan001 — 새 워크스페이스 추가 진입점). 워크스페이스 한정 결정은 `<workspace>/docs/adr.md`.
+- `docs/` — ai-nodes 모노레포 레벨.
+  - `docs/adr.md` — 모노레포 ADR.
+  - `docs/workspace-structure.md` — 워크스페이스 표준 청사진 (plan001 신설, 새 워크스페이스 추가 진입점).
+  - `docs/docs-style.md` — docs / ADR 형식 정책 (ADR-005). 6 패턴 + 한자어 회피 + 거울 구조. 워크스페이스 docs · CLAUDE.md · SKILL.md 모두 본 문서를 따른다.
+  - 워크스페이스 한정 결정은 `<workspace>/docs/adr.md`.
 
 ### 1-1. career-os 한정 컨벤션 (ADR-019)
 
@@ -147,7 +151,8 @@ career-os는 `tasks/plan{N}-<slug>/` 영구 plan 영역을 운영. `skills/plann
 ## 10. 참고 문서
 
 - 워크스페이스 표준 청사진: `docs/workspace-structure.md` (새 워크스페이스 추가 진입점).
-- 모노레포 ADR: `docs/adr.md` (ADR-001~004 누적).
+- 모노레포 ADR: `docs/adr.md` (ADR-001~005 누적).
+- docs / ADR 형식 정책: `docs/docs-style.md` (ADR-005 — 6 패턴 + 한자어 회피 + 거울 구조).
 - 워크스페이스별 상세: `<workspace>/AGENTS.md`.
 - career-os 5문서: `career-os/docs/{prd, data-schema, flow, code-architecture, adr}.md`.
 - apartment 5문서: `apartment/docs/{prd, data-schema, flow, code-architecture, adr}.md` (plan001 신설).
