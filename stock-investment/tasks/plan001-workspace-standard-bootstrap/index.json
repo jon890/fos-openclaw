@@ -2,9 +2,9 @@
   "name": "plan001-workspace-standard-bootstrap",
   "description": "stock-investment 워크스페이스 ai-nodes 표준 구조 적용 시리즈의 첫 plan (docs 영역). 5문서 신설 (prd/data-schema/flow/code-architecture/adr) + AGENTS.md 한글화 + CLAUDE.md 심링크 + tasks/ 디렉터리. docs/decisions/* 7 ADR 자료를 5문서로 재분배 (decisions/ 자체 폐기는 plan003). 후속: plan002 (ADR-006 분리 패턴 마이그) → plan003 (decisions/ 폐기 + workspace-structure 매트릭스 갱신).",
   "created_at": "2026-05-20T00:00:00+00:00",
-  "updated_at": "2026-05-20T00:00:00+00:00",
-  "status": "planned",
-  "current_phase": 1,
+  "updated_at": "2026-05-20T08:30:00+00:00",
+  "status": "completed",
+  "current_phase": 3,
   "total_phases": 3,
   "error_message": null,
   "blocked_reason": null,
@@ -24,7 +24,7 @@
       "number": 1,
       "title": "5문서 신설 (prd/data-schema/flow/code-architecture/adr) — decisions/* 자료 재분배",
       "file": "phase-01.md",
-      "status": "pending",
+      "status": "completed",
       "allowedTools": [
         "Read",
         "Write",
@@ -33,13 +33,14 @@
         "Grep"
       ],
       "model": "sonnet",
-      "timeout": 1800
+      "timeout": 1800,
+      "commitSha": "4da850cefce0"
     },
     {
       "number": 2,
       "title": "AGENTS.md 한글화 + 5문서 라우팅 + CLAUDE.md 심링크 + tasks/ + .env.example placeholder",
       "file": "phase-02.md",
-      "status": "pending",
+      "status": "completed",
       "allowedTools": [
         "Read",
         "Write",
@@ -47,13 +48,14 @@
         "Bash"
       ],
       "model": "sonnet",
-      "timeout": 900
+      "timeout": 900,
+      "commitSha": "e0e4d4cec230"
     },
     {
       "number": 3,
       "title": "통합 검증 + status=completed + push",
       "file": "phase-03.md",
-      "status": "pending",
+      "status": "completed",
       "allowedTools": [
         "Read",
         "Edit",
@@ -61,7 +63,8 @@
         "Grep"
       ],
       "model": "haiku",
-      "timeout": 600
+      "timeout": 600,
+      "commitSha": null
     }
   ]
 }
