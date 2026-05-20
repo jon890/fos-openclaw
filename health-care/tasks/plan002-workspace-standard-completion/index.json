@@ -2,9 +2,9 @@
   "name": "plan002-workspace-standard-completion",
   "description": "health-care 워크스페이스 ai-nodes 표준 완전 적용. (1) workflow.md → flow.md 5문서 명명 정합. (2) ADR-006 분리 마이그 (3 skill skills/<name>/ → .claude/skills/<name>/). (3) .env 도입 (DISCORD_CHANNEL_ID + TZ) + .env.example. (4) ai-nodes/docs/workspace-structure.md 5번째 워크스페이스 행 추가 + 매트릭스 5번째 행. cron payload 영향 0 (skills/ 참조 부재 확인).",
   "created_at": "2026-05-20T00:00:00+00:00",
-  "updated_at": "2026-05-20T00:00:00+00:00",
-  "status": "planned",
-  "current_phase": 1,
+  "updated_at": "2026-05-20T01:35:15Z",
+  "status": "completed",
+  "current_phase": 4,
   "total_phases": 4,
   "error_message": null,
   "blocked_reason": null,
@@ -24,7 +24,7 @@
       "number": 1,
       "title": "workflow.md → flow.md (5문서 명명 정합) + AGENTS / docs 참조 갱신",
       "file": "phase-01.md",
-      "status": "pending",
+      "status": "completed",
       "allowedTools": [
         "Read",
         "Edit",
@@ -32,13 +32,14 @@
         "Grep"
       ],
       "model": "sonnet",
-      "timeout": 600
+      "timeout": 600,
+      "commitSha": "4bb8c9c0ad4f35af99abbda94b6986432835377e"
     },
     {
       "number": 2,
       "title": "ADR-006 분리 마이그 (3 skill skills/<name>/ → .claude/skills/<name>/)",
       "file": "phase-02.md",
-      "status": "pending",
+      "status": "completed",
       "allowedTools": [
         "Read",
         "Edit",
@@ -46,13 +47,14 @@
         "Grep"
       ],
       "model": "sonnet",
-      "timeout": 900
+      "timeout": 900,
+      "commitSha": "f090a10455922f25ac38718a5ce9b1c18958134e"
     },
     {
       "number": 3,
       "title": ".env + .env.example 신설 + ai-nodes/docs/workspace-structure.md 5번째 워크스페이스 행 추가",
       "file": "phase-03.md",
-      "status": "pending",
+      "status": "completed",
       "allowedTools": [
         "Read",
         "Write",
@@ -61,13 +63,14 @@
         "Grep"
       ],
       "model": "sonnet",
-      "timeout": 900
+      "timeout": 900,
+      "commitSha": "89163452f6e36f8b63b7d3fe9862e58bf5aa70bf"
     },
     {
       "number": 4,
       "title": "통합 검증 + status=completed + push",
       "file": "phase-04.md",
-      "status": "pending",
+      "status": "completed",
       "allowedTools": [
         "Read",
         "Edit",
