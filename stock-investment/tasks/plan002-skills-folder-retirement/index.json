@@ -2,9 +2,9 @@
   "name": "plan002-skills-folder-retirement",
   "description": "stock-investment ADR-006 분리 패턴 마이그. skills/<name>/scripts/* → scripts/<name>/, skills/<name>/{SKILL.md, references/} → .claude/skills/<name>/. 3 skill (stock-investing-morning-brief / current-issue-analysis / daily-stock-analysis-note) + 4 runner (run_report + run_smoke_test + run_issue_report + run_daily_note) SKILL_ROOT/path 갱신. cron payload absolute path는 plan002 완료 후 사용자 수동 갱신 (openclaw_safety 정책).",
   "created_at": "2026-05-20T00:00:00+00:00",
-  "updated_at": "2026-05-20T00:00:00+00:00",
-  "status": "planned",
-  "current_phase": 1,
+  "updated_at": "2026-05-20T00:25:54Z",
+  "status": "completed",
+  "current_phase": 2,
   "total_phases": 2,
   "error_message": null,
   "blocked_reason": null,
@@ -24,7 +24,7 @@
       "number": 1,
       "title": "3 skill 분리 마이그 (skills/<name>/ → scripts/<name>/ + .claude/skills/<name>/) + 4 runner SKILL_ROOT/path 갱신",
       "file": "phase-01.md",
-      "status": "pending",
+      "status": "completed",
       "allowedTools": [
         "Read",
         "Write",
@@ -33,13 +33,14 @@
         "Grep"
       ],
       "model": "sonnet",
-      "timeout": 1800
+      "timeout": 1800,
+      "commitSha": "cd888f582baf"
     },
     {
       "number": 2,
       "title": "통합 검증 + cron 수동 갱신 안내 + status=completed + push",
       "file": "phase-02.md",
-      "status": "pending",
+      "status": "completed",
       "allowedTools": [
         "Read",
         "Edit",
