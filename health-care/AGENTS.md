@@ -7,7 +7,7 @@
 
 - `docs/prd.md` — 제품 범위, MVP 기능, 성공/비범위
 - `docs/data-schema.md` — 공개 config와 private data 스키마
-- `docs/workflow.md` — intake, tracking, clinic prep, skill flow
+- `docs/flow.md` — intake, tracking, clinic prep, skill flow
 - `docs/code-architecture.md` — 디렉터리/skill 경계/cron 책임
 - `docs/adr.md` — 의사결정의 왜
 
