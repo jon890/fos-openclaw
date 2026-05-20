@@ -2,7 +2,7 @@
   "name": "plan002-workspace-standard-completion",
   "description": "health-care 워크스페이스 ai-nodes 표준 완전 적용. (1) workflow.md → flow.md 5문서 명명 정합. (2) ADR-006 분리 마이그 (3 skill skills/<name>/ → .claude/skills/<name>/). (3) .env 도입 (DISCORD_CHANNEL_ID + TZ) + .env.example. (4) ai-nodes/docs/workspace-structure.md 5번째 워크스페이스 행 추가 + 매트릭스 5번째 행. cron payload 영향 0 (skills/ 참조 부재 확인).",
   "created_at": "2026-05-20T00:00:00+00:00",
-  "updated_at": "2026-05-20T01:35:15Z",
+  "updated_at": "2026-05-20T01:35:56.009366+00:00",
   "status": "completed",
   "current_phase": 4,
   "total_phases": 4,
@@ -33,7 +33,7 @@
       ],
       "model": "sonnet",
       "timeout": 600,
-      "commitSha": "4bb8c9c0ad4f35af99abbda94b6986432835377e"
+      "commitSha": "4bb8c9c0ad4f"
     },
     {
       "number": 2,
@@ -48,7 +48,7 @@
       ],
       "model": "sonnet",
       "timeout": 900,
-      "commitSha": "f090a10455922f25ac38718a5ce9b1c18958134e"
+      "commitSha": "f090a1045592"
     },
     {
       "number": 3,
@@ -64,7 +64,7 @@
       ],
       "model": "sonnet",
       "timeout": 900,
-      "commitSha": "89163452f6e36f8b63b7d3fe9862e58bf5aa70bf"
+      "commitSha": "89163452f6e3"
     },
     {
       "number": 4,
@@ -78,7 +78,8 @@
         "Grep"
       ],
       "model": "haiku",
-      "timeout": 600
+      "timeout": 600,
+      "commitSha": "021f2bfe5bd5"
     }
   ]
 }
