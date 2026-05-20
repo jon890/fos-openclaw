@@ -34,6 +34,7 @@
 - `config/` — 외부 공개 가능 정책, 일반화된 회복 플랜, 비식별 운영 기준
 - `data/conditions/` — 질환/증상별 원본 문맥, 경과 기록, 진료 노트. 민감정보이므로 git 커밋하지 않는다.
 - `docs/` — 워크플로/ADR/운영 문서
+- `.claude/skills/` — Claude native skill 컨텍스트 자산 (SKILL.md + references/). ADR-006 분리 표준.
 
 ## 작업 방식
 
